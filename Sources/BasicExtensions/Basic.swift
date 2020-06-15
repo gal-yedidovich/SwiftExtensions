@@ -1,8 +1,8 @@
 //
-//  File.swift
-//  Extensions
+//  Basic.swift
+//  
 //
-//  Created by Gal Yedidovich on 14/06/2020.
+//  Created by Gal Yedidovich on 15/06/2020.
 //
 
 import Foundation
@@ -10,6 +10,13 @@ extension String {
 	/// get the localized version of a given string, using the string value as key.
 	var localized: String {
 		NSLocalizedString(self, comment: self)
+	}
+}
+
+extension DateFormatter {
+	convenience init(format: String) {
+		self.init()
+		dateFormat = format
 	}
 }
 
@@ -29,4 +36,21 @@ public func post(delay: TimeInterval? = nil, block: @escaping ()->()) {
 /// - Parameter block: a completion handler to run in the background
 public func async(quality: DispatchQoS.QoSClass = .background, block: @escaping ()->()) {
 	DispatchQueue.global(qos: quality).async(execute: block)
+}
+
+extension Encodable {
+	/// encode in JSON encoding
+	/// - Returns: JSON represention of data
+	public func json() -> Data {
+		try! JSONEncoder().encode(self)
+	}
+}
+
+extension Decodable {
+	/// Decode data in JSON decoding
+	/// - Parameter json: JSON encoded data
+	/// - Returns: Generic Decodable value representing the JSON
+	public static func from <T: Decodable> (json: Data) -> T {
+		try! JSONDecoder().decode(T.self, from: json)
+	}
 }

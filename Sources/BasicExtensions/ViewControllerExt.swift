@@ -1,8 +1,8 @@
 //
-//  Encryptor.swift
-//  Extensions
+//  ViewControllerExt.swift
+//  
 //
-//  Created by Gal Yedidovich on 14/06/2020.
+//  Created by Gal Yedidovich on 15/06/2020.
 //
 
 import UIKit
@@ -31,5 +31,9 @@ extension UIViewController {
 /// push(to: .myCtrl)
 /// ```
 public struct ControllerID {
+	public init(id: String) {
+		value = id
+	}
+	
 	var value: String
 }
