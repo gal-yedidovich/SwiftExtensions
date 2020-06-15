@@ -66,7 +66,7 @@ For easy Safe & scalable Storage Architecture, the FileSystem class gives you th
 ```swift
 extension Filename {
 	static let myFile1 = Filename(value: "name1InFileSystem")
-  static let myFile2 = Filename(value: "name2InFileSystem")
+	static let myFile2 = Filename(value: "name2InFileSystem")
 }
 
 //usage
