@@ -40,7 +40,7 @@ let instance: MyType = .from(json: data) //convert back to your type
 #### Asynchronous block  
 ```swift
 post {
-	//run in main thread
+	//run in the main thread
 }
 
 async {
