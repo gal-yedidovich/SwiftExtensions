@@ -32,6 +32,25 @@ final class PrefsTests: XCTestCase {
 		}
 	}
 	
+	func testReplace() {
+		let prefs = Prefs.standard
+		
+		prefs.edit()
+			.put(key: "name", "Gal")
+			.put(key: "age", "26")
+			.commit()
+		
+		prefs.edit()
+			.put(key: "name", "Bubu")
+			.commit()
+		
+		XCTAssert(prefs.dict["name"] == "Bubu")
+		
+		afterWrite(at: prefs) { json in
+			XCTAssert(json["name"] == "Bubu")
+		}
+	}
+	
 	func testRemove() {
 		let prefs = Prefs.standard
 		
@@ -47,26 +66,6 @@ final class PrefsTests: XCTestCase {
 		
 		afterWrite(at: prefs) { (json) in
 			XCTAssert(json.count == 0)
-		}
-	}
-	
-	func testReplace() {
-		let prefs = Prefs.standard
-		
-		
-		prefs.edit()
-			.put(key: "name", "Gal")
-			.put(key: "age", "26")
-			.commit()
-		
-		prefs.edit()
-			.put(key: "name", "Bubu")
-			.commit()
-		
-		XCTAssert(prefs.dict["name"] == "Bubu")
-		
-		afterWrite(at: prefs) { json in
-			XCTAssert(json["name"] == "Bubu")
 		}
 	}
 	
@@ -100,8 +99,8 @@ final class PrefsTests: XCTestCase {
 	
 	static var allTests = [
 		("testInsert", testInsert),
-		("testRemove", testRemove),
 		("testReplace", testReplace),
+		("testRemove", testRemove),
 		("testClear", testClear),
 	]
 	
