@@ -11,7 +11,16 @@ import CryptoKit
 public class Encryptor {
 	private init() {}
 	
-	/// A Dictionary, representing the service & account in the keychain which to query the encryption key.
+	/// A Dictionary, representing query ths is used to store & fetch the encryption key.
+	/// 
+	/// You can change this value to as you see fit, default value is:
+	/// ```
+	/// [
+	///	    kSecClass: kSecClassGenericPassword,
+	///	    kSecAttrService: "encryption key",
+	///     kSecAttrAccount: "SwiftStorage"
+	/// ]
+	/// ```
 	public static var keyChainQuery: [CFString : Any] = [
 		kSecClass: kSecClassGenericPassword,
 		kSecAttrService: "encryption key", //role

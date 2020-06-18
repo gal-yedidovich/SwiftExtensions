@@ -7,18 +7,31 @@
 
 import UIKit
 public extension UIViewController {
+	/// Pushes a view controller on the navigation controller
+	/// - Parameters:
+	///   - id: the identifier of the controlle in the storyboard
+	///   - storyboard: the target storayboard the contains the target view controller id
+	///   - config: a configuration clouse, that accepts the newly created view controller instance, use this clouse to initilize any specific vlaue before the transition.
 	func push<T: UIViewController>(to id: ControllerID, storyboard: UIStoryboard? = nil, config: ((T)->())? = nil) {
 		let vc = (storyboard ?? self.storyboard!).instantiateViewController(identifier: id.value) as! T
 		config?(vc)
 		navigationController?.pushViewController(vc, animated: true)
 	}
 	
+	/// Presents a view controller on the on screen
+	/// - Parameters:
+	///   - id: the identifier of the controlle in the storyboard
+	///   - storyboard: the target storayboard the contains the target view controller id
+	///   - config: a configuration clouse, that accepts the newly created view controller instance, use this clouse to initilize any specific vlaue before the transition.
 	func present<T: UIViewController>(_ id: ControllerID, storyboard: UIStoryboard? = nil, config: ((T)->())? = nil) {
 		let vc = (storyboard ?? self.storyboard!).instantiateViewController(identifier: id.value) as! T
 		config?(vc)
 		present(vc, animated: true)
 	}
 	
+	/// Generate an alert with activity indicator and a message
+	/// - Parameter title: a message to the user while doing work
+	/// - Returns: the alert controller.
 	func loadingAlert(title: String) -> UIAlertController {
 		let alert = UIAlertController(title: " ", message: nil, preferredStyle: .alert)
 		
@@ -47,6 +60,15 @@ public extension UIViewController {
 		return alert
 	}
 	
+	/// Presents an alert modally after a delay, or not at all if the finished beforehand
+	///
+	/// this is a convenince method to for UX, it will wait a given time inteval, and will present the given alert until the returned "dismiss" clouse is called.
+	///  - if the dismiss clouse is called before the alert is shown, the alert won't be presented at all.
+	///
+	/// - Parameters:
+	///   - alert: an alert to present after a delay
+	///   - delay: time to wait before presenting the alert
+	/// - Returns: a dismiss clouse, which closes the alert if it presented, then executes a completion handler
 	func present(_ alert: UIAlertController, delay: Double = 0.5) -> ((_ completion: @escaping () -> ()) -> ()) {
 		var done = false
 		var canDismiss = false

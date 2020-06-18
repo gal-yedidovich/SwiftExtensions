@@ -77,6 +77,27 @@ FileSystem.write(data: data, to: .myFile1)
 #### TIP
 > when implementing `Filename` or `Folder` you can (and probably should) use obfusctated names, for exmaple: use "--" insated of "secret.info".
 
+### Storage Customizations
+You are able to change some values in the library.
+
+`FileSystem.rootURL`: defaults to the documents url of the app, it can change for example to an AppGroup url: 
+
+```swift
+FileSystem.rootURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "your AppGroup")
+```
+
+`Encryptor.keyChainQuery`: defaults with basic password class. Here is a customized example:
+
+```swift
+Encryptor.keyChainQuery[kSecAttrAccessGroup] = "your AppGroup"
+
+//OR - override the whole dictionary
+Encryptor.keyChainQuery = [
+	key: value
+]
+```
+
+
 ### Prefs - Secure Key-Value pairs in storage. 
 Insapired after iOS's `UserDefaults` & Android's `SharedPreferences`, The `Prefs` class enables you to manages Key-Value pairs easily and securely using the same encryption layer, also comes with a caching logic for fast & non blocking read/writes operation in memory.
 
