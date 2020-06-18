@@ -9,8 +9,17 @@ import XCTest
 @testable import StorageExtensions
 
 final class PrefsTests: XCTestCase {
+	
+	override class func setUp() { //before the test case starts
+		FileSystem.delete(file: .prefs) //verify that there is no prefs file on start
+	}
+	
+	override func tearDown() { //after each test
+		FileSystem.delete(file: .prefs)
+	}
+	
 	func testInsert() {
-		let prefs = preparePrefs()
+		let prefs = Prefs.standard
 		
 		prefs.edit()
 			.put(key: "name", "Gal")
@@ -24,7 +33,7 @@ final class PrefsTests: XCTestCase {
 	}
 	
 	func testRemove() {
-		let prefs = preparePrefs()
+		let prefs = Prefs.standard
 		
 		prefs.edit()
 			.put(key: "name", "Gal")
@@ -42,7 +51,7 @@ final class PrefsTests: XCTestCase {
 	}
 	
 	func testReplace() {
-		let prefs = preparePrefs()
+		let prefs = Prefs.standard
 		
 		
 		prefs.edit()
@@ -62,7 +71,7 @@ final class PrefsTests: XCTestCase {
 	}
 	
 	func testClear() {
-		let prefs = preparePrefs()
+		let prefs = Prefs.standard
 		
 		prefs.edit()
 			.put(key: "name", "Gal")
@@ -73,11 +82,6 @@ final class PrefsTests: XCTestCase {
 		
 		XCTAssert(prefs.dict.count == 0)
 		XCTAssert(!FileSystem.fileExists(prefs.filename))
-	}
-	
-	private func preparePrefs() -> Prefs {
-		FileSystem.delete(file: .prefs)
-		return Prefs.standard
 	}
 	
 	private func afterWrite(at prefs: Prefs, test: @escaping ([String:String]) -> ()) {
@@ -91,7 +95,7 @@ final class PrefsTests: XCTestCase {
 			expectation.fulfill()
 		}
 		
-		wait(for: [expectation], timeout: 5)
+		wait(for: [expectation], timeout: 2)
 	}
 	
 	static var allTests = [
