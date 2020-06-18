@@ -6,17 +6,71 @@
 //
 
 import UIKit
-extension UIViewController {
-	public func push<T: UIViewController>(to id: ControllerID, storyboard: UIStoryboard? = nil, config: ((T)->())? = nil) {
+public extension UIViewController {
+	func push<T: UIViewController>(to id: ControllerID, storyboard: UIStoryboard? = nil, config: ((T)->())? = nil) {
 		let vc = (storyboard ?? self.storyboard!).instantiateViewController(identifier: id.value) as! T
 		config?(vc)
 		navigationController?.pushViewController(vc, animated: true)
 	}
 	
-	public func present<T: UIViewController>(_ id: ControllerID, storyboard: UIStoryboard? = nil, config: ((T)->())? = nil) {
+	func present<T: UIViewController>(_ id: ControllerID, storyboard: UIStoryboard? = nil, config: ((T)->())? = nil) {
 		let vc = (storyboard ?? self.storyboard!).instantiateViewController(identifier: id.value) as! T
 		config?(vc)
 		present(vc, animated: true)
+	}
+	
+	func loadingAlert(title: String) -> UIAlertController {
+		let alert = UIAlertController(title: " ", message: nil, preferredStyle: .alert)
+		
+		let indicator = UIActivityIndicatorView()
+		indicator.translatesAutoresizingMaskIntoConstraints = false
+		indicator.isUserInteractionEnabled = false
+		
+		let ttl = UILabel()
+		ttl.translatesAutoresizingMaskIntoConstraints = false
+		ttl.isUserInteractionEnabled = false
+		ttl.text = title
+		ttl.lineBreakMode = .byWordWrapping
+		ttl.font = .systemFont(ofSize: 17, weight: .semibold)
+		
+		let stack = UIStackView(arrangedSubviews: [indicator, ttl])
+		stack.translatesAutoresizingMaskIntoConstraints = false
+		stack.setCustomSpacing(15, after: indicator)
+		
+		alert.view.addSubview(stack)
+		NSLayoutConstraint.activate([
+			stack.topAnchor.constraint(equalTo: alert.view.topAnchor,constant: 20),
+			stack.leadingAnchor.constraint(equalTo: alert.view.leadingAnchor, constant: 25)
+		])
+		indicator.startAnimating()
+		
+		return alert
+	}
+	
+	func present(_ alert: UIAlertController, delay: Double = 0.5) -> ((_ completion: @escaping () -> ()) -> ()) {
+		var done = false
+		var canDismiss = false
+		
+		post(delay: delay) {
+			if !done {
+				self.present(alert, animated: true) {
+					if canDismiss {
+						alert.dismiss(animated: true)
+					}
+				}
+			}
+		}
+		
+		return { completion in
+			done = true
+			
+			if self.presentedViewController === alert { //if done presenting
+				alert.dismiss(animated: true, completion: completion)
+			} else { //middle of presentating or non presented at all
+				canDismiss = true
+				completion()
+			}
+		}
 	}
 }
 

@@ -6,17 +6,27 @@
 //
 
 import Foundation
-extension String {
+public extension String {
 	/// get the localized version of a given string, using the string value as key.
 	var localized: String {
 		NSLocalizedString(self, comment: self)
 	}
 }
 
-extension DateFormatter {
+public extension DateFormatter {
+	
+	/// Initialize new instance with string format
+	/// - Parameter format: date fromat string
 	convenience init(format: String) {
 		self.init()
 		dateFormat = format
+	}
+}
+
+public extension URL {
+	///computes file size at the url, if exists
+	var fileSize: UInt64? {
+		try? FileManager.default.attributesOfItem(atPath: path)[.size] as? UInt64
 	}
 }
 
@@ -38,19 +48,19 @@ public func async(quality: DispatchQoS.QoSClass = .background, block: @escaping 
 	DispatchQueue.global(qos: quality).async(execute: block)
 }
 
-extension Encodable {
+public extension Encodable {
 	/// encode in JSON encoding
 	/// - Returns: JSON represention of data
-	public func json() -> Data {
+	func json() -> Data {
 		try! JSONEncoder().encode(self)
 	}
 }
 
-extension Decodable {
+public extension Decodable {
 	/// Decode data in JSON decoding
 	/// - Parameter json: JSON encoded data
 	/// - Returns: Generic Decodable value representing the JSON
-	public static func from <T: Decodable> (json: Data) -> T {
+	static func from <T: Decodable> (json: Data) -> T {
 		try! JSONDecoder().decode(T.self, from: json)
 	}
 }
