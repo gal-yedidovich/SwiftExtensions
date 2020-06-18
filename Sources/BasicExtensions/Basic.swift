@@ -64,3 +64,14 @@ public extension Decodable {
 		try! JSONDecoder().decode(T.self, from: json)
 	}
 }
+
+/// Convenince error struct for custom string errors
+public struct MsgError: LocalizedError {
+	public init(msg: String) {
+		self.msg = msg
+	}
+	
+	let msg: String
+	
+	public var errorDescription: String? { msg }
+}
