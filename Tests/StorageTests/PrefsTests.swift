@@ -13,19 +13,17 @@ final class PrefsTests: XCTestCase {
 	
 	override func setUp() { //before each test
 		FileSystem.delete(file: .prefs)
+		Prefs.standard.dict = [:]
 	}
 	
 	func testInsert() {
 		let prefs = Prefs.standard
 		
-		prefs.edit()
-			.put(key: "name", "Gal")
-			.commit()
+		prefs.edit().put(key: .name, "Gal").commit()
 		
-		XCTAssert(prefs.string(key: "name") == "Gal")
-		
+		XCTAssert(prefs.string(key: .name) == "Gal")
 		afterWrite(at: prefs) { json in
-			XCTAssert(json["name"] == "Gal")
+			XCTAssert(json[.name] == "Gal")
 		}
 	}
 	
@@ -33,36 +31,27 @@ final class PrefsTests: XCTestCase {
 		let prefs = Prefs.standard
 		
 		prefs.edit()
-			.put(key: "name", "Gal")
-			.put(key: "age", 26)
+			.put(key: .name, "Gal")
+			.put(key: .age, 26)
 			.commit()
 		
-		prefs.edit()
-			.put(key: "name", "Bubu")
-			.commit()
+		prefs.edit().put(key: .name, "Bubu").commit()
 		
-		XCTAssert(prefs.dict["name"] == "Bubu")
-		
+		XCTAssert(prefs.string(key: .name) == "Bubu")
 		afterWrite(at: prefs) { json in
-			XCTAssert(json["name"] == "Bubu")
+			XCTAssert(json[.name] == "Bubu")
 		}
 	}
 	
 	func testRemove() {
 		let prefs = Prefs.standard
 		
-		prefs.edit()
-			.put(key: "test", true)
-			.commit()
+		prefs.edit().put(key: .isAlive, true).commit()
+		prefs.edit().remove(key: .isAlive).commit()
 		
-		prefs.edit()
-			.remove(key: "test")
-			.commit()
-		
-		XCTAssert(prefs.dict["test"] == nil)
-		
+		XCTAssert(prefs.dict[.isAlive] == nil)
 		afterWrite(at: prefs) { (json) in
-			XCTAssert(json["test"] == nil)
+			XCTAssert(json[.isAlive] == nil)
 		}
 	}
 	
@@ -70,8 +59,8 @@ final class PrefsTests: XCTestCase {
 		let prefs = Prefs.standard
 		
 		prefs.edit()
-			.put(key: "name", "Gal")
-			.put(key: "age", 26)
+			.put(key: .name, "Gal")
+			.put(key: .age, 26)
 			.commit()
 		
 		prefs.edit().clear().commit()
@@ -84,14 +73,12 @@ final class PrefsTests: XCTestCase {
 		let prefs = Prefs.standard
 		
 		let dict = ["one": 1, "two": 2]
-		prefs.edit()
-			.put(key: "codable", dict)
-			.commit()
+		prefs.edit().put(key: .numbers, dict).commit()
 		
-		XCTAssert(dict == prefs.codable(key: "codable"))
+		XCTAssert(dict == prefs.codable(key: .numbers))
 		
 		afterWrite(at: prefs) { json in
-			XCTAssert(dict == .from(json: json["codable"]!))
+			XCTAssert(dict == .from(json: json[.numbers]!))
 		}
 	}
 	
@@ -146,4 +133,11 @@ final class PrefsTests: XCTestCase {
 		("testClear", testClear),
 	]
 	
+}
+
+fileprivate extension String {
+	static let name = "name"
+	static let age = "age"
+	static let isAlive = "isAlive"
+	static let numbers = "numbers"
 }

@@ -70,7 +70,7 @@ public final class Prefs {
 	public func edit() -> Editor { Editor(prefs: self) }
 	
 	
-	/// Editor calss, does CRUD operations on a linked Prefs instance.
+	/// An object that operate changes on a linked Prefs instance.
 	public class Editor {
 		internal static let queue = DispatchQueue(label: "prefs", qos: .background)
 		internal let prefs: Prefs

@@ -110,5 +110,25 @@ let standardPrefs = Prefs.standard //the built-in standard instance
 let myPrefs = Prefs(file: .myFile1) //new instance using the Filename struct
 ```
 
+You can put values: 
+```swift
+let myPrefs.edit() //start editing
+	.put(key: .name, "Gal") //prefer contants over hard coded string
+	.put(key: "age", 26)
+	.commit() //save your changes in memory & lcoal storage
+	
+extension String {
+	static let name = "obfuscatedKey" //value should be obfuscated
+}
+```
+
+And you can read them:
+```swift
+if let name = myPrefs.string(key: .name),
+	let age = myPrefs.age(key: "age") {
+	print("\(name), \(age) years old") 
+}
+```
+
 ## License
 Apache License 2.0
