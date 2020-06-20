@@ -33,7 +33,7 @@ final class PrefsTests: XCTestCase {
 		
 		prefs.edit()
 			.put(key: "name", "Gal")
-			.put(key: "age", "26")
+			.put(key: "age", 26)
 			.commit()
 		
 		prefs.edit()
@@ -70,13 +70,28 @@ final class PrefsTests: XCTestCase {
 		
 		prefs.edit()
 			.put(key: "name", "Gal")
-			.put(key: "age", "26")
+			.put(key: "age", 26)
 			.commit()
 		
 		prefs.edit().clear().commit()
 		
 		XCTAssert(prefs.dict.count == 0)
 		XCTAssert(!FileSystem.fileExists(prefs.filename))
+	}
+	
+	func testCodable() {
+		let prefs = Prefs.standard
+		
+		let dict = ["one": 1, "two": 2]
+		prefs.edit()
+			.put(key: "codable", dict)
+			.commit()
+		
+		XCTAssert(dict == prefs.codable(key: "codable"))
+		
+		afterWrite(at: prefs) { json in
+			XCTAssert(dict == .from(json: json["codable"]!))
+		}
 	}
 	
 	private func afterWrite(at prefs: Prefs, test: @escaping ([String:String]) -> ()) {
