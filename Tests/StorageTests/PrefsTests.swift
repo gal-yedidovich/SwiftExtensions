@@ -10,11 +10,7 @@ import XCTest
 
 final class PrefsTests: XCTestCase {
 	
-	override class func setUp() { //before the test case starts
-		FileSystem.delete(file: .prefs) //verify that there is no prefs file on start
-	}
-	
-	override func tearDown() { //after each test
+	override func setUp() { //before each test
 		FileSystem.delete(file: .prefs)
 	}
 	
@@ -55,17 +51,17 @@ final class PrefsTests: XCTestCase {
 		let prefs = Prefs.standard
 		
 		prefs.edit()
-			.put(key: "name", "Gal")
+			.put(key: "test", true)
 			.commit()
 		
 		prefs.edit()
-			.remove(key: "name")
+			.remove(key: "test")
 			.commit()
 		
-		XCTAssert(prefs.dict["name"] == nil)
+		XCTAssert(prefs.dict["test"] == nil)
 		
 		afterWrite(at: prefs) { (json) in
-			XCTAssert(json.count == 0)
+			XCTAssert(json["test"] == nil)
 		}
 	}
 	

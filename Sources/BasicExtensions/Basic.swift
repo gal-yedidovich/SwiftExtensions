@@ -7,6 +7,12 @@
 
 import Foundation
 public extension String {
+	/// Initialize a string instance, in JSON format, from a given Encodable value
+	/// - Parameter json: An encodable value that can be parsed into JSON string
+	init(json: Encodable) {
+		self = String(data: json.json(), encoding: .utf8)!
+	}
+	
 	/// get the localized version of a given string, using the string value as key.
 	var localized: String {
 		NSLocalizedString(self, comment: self)
@@ -62,6 +68,12 @@ public extension Decodable {
 	/// - Returns: Generic Decodable value representing the JSON
 	static func from <T: Decodable> (json: Data) -> T {
 		try! JSONDecoder().decode(T.self, from: json)
+	}
+	/// Decode data in JSON decoding
+	/// - Parameter json: JSON encoded string
+	/// - Returns: Generic Decodable value representing the JSON
+	static func from <T: Decodable> (json: String) -> T {
+		from(json: json.data(using: .utf8)!)
 	}
 }
 

@@ -33,39 +33,31 @@ public final class Prefs {
 	/// Get an int value from `Prefs` by given key, or nil if not found
 	/// - Parameter key: the wanted key, linked to the wanted value
 	/// - Returns: int value of the given key, or nil if not found
-	public func int(key: String) -> Int? { Int(dict[key] ?? "") }
+	public func int(key: String) -> Int? { codable(key: key) }
 	
 	/// Gets a boolean value from `Prefs` by given key, or uses the fallback value if not found
 	/// - Parameters:
 	///   - key: the wanted key, linked to the wanted value
 	///   - fallback: the default value in case the key is not found
 	/// - Returns: boolean value of the given key, or the fallback if not found.
-	public func bool(key: String, fallback: Bool = false) -> Bool { Bool(dict[key] ?? "") ?? fallback }
+	public func bool(key: String, fallback: Bool = false) -> Bool { codable(key: key) ?? fallback }
 	
 	/// Get a date value from `Prefs` by given key, or nil if not found
 	/// - Parameter key: the wanted key, linked to the wanted value
 	/// - Returns: date value of the given key, or nil if not found
-	public func date(key: String) -> Date? {
-		if let val = dict[key] {
-			let dateFormatter = DateFormatter()
-			dateFormatter.dateFormat = "dd-MM-yyyy HH-mm-ss"
-			
-			let date = dateFormatter.date(from: val)!
-			return date
-		}
-		else { return nil }
-	}
+	public func date(key: String) -> Date? { codable(key: key) }
 	
 	/// Get a string array from `Prefs` by given key, or nil if not found
 	/// - Parameter key: the wanted key, linked to the wanted value
 	/// - Returns: string array, or nil if not found
-	public func array(key: String, fallback: [String]? = nil) -> [String]? {
-		if let val = dict[key] {
-			var arr =  val.components(separatedBy: "\n")
-			arr.removeLast()
-			return arr
-		}
-		else { return fallback }
+	public func array(key: String, fallback: [String]? = nil) -> [String]? { codable(key: key) }
+	
+	/// Get a Decodable value from `Prefs` by given key, or nil if not found
+	/// - Parameter key: the wanted key, linked to the wanted value
+	/// - Returns: some Decodable, or nil if not found
+	public func codable<Type: Decodable>(key: String) -> Type? {
+		guard let str = dict[key] else { return nil }
+		return .from(json: str)
 	}
 	
 	/// check if value exists at a given key
@@ -103,37 +95,35 @@ public final class Prefs {
 		///   - key: target uniqe key to link to the value
 		///   - value: a value to keep in Prefs
 		/// - Returns: this instance, for method chaining
-		public func put(key: String, _ value: Int) -> Editor { put(key, "\(value)") }
+		public func put(key: String, _ value: Int) -> Editor { put(key: key, value as Encodable) }
 		
 		/// Insert a boolean value to uncommited changes under a given key
 		/// - Parameters:
 		///   - key: target uniqe key to link to the value
 		///   - value: a value to keep in Prefs
 		/// - Returns: this instance, for method chaining
-		public func put(key: String, _ value: Bool) -> Editor { put(key, "\(value)") }
+		public func put(key: String, _ value: Bool) -> Editor { put(key: key, value as Encodable) }
 		
 		/// Insert a date value to uncommited changes under a given key
 		/// - Parameters:
 		///   - key: target uniqe key to link to the value
 		///   - value: a value to keep in Prefs
 		/// - Returns: this instance, for method chaining
-		public func put(key: String, _ value: Date) -> Editor {
-			let date = DateFormatter()
-			date.dateFormat = "dd-MM-yyyy HH-mm-ss"
-			
-			return put(key: key, date.string(from: value))
-		}
+		public func put(key: String, _ value: Date) -> Editor { put(key: key, value as Encodable) }
 		
 		/// Insert a string array of values to uncommited changes under a given key
 		/// - Parameters:
 		///   - key: target uniqe key to link to the value
 		///   - values: string values to keep in Prefs
 		/// - Returns: this instance, for method chaining
-		public func put(key: String, _ values: [String]) -> Editor {
-			var str = ""
-			for v in values { str += v + "\n" }
-			return put(key, str)
-		}
+		public func put(key: String, _ values: [String]) -> Editor { put(key: key, values as Encodable) }
+		
+		/// Insert a date value to uncommited changes under a given key
+		/// - Parameters:
+		///   - key: target uniqe key to link to the value
+		///   - value: a value to keep in Prefs
+		/// - Returns: this instance, for method chaining
+		public func put(key: String, _ value: Encodable) -> Editor { put(key, String(json: value)) }
 		
 		/// insert an uncommited removal to given key
 		/// - Parameter key: target key to remove from Prefs
@@ -183,4 +173,3 @@ public final class Prefs {
 		}
 	}
 }
-
