@@ -6,6 +6,7 @@
 //
 
 import XCTest
+import BasicExtensions
 @testable import StorageExtensions
 
 final class PrefsTests: XCTestCase {
@@ -91,6 +92,36 @@ final class PrefsTests: XCTestCase {
 		
 		afterWrite(at: prefs) { json in
 			XCTAssert(dict == .from(json: json["codable"]!))
+		}
+	}
+	
+	func testParallelWrites() {
+		let prefs = Prefs.standard
+		let prefixes = ["Bubu", "Groot", "Deadpool"]
+		let range = 0...9
+		
+		let expectation = XCTestExpectation(description: "for concurrent writing")
+		expectation.expectedFulfillmentCount = prefixes.count
+		for prefix in prefixes {
+			async {
+				for i in range {
+					prefs.edit()
+						.put(key: "\(prefix)-\(i)", i)
+						.commit()
+				}
+				expectation.fulfill()
+			}
+		}
+		wait(for: [expectation], timeout: 2)
+		
+		afterWrite(at: prefs) { json in
+			XCTAssert(json.count == 30)
+			
+			for prefix in prefixes {
+				for i in range {
+					XCTAssert(json["\(prefix)-\(i)"] == "\(i)")
+				}
+			}
 		}
 	}
 	
