@@ -50,7 +50,7 @@ public final class Prefs {
 	/// Get a string array from `Prefs` by given key, or nil if not found
 	/// - Parameter key: the wanted key, linked to the wanted value
 	/// - Returns: string array, or nil if not found
-	public func array(key: String, fallback: [String]? = nil) -> [String]? { codable(key: key) }
+	public func array(key: String) -> [String]? { codable(key: key) }
 	
 	/// Get a Decodable value from `Prefs` by given key, or nil if not found
 	/// - Parameter key: the wanted key, linked to the wanted value
