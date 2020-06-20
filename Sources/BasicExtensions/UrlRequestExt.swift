@@ -44,13 +44,13 @@ public extension URLRequest {
 	/// - Parameter body: the request body in string
 	/// - Returns: new request after settings the body
 	func set(body: String) -> URLRequest {
-		set(body: body.data(using: .utf8))
+		set(body: body.data(using: .utf8)!)
 	}
 	
 	/// convenience method for settings the body, using method chaining
 	/// - Parameter body: the request body data
 	/// - Returns: new request after settings the body
-	func set(body: Data?) -> URLRequest {
+	func set(body: Data) -> URLRequest {
 		var req = self
 		req.httpBody = body
 		return req
@@ -58,7 +58,7 @@ public extension URLRequest {
 }
 
 
-/// Convenince HTTP methods for url `URLRequest`
+/// Convenince HTTP methods for `URLRequest`
 public enum Method: String {
 	case GET = "GET",
 		POST = "POST",

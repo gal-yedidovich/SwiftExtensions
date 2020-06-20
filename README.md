@@ -1,4 +1,4 @@
-# SwiftExtensions - Reusable & Secure utilities 
+# SwiftExtensions - Robust, Reusable & Secure utilities 
 
 This library is handle IO operations on the local disk, with encryption layer for security. it also provides a convenice `Prefs` class for storing Key-Value easily and safely with the same encryption layer.
 
@@ -46,6 +46,24 @@ post {
 async {
 	//run in a background thread
 }
+```
+
+#### URLRequest builder
+```swift
+let req = URLRequest(url: "https://your.end.point")
+	.set(method: .POST) //Or .get, .put, .delete, .patch
+	.set(contentType: .json) //OR .xml, .urlEncoded etc.
+	.set(body: "some String or Data")
+```
+
+Also:
+```swift
+let dict = ["title": "Bubu is the king", "message": "I am Groot"]
+
+let req = URLRequest(url: "https://your.end.point")
+	.set(method: .PUT)
+	.set(contentType: .json)
+	.set(body: dict.json()) //allows encodable values
 ```
 
 #### Localization
