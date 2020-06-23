@@ -11,7 +11,11 @@ import BasicExtensions
 
 final class PrefsTests: XCTestCase {
 	
-	override func setUp() { //before each test
+	override static func setUp() {
+		FileSystem.delete(file: .prefs)
+	}
+	
+	override func tearDown() {
 		FileSystem.delete(file: .prefs)
 		Prefs.standard.dict = [:]
 	}
