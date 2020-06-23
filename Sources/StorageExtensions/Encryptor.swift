@@ -8,6 +8,8 @@
 import Foundation
 import CryptoKit
 
+internal let BUFFER_SIZE = 1024 * 32
+
 public class Encryptor {
 	private init() {}
 	
