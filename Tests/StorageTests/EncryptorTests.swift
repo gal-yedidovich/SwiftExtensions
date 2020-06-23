@@ -20,8 +20,8 @@ final class EncryptorTests: XCTestCase {
 		XCTAssert(str == strTest)
 	}
 	
-	func testCiphers() {
-		let str = [String](repeating: "Bubu is the king\n", count: 50).reduce("", +)
+	func testStreams() {
+		let str = [String](repeating: "Bubu is the king\n", count: 5000).reduce("", +)
 		
 		let baseURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
 		let url = baseURL.appendingPathComponent("data.txt")
@@ -41,5 +41,6 @@ final class EncryptorTests: XCTestCase {
 	
 	static var allTests = [
 		("testEncryption", testEncryption),
+		("testStreams", testStreams),
 	]
 }

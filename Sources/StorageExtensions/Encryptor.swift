@@ -44,50 +44,52 @@ public class Encryptor {
 		try AES.GCM.open(try AES.GCM.SealedBox(combined: data), using: key)
 	}
 	
-	public static func encrypt(file src: URL, to dest: URL) {
-		let input = InputStream(url: src)!
-		let output = OutputStream(url: dest, append: false)!
-		let buffer = UnsafeMutablePointer<UInt8>.allocate(capacity: BUFFER_SIZE)
-		
-		input.open()
-		output.open()
-		
-		while input.hasBytesAvailable {
-			let bytesRead = input.read(buffer, maxLength: BUFFER_SIZE)
-			guard bytesRead > 0 else { break }
-			
-			let data = Data(bytes: buffer, count: bytesRead)
-			let enc = encrypt(data: data)
-			enc.withUnsafeBytes { (writeBuffer: UnsafeRawBufferPointer) in
-				_ = output.write(writeBuffer.bindMemory(to: UInt8.self).baseAddress!, maxLength: enc.count)
-			}
-		}
-		
-		input.close()
-		output.close()
+	/// Encrypt a file and save the encrypted content in a different file, this function let you encrypt scaleable chunck of content without risking memory to run out
+	/// - Parameters:
+	///   - src: source file to encrypt
+	///   - dest: destination file to save the encrypted content
+	///   - onProgress: a  progress event to track the progress of the writing
+	public static func encrypt(file src: URL, to dest: URL, onProgress: ((Int)->())? = nil) {
+		process(file: src, to: dest, encrypt: true, onProgress: onProgress)
 	}
 	
-	public static func decrypt(file src: URL, to dest: URL) {
+	/// Decrypt a file and save the "clear text" content in a different file, this function let you decrypt scaleable chunck of content without risking memory to run out
+	/// - Parameters:
+	///   - src: An encrypted, source file to decrypt
+	///   - dest: destination file to save the decrypted content
+	///   - onProgress: a  progress event to track the progress of the writing
+	public static func decrypt(file src: URL, to dest: URL, onProgress: ((Int)->())? = nil) {
+		process(file: src, to: dest, encrypt: false, onProgress: onProgress)
+	}
+	
+	private static func process(file src: URL, to dest: URL, encrypt isEncryption: Bool , onProgress: ((Int)->())?) {
+		let bufferSize = isEncryption ? BUFFER_SIZE : BUFFER_SIZE + 28
+		
 		let input = InputStream(url: src)!
 		let output = OutputStream(url: dest, append: false)!
-		let buffer = UnsafeMutablePointer<UInt8>.allocate(capacity: BUFFER_SIZE)
+		let buffer = UnsafeMutablePointer<UInt8>.allocate(capacity: bufferSize)
+		let fileSize = src.fileSize!
+		var offset: UInt64 = 0
 		
 		input.open()
 		output.open()
 		
-		while input.hasBytesAvailable {
-			let bytesRead = input.read(buffer, maxLength: BUFFER_SIZE)
-			guard bytesRead > 0 else { break }
-			
-			let data = Data(bytes: buffer, count: bytesRead)
-			let dec = try! decrypt(data: data)
-			dec.withUnsafeBytes { (writeBuffer: UnsafeRawBufferPointer) in
-				_ = output.write(writeBuffer.bindMemory(to: UInt8.self).baseAddress!, maxLength: dec.count)
-			}
+		defer {
+			input.close()
+			output.close()
 		}
 		
-		input.close()
-		output.close()
+		while input.hasBytesAvailable {
+			let bytesRead = input.read(buffer, maxLength: bufferSize)
+			guard bytesRead > 0 else { break }
+			offset += UInt64(bytesRead)
+			onProgress?(Int((offset * 100) / fileSize))
+			let data = Data(bytes: buffer, count: bytesRead)
+			let processedData = isEncryption ? encrypt(data: data) : try! decrypt(data: data)
+			processedData.withUnsafeBytes { (writeBuffer: UnsafeRawBufferPointer) in
+				_ = output.write(writeBuffer.bindMemory(to: UInt8.self).baseAddress!, maxLength: processedData.count)
+			}
+		}
 	}
 	
 	/// Encryption key for cipher operations, lazy loaded, it will get the current key in Keychain or will generate new one.
