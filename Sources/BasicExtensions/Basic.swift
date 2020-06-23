@@ -1,6 +1,6 @@
 //
 //  Basic.swift
-//  
+//  Basic
 //
 //  Created by Gal Yedidovich on 15/06/2020.
 //
