@@ -42,6 +42,52 @@ public class Encryptor {
 		try AES.GCM.open(try AES.GCM.SealedBox(combined: data), using: key)
 	}
 	
+	public static func encrypt(file src: URL, to dest: URL) {
+		let input = InputStream(url: src)!
+		let output = OutputStream(url: dest, append: false)!
+		let buffer = UnsafeMutablePointer<UInt8>.allocate(capacity: BUFFER_SIZE)
+		
+		input.open()
+		output.open()
+		
+		while input.hasBytesAvailable {
+			let bytesRead = input.read(buffer, maxLength: BUFFER_SIZE)
+			guard bytesRead > 0 else { break }
+			
+			let data = Data(bytes: buffer, count: bytesRead)
+			let enc = encrypt(data: data)
+			enc.withUnsafeBytes { (writeBuffer: UnsafeRawBufferPointer) in
+				_ = output.write(writeBuffer.bindMemory(to: UInt8.self).baseAddress!, maxLength: enc.count)
+			}
+		}
+		
+		input.close()
+		output.close()
+	}
+	
+	public static func decrypt(file src: URL, to dest: URL) {
+		let input = InputStream(url: src)!
+		let output = OutputStream(url: dest, append: false)!
+		let buffer = UnsafeMutablePointer<UInt8>.allocate(capacity: BUFFER_SIZE)
+		
+		input.open()
+		output.open()
+		
+		while input.hasBytesAvailable {
+			let bytesRead = input.read(buffer, maxLength: BUFFER_SIZE)
+			guard bytesRead > 0 else { break }
+			
+			let data = Data(bytes: buffer, count: bytesRead)
+			let dec = try! decrypt(data: data)
+			dec.withUnsafeBytes { (writeBuffer: UnsafeRawBufferPointer) in
+				_ = output.write(writeBuffer.bindMemory(to: UInt8.self).baseAddress!, maxLength: dec.count)
+			}
+		}
+		
+		input.close()
+		output.close()
+	}
+	
 	/// Encryption key for cipher operations, lazy loaded, it will get the current key in Keychain or will generate new one.
 	private static var key: SymmetricKey = {
 		var query = keyChainQuery

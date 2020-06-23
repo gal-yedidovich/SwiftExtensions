@@ -5,6 +5,7 @@
 //  Created by Gal Yedidovich on 15/06/2020.
 //
 
+#if canImport(UIKit)
 import UIKit
 public extension UIViewController {
 	/// Pushes a view controller on the navigation controller
@@ -113,3 +114,4 @@ public struct ControllerID {
 	
 	var value: String
 }
+#endif
