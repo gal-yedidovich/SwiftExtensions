@@ -99,11 +99,11 @@ public class Encryptor {
 		
 		var item: CFTypeRef? //reference to the result
 		let readStatus = SecItemCopyMatching(query as CFDictionary, &item)
-		if readStatus == errSecSuccess {
-			return SymmetricKey(data: item as! Data) // Convert back to a key.
+		switch readStatus {
+			case errSecSuccess: return SymmetricKey(data: item as! Data) // Convert back to a key.
+			case errSecItemNotFound: return storeNewKey()
+			default: fatalError("unable to fetch key. error: '\(readStatus)'")
 		}
-		
-		return storeNewKey()
 	}()
 	
 	/// Generate a new Symmetric encryption key and stores it in the Keychain
@@ -113,11 +113,11 @@ public class Encryptor {
 		var query = keyChainQuery
 		query[kSecAttrAccessible] = kSecAttrAccessibleAfterFirstUnlock
 		query[kSecValueData] = key.dataRepresentation //request to get the result (key) as data
-
-		let _ = SecItemAdd(query as CFDictionary, nil)
-//		guard status == errSecSuccess else {
-//			fatalError("Unable to store item \(addStatus)")
-//		}
+		
+		let status = SecItemAdd(query as CFDictionary, nil)
+		guard status == errSecSuccess else {
+			fatalError("Unable to store key, error: '\(status)'")
+		}
 		
 		return key
 	}
@@ -133,12 +133,12 @@ public class Encryptor {
 }
 
 extension SymmetricKey {
-    /// A Data instance created safely from the contiguous bytes without making any copies.
-    var dataRepresentation: Data {
-        return withUnsafeBytes { bytes in
-            let cfdata = CFDataCreateWithBytesNoCopy(nil, bytes.baseAddress?.assumingMemoryBound(to: UInt8.self), bytes.count, kCFAllocatorNull)
-            return ((cfdata as NSData?) as Data?) ?? Data()
-        }
-    }
+	/// A Data instance created safely from the contiguous bytes without making any copies.
+	var dataRepresentation: Data {
+		return withUnsafeBytes { bytes in
+			let cfdata = CFDataCreateWithBytesNoCopy(nil, bytes.baseAddress?.assumingMemoryBound(to: UInt8.self), bytes.count, kCFAllocatorNull)
+			return ((cfdata as NSData?) as Data?) ?? Data()
+		}
+	}
 }
 
