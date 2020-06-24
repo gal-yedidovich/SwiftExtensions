@@ -11,18 +11,12 @@ import BasicExtensions
 
 final class PrefsTests: XCTestCase {
 	
-	override static func setUp() {
-		FileSystem.delete(file: .prefs)
-	}
-	
-	override func tearDown() {
-		FileSystem.delete(file: .prefs)
-		Prefs.standard.dict = [:]
+	override func tearDown() { //clean up after each test
+		FileSystem.delete(file: prefs.filename)
+		prefs.dict = [:]
 	}
 	
 	func testInsert() {
-		let prefs = Prefs.standard
-		
 		prefs.edit().put(key: .name, "Gal").commit()
 		
 		XCTAssert(prefs.string(key: .name) == "Gal")
@@ -32,8 +26,6 @@ final class PrefsTests: XCTestCase {
 	}
 	
 	func testReplace() {
-		let prefs = Prefs.standard
-		
 		prefs.edit()
 			.put(key: .name, "Gal")
 			.put(key: .age, 26)
@@ -48,8 +40,6 @@ final class PrefsTests: XCTestCase {
 	}
 	
 	func testRemove() {
-		let prefs = Prefs.standard
-		
 		prefs.edit().put(key: .isAlive, true).commit()
 		prefs.edit().remove(key: .isAlive).commit()
 		
@@ -60,8 +50,6 @@ final class PrefsTests: XCTestCase {
 	}
 	
 	func testClear() {
-		let prefs = Prefs.standard
-		
 		prefs.edit()
 			.put(key: .name, "Gal")
 			.put(key: .age, 26)
@@ -74,8 +62,6 @@ final class PrefsTests: XCTestCase {
 	}
 	
 	func testCodable() {
-		let prefs = Prefs.standard
-		
 		let dict = ["one": 1, "two": 2]
 		prefs.edit().put(key: .numbers, dict).commit()
 		
@@ -87,7 +73,6 @@ final class PrefsTests: XCTestCase {
 	}
 	
 	func testParallelWrites() {
-		let prefs = Prefs.standard
 		let prefixes = ["Bubu", "Groot", "Deadpool"]
 		let range = 0...9
 		
@@ -138,6 +123,8 @@ final class PrefsTests: XCTestCase {
 	]
 	
 }
+
+let prefs = Prefs.standard
 
 fileprivate extension String {
 	static let name = "name"

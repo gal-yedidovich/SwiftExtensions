@@ -61,9 +61,9 @@ public extension UIViewController {
 		return alert
 	}
 	
-	/// Presents an alert modally after a delay, or not at all if the finished beforehand
+	/// Presents an alert modally after a delay, or not at all if the dismissed beforehand
 	///
-	/// this is a convenince method to for UX, it will wait a given time inteval, and will present the given alert until the returned "dismiss" clouse is called.
+	/// This is a convenince method for UX, it will wait a given time inteval, and will present the given alert until the returned "dismiss" clouse is called.
 	///  - if the dismiss clouse is called before the alert is shown, the alert won't be presented at all.
 	///
 	/// - Parameters:
