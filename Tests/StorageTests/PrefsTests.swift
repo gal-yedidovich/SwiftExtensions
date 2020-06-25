@@ -153,6 +153,9 @@ final class PrefsTests: XCTestCase {
 		("testReplace", testReplace),
 		("testRemove", testRemove),
 		("testClear", testClear),
+		("testCodable", testCodable),
+		("testParallelWrites", testParallelWrites),
+		("testMultiplePrefs", testMultiplePrefs),
 	]
 	
 }

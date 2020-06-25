@@ -68,7 +68,7 @@ let req = URLRequest(url: "https://your.end.point")
 
 #### Localization
 ```swift
-let helloWorld = "helloWorld".localized //provided you have "helloWorld" key in Localizable.string files"
+let helloWorld = "helloWorld".localized //provided you have "helloWorld" key in Localizable.strings files"
 
 print(helloWorld) //will automatically use the wanted localization
 
