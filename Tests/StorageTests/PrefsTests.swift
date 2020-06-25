@@ -101,10 +101,43 @@ final class PrefsTests: XCTestCase {
 		}
 	}
 	
+	func testMultiplePrefs() {
+		let prefs1 = Prefs(file: Filename(name: "prefs1"))
+		let prefs2 = Prefs(file: Filename(name: "prefs2"))
+		
+		async {
+			prefs1.edit()
+				.put(key: .name, "Bubu")
+				.put(key: .age, 100)
+				.commit()
+			
+			XCTAssert(prefs1.dict.count == 2)
+		}
+		
+		prefs2.edit()
+			.put(key: .name, "Groot")
+			.put(key: .age, 200)
+			.put(key: .isAlive, true)
+			.commit()
+		
+		XCTAssert(prefs2.dict.count == 3)
+		
+		afterWrite(at: prefs1) { json in
+			XCTAssert(json.count == 2)
+		}
+		
+		afterWrite(at: prefs2) { json in
+			XCTAssert(json.count == 3)
+		}
+		
+		prefs1.edit().clear().commit()
+		prefs2.edit().clear().commit()
+	}
+	
 	private func afterWrite(at prefs: Prefs, test: @escaping ([String:String]) -> ()) {
 		let expectation = XCTestExpectation(description: "wait to write to Prefs")
 		
-		Prefs.Editor.queue.async { //after written to storage
+		prefs.queue.async { //after written to storage
 			let data = FileSystem.read(file: prefs.filename)!
 			let json: [String: String] = .from(json: data)
 			test(json)
