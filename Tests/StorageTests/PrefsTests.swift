@@ -91,7 +91,7 @@ final class PrefsTests: XCTestCase {
 		wait(for: [expectation], timeout: 2)
 		
 		afterWrite(at: prefs) { json in
-			XCTAssert(json.count == 30)
+			XCTAssert(json.count == prefixes.count * range.count)
 			
 			for prefix in prefixes {
 				for i in range {

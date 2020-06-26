@@ -32,8 +32,8 @@ public class Encryptor {
 	/// Encrypt data with CGM encryption, and returns the encrypted data in result
 	/// - Parameter data: the data to encrypt
 	/// - Returns: encrypted data
-	public static func encrypt(data: Data) -> Data {
-		try! AES.GCM.seal(data, using: key).combined!
+	public static func encrypt(data: Data) throws -> Data {
+		try AES.GCM.seal(data, using: key).combined!
 	}
 	
 	/// Deccrypt data with CGM decryption, and returns the original (clear-text) data in result
@@ -49,8 +49,8 @@ public class Encryptor {
 	///   - src: source file to encrypt
 	///   - dest: destination file to save the encrypted content
 	///   - onProgress: a  progress event to track the progress of the writing
-	public static func encrypt(file src: URL, to dest: URL, onProgress: ((Int)->())? = nil) {
-		process(file: src, to: dest, encrypt: true, onProgress: onProgress)
+	public static func encrypt(file src: URL, to dest: URL, onProgress: ((Int)->())? = nil) throws {
+		try process(file: src, to: dest, encrypt: true, onProgress: onProgress)
 	}
 	
 	/// Decrypt a file and save the "clear text" content in a different file, this function let you decrypt scaleable chunck of content without risking memory to run out
@@ -58,15 +58,20 @@ public class Encryptor {
 	///   - src: An encrypted, source file to decrypt
 	///   - dest: destination file to save the decrypted content
 	///   - onProgress: a  progress event to track the progress of the writing
-	public static func decrypt(file src: URL, to dest: URL, onProgress: ((Int)->())? = nil) {
-		process(file: src, to: dest, encrypt: false, onProgress: onProgress)
+	public static func decrypt(file src: URL, to dest: URL, onProgress: ((Int)->())? = nil) throws {
+		try process(file: src, to: dest, encrypt: false, onProgress: onProgress)
 	}
 	
-	private static func process(file src: URL, to dest: URL, encrypt isEncryption: Bool , onProgress: ((Int)->())?) {
+	private static func process(file src: URL, to dest: URL, encrypt isEncryption: Bool , onProgress: ((Int)->())?) throws {
 		let bufferSize = isEncryption ? BUFFER_SIZE : BUFFER_SIZE + 28
+		let fm = FileManager.default
+		
+		let tempDir = fm.temporaryDirectory
+		try! fm.createDirectory(at: tempDir, withIntermediateDirectories: true, attributes: nil)
+		let tempFile = tempDir.appendingPathComponent(UUID().uuidString)
 		
 		let input = InputStream(url: src)!
-		let output = OutputStream(url: dest, append: false)!
+		let output = OutputStream(url: tempFile, append: false)!
 		let buffer = UnsafeMutablePointer<UInt8>.allocate(capacity: bufferSize)
 		let fileSize = src.fileSize!
 		var offset: UInt64 = 0
@@ -85,11 +90,17 @@ public class Encryptor {
 			offset += UInt64(bytesRead)
 			onProgress?(Int((offset * 100) / fileSize))
 			let data = Data(bytes: buffer, count: bytesRead)
-			let processedData = isEncryption ? encrypt(data: data) : try! decrypt(data: data)
+			let processedData = isEncryption ? try encrypt(data: data) : try decrypt(data: data)
 			processedData.withUnsafeBytes { (writeBuffer: UnsafeRawBufferPointer) in
 				_ = output.write(writeBuffer.bindMemory(to: UInt8.self).baseAddress!, maxLength: processedData.count)
 			}
 		}
+		
+		if fm.fileExists(atPath: dest.path) {
+			try fm.removeItem(at: dest)
+		}
+		
+		try fm.moveItem(at: tempFile, to: dest)
 	}
 	
 	/// Encryption key for cipher operations, lazy loaded, it will get the current key in Keychain or will generate new one.

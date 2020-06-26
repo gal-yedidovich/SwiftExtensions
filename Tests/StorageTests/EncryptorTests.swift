@@ -13,7 +13,7 @@ final class EncryptorTests: XCTestCase {
 		let str = "Bubu is the king"
 		let data = str.data(using: .utf8)!
 		
-		let enc = Encryptor.encrypt(data: data)
+		let enc = try! Encryptor.encrypt(data: data)
 		let dec = try! Encryptor.decrypt(data: enc)
 		
 		let strTest = String(data: dec, encoding: .utf8)!
@@ -29,8 +29,8 @@ final class EncryptorTests: XCTestCase {
 		let decUrl = baseURL.appendingPathComponent("dec_data.txt")
 		
 		try! str.data(using: .utf8)!.write(to: url)
-		Encryptor.encrypt(file: url, to: encUrl)
-		Encryptor.decrypt(file: encUrl, to: decUrl)
+		try! Encryptor.encrypt(file: url, to: encUrl)
+		try! Encryptor.decrypt(file: encUrl, to: decUrl)
 		let str2 = try! String(contentsOf: decUrl)
 		XCTAssert(str == str2)
 		

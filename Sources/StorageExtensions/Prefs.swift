@@ -11,7 +11,7 @@ import BasicExtensions
 public final class Prefs {
 	///Built-in instance for convenience.
 	public static let standard = Prefs(file: .prefs)
-	internal private(set) lazy var queue = DispatchQueue(label: "prefs", qos: .background)
+	internal let queue = DispatchQueue(label: "prefs", qos: .background)
 	internal var dict: [String: String] = [:]
 	internal var filename: Filename
 	

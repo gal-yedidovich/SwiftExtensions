@@ -31,7 +31,7 @@ public final class FileSystem {
 	public static func write(data: Data, to url: URL) {
 		try! fm.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true, attributes: nil)
 		
-		let encData = Encryptor.encrypt(data: data)
+		let encData = try! Encryptor.encrypt(data: data)
 		try! encData.write(to: url, options: .atomic)
 	}
 	
