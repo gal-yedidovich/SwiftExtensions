@@ -1,6 +1,6 @@
 # SwiftExtensions - Robust, Reusable & Secure utilities 
 
-This library is handle IO operations on the local disk, with encryption layer for security. it also provides a convenice `Prefs` class for storing Key-Value easily and safely with the same encryption layer.
+This library is provides helpful utilities, like IO operations on the local disk, with encryption layer for security. it also provides a convenice `Prefs` class for storing Key-Value pairs easily and safely with the same encryption layer.
 
 ## Installation
 SwiftExtensions is a *Swift Package*. 
@@ -22,7 +22,7 @@ viewController.push(to: .myCtrl)
 
 //OR with `config` block
 viewController.present(.myCtrl) { (vc: MyViewController) in 
-	//do any configuration before presenting "myCTRL", like: set instance variables
+	//do any configuration before presenting "myCTRL", for example: settting instance variables
 }
 ```
 
@@ -56,7 +56,7 @@ let req = URLRequest(url: "https://your.end.point")
 	.set(body: "some String or Data")
 ```
 
-Also:
+Another example:
 ```swift
 let dict = ["title": "Bubu is the king", "message": "I am Groot"]
 
@@ -101,13 +101,13 @@ You are able to change some values in the library.
 `FileSystem.rootURL`: defaults to the documents url of the app, it can change for example to an AppGroup url: 
 
 ```swift
-FileSystem.rootURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "your AppGroup")
+FileSystem.rootURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "your.app.group")
 ```
 
 `Encryptor.keyChainQuery`: defaults with basic password class. Here is a customized example:
 
 ```swift
-Encryptor.keyChainQuery[kSecAttrAccessGroup] = "your AppGroup"
+Encryptor.keyChainQuery[kSecAttrAccessGroup] = "your.app.group"
 
 //OR - override the whole dictionary
 Encryptor.keyChainQuery = [
@@ -117,7 +117,7 @@ Encryptor.keyChainQuery = [
 
 
 ### Prefs - Secure Key-Value pairs in storage. 
-Insapired after iOS's `UserDefaults` & Android's `SharedPreferences`, The `Prefs` class enables you to manages Key-Value pairs easily and securely using the same encryption layer, also comes with a caching logic for fast & non blocking read/writes operation in memory.
+Insapired after iOS's `UserDefaults` & Android's `SharedPreferences`, The `Prefs` class enables you to manages Key-Value pairs easily and securely using the same encryption layer from `Encryptor`, also comes with a caching logic for fast & non blocking read/writes operation in memory.
 
 You can either use the Standard instance, which is also using an obfuscated filename, or create your own instances for multiple files, like so:
 
