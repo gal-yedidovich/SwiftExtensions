@@ -160,7 +160,7 @@ final class PrefsTests: XCTestCase {
 	
 }
 
-let prefs = Prefs.standard
+fileprivate let prefs = Prefs.standard
 
 fileprivate extension String {
 	static let name = "name"
