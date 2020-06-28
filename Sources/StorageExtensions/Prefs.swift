@@ -79,7 +79,7 @@ public class Editor {
 	
 	/// initialize new instance with linked Prefs instance.
 	/// - Parameter prefs: target Prefs to manipulate, depency injection
-	public init(prefs: Prefs) {
+	internal init(prefs: Prefs) {
 		self.prefs = prefs
 	}
 	

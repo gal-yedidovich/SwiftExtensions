@@ -62,6 +62,12 @@ public class Encryptor {
 		try process(file: src, to: dest, encrypt: false, onProgress: onProgress)
 	}
 	
+	/// Streaming a cipher action from source file to destination file, and updating progress.
+	/// - Parameters:
+	///   - src: source file to cipher
+	///   - dest: destination file to write processed data
+	///   - isEncryption: flag for determinating to encrypt or decrypt
+	///   - onProgress: a  progress event to track the progress of the writing
 	private static func process(file src: URL, to dest: URL, encrypt isEncryption: Bool , onProgress: ((Int)->())?) throws {
 		let bufferSize = isEncryption ? BUFFER_SIZE : BUFFER_SIZE + 28
 		let fm = FileManager.default

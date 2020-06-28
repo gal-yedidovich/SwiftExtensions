@@ -58,7 +58,7 @@ public final class FileSystem {
 	
 	/// delete a Filename from storage
 	/// - Parameter file: target Filename to delete
-	public static func delete(file: Filename){
+	public static func delete(file: Filename) {
 		let fileUrl = url(of: file)
 		if fm.fileExists(atPath: fileUrl.path) {
 			try! fm.removeItem(at: fileUrl)
@@ -67,7 +67,7 @@ public final class FileSystem {
 	
 	/// delete a Folder from storage, including its content
 	/// - Parameter file: target Folder to delete
-	public static func delete(folder: Folder){
+	public static func delete(folder: Folder) {
 		let fileUrl = url(of: folder)
 		if fm.fileExists(atPath: fileUrl.path) {
 			try! fm.removeItem(at: fileUrl)
