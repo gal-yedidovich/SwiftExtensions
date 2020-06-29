@@ -21,7 +21,7 @@ final class PrefsTests: XCTestCase {
 		
 		XCTAssert(prefs.string(key: .name) == "Gal")
 		afterWrite(at: prefs) { json in
-			XCTAssert(json[.name] == "Gal")
+			XCTAssert(json[PrefKey.name.value] == "Gal")
 		}
 	}
 	
@@ -35,7 +35,7 @@ final class PrefsTests: XCTestCase {
 		
 		XCTAssert(prefs.string(key: .name) == "Bubu")
 		afterWrite(at: prefs) { json in
-			XCTAssert(json[.name] == "Bubu")
+			XCTAssert(json[PrefKey.name.value] == "Bubu")
 		}
 	}
 	
@@ -43,9 +43,9 @@ final class PrefsTests: XCTestCase {
 		prefs.edit().put(key: .isAlive, true).commit()
 		prefs.edit().remove(key: .isAlive).commit()
 		
-		XCTAssert(prefs.dict[.isAlive] == nil)
+		XCTAssert(prefs.dict[PrefKey.isAlive.value] == nil)
 		afterWrite(at: prefs) { (json) in
-			XCTAssert(json[.isAlive] == nil)
+			XCTAssert(json[PrefKey.isAlive.value] == nil)
 		}
 	}
 	
@@ -68,7 +68,7 @@ final class PrefsTests: XCTestCase {
 		XCTAssert(dict == prefs.codable(key: .numbers))
 		
 		afterWrite(at: prefs) { json in
-			XCTAssert(dict == .from(json: json[.numbers]!))
+			XCTAssert(dict == .from(json: json[PrefKey.numbers.value]!))
 		}
 	}
 	
@@ -82,7 +82,7 @@ final class PrefsTests: XCTestCase {
 			async {
 				for i in range {
 					prefs.edit()
-						.put(key: "\(prefix)-\(i)", i)
+						.put(key: PrefKey(value: "\(prefix)-\(i)"), i)
 						.commit()
 				}
 				expectation.fulfill()
@@ -162,9 +162,9 @@ final class PrefsTests: XCTestCase {
 
 fileprivate let prefs = Prefs.standard
 
-fileprivate extension String {
-	static let name = "name"
-	static let age = "age"
-	static let isAlive = "isAlive"
-	static let numbers = "numbers"
+fileprivate extension PrefKey {
+	static let name = PrefKey(value: "name")
+	static let age = PrefKey(value: "age")
+	static let isAlive = PrefKey(value: "isAlive")
+	static let numbers = PrefKey(value: "numbers")
 }
