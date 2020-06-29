@@ -131,20 +131,18 @@ let myPrefs = Prefs(file: .myFile1) //new instance using the Filename struct
 You can put values: 
 ```swift
 let myPrefs.edit() //start editing
-	.put(key: .name, "Gal") //prefer contants over hard coded string
-	.put(key: "age", 26)
+	.put(key: .name, "Bubu") //using the static constant '.name'
 	.commit() //save your changes in memory & lcoal storage
 	
-extension String {
+extension PrefKey {
 	static let name = "obfuscatedKey" //value should be obfuscated
 }
 ```
 
 And you can read them:
 ```swift
-if let name = myPrefs.string(key: .name),
-	let age = myPrefs.age(key: "age") {
-	print("\(name), \(age) years old") 
+if let name = myPrefs.string(key: .name) {
+	print("\(name), is the king") 
 }
 ```
 
