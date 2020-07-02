@@ -1,11 +1,11 @@
 # SwiftExtensions - Robust, Reusable & Secure utilities 
 
-This library is provides helpful utilities, like IO operations on the local disk, with encryption layer for security. it also provides a convenice `Prefs` class for storing Key-Value pairs easily and safely with the same encryption layer.
+This library provides helpful utilities, like IO operations on the local disk, with encryption layer for security. It also provides a convenice `Prefs` class for storing Key-Value pairs easily and safely with the same encryption layer.
 
 ## Installation
 SwiftExtensions is a *Swift Package*. 
 
-Use the swift package manager to intall SwiftExtensions on your project. [Apple Developer Guide](https://developer.apple.com/documentation/xcode/adding_package_dependencies_to_your_app)
+Use the swift package manager to install SwiftExtensions on your project. [Apple Developer Guide](https://developer.apple.com/documentation/xcode/adding_package_dependencies_to_your_app)
 
 ## BasicExtensions 
 
@@ -76,24 +76,24 @@ print(helloWorld) //will automatically use the wanted localization
 
 ## StorageExtensions
 
-### Convenience Read Write with GCM Encryption 
-For easy Safe & scalable Storage Architecture, the FileSystem class gives you the ability to read & write files with GCM encryption, implemented using Apple's [CryptoKit Framework](https://developer.apple.com/documentation/cryptokit). 
+### Convenience Read & Write operations with GCM Encryption 
+For easy, safe & scalable storage architecture, the `FileSystem` class gives you the ability to read & write files with GCM encryption, implemented using Apple's [CryptoKit Framework](https://developer.apple.com/documentation/cryptokit). 
 
 - IO (Read/Write) operations are synchronous, for more control over threading.
-- You are are required to use the `Filename` and/or `Folder` structs to state your desired files/folders. best used with `extension` like so:
+- You are are required to use the `Filename` or `Folder` structs to state your desired files/folders. best used with `extension` like so:
 ```swift
 extension Filename {
 	static let myFile1 = Filename(value: "name1InFileSystem")
 	static let myFile2 = Filename(value: "name2InFileSystem")
 }
 
-//usage
-let data = ...
+//Usage
+let data = "Bubu is the king".data(encoding: .utf8)!
 FileSystem.write(data: data, to: .myFile1)
 ```
 
 #### TIP
-> when implementing `Filename` or `Folder` you can (and probably should) use obfusctated names, for exmaple: use "--" insated of "secret.info".
+> when instantiating `Filename` or `Folder` you can (and probably should) use obfusctated names, for exmaple: use "--" insated of "secret.info".
 
 ### Storage Customizations
 You are able to change some values in the library.
@@ -117,7 +117,7 @@ Encryptor.keyChainQuery = [
 
 
 ### Prefs - Secure Key-Value pairs in storage. 
-Insapired after iOS's `UserDefaults` & Android's `SharedPreferences`, The `Prefs` class enables you to manages Key-Value pairs easily and securely using the same encryption layer from `Encryptor`, also comes with a caching logic for fast & non blocking read/writes operation in memory.
+Insapired after iOS's `UserDefaults` & Android's `SharedPreferences`, The `Prefs` class enables you to manage Key-Value pairs easily and securely using the same encryption layer from `Encryptor`, also comes with a caching logic for fast & non blocking read/writes operation in memory.
 
 You can either use the Standard instance, which is also using an obfuscated filename, or create your own instances for multiple files, like so:
 
@@ -135,7 +135,7 @@ let myPrefs.edit() //start editing
 	.commit() //save your changes in memory & lcoal storage
 	
 extension PrefKey {
-	static let name = "obfuscatedKey" //value should be obfuscated
+	static let name = PrefKey(value: "obfuscatedKey") //value should be obfuscated
 }
 ```
 
