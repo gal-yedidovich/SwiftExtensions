@@ -8,6 +8,11 @@
 import Foundation
 import BasicExtensions
 
+/// An interface to an encrypted JSON file, where you store key-value pairs persistently and safely.
+///
+/// The Prefs class provides a programmatic interface to save sensetive information in device's storage.
+/// These key-value pairs persists across launches & act as preferences in your app.
+/// You can think of `Prefs` like a `UserDefaults` with an encryption layer.
 public final class Prefs {
 	///Built-in instance for convenience.
 	public static let standard = Prefs(file: .prefs)
@@ -173,6 +178,8 @@ public class Editor {
 	}
 }
 
+
+/// String wrapper for representing a key in a `Prefs` instance.
 public struct PrefKey {
 	let value: String
 	

@@ -10,6 +10,10 @@ import CryptoKit
 
 internal let BUFFER_SIZE = 1024 * 32
 
+/// An interface to cipher sensetive infomation using GCM encryption.
+///
+/// The `Encryptor` class provides basic cipher (encryption & decryption) operations on `Data` or files, using the `CryptoKit` framework.
+/// All cipher operations are using a Symmetric key that is stored in the device's KeyChain. 
 public class Encryptor {
 	private init() {}
 	
