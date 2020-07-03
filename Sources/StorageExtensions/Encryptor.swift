@@ -159,3 +159,15 @@ extension SymmetricKey {
 	}
 }
 
+extension Digest {
+	///create an array of bytes from a digest
+	var bytes: [UInt8] { Array(makeIterator()) }
+	
+	///create data value from a digest
+	var data: Data { Data(bytes) }
+	
+	///create a hex string representation of the digestx
+	var hexStr: String {
+		bytes.map { String(format: "%02x", $0) }.joined()
+	}
+}

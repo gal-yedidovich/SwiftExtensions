@@ -6,6 +6,7 @@
 //
 
 import Foundation
+
 public extension String {
 	/// Initialize a string instance, in JSON format, from a given Encodable value
 	/// - Parameter json: An encodable value that can be parsed into JSON string
