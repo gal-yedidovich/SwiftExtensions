@@ -62,7 +62,7 @@ final class UrlRequestTests: XCTestCase {
 			.set(method: .DELETE)
 		
 		send(req) { response in
-			XCTAssert(response == "{}".data(using: .utf8)!)
+			XCTAssert(response == Data("{}".utf8))
 		}
 	}
 	

@@ -74,7 +74,7 @@ public extension Decodable {
 	/// - Parameter json: JSON encoded string
 	/// - Returns: Generic Decodable value representing the JSON
 	static func from <T: Decodable> (json: String) -> T {
-		from(json: json.data(using: .utf8)!)
+		from(json: Data(json.utf8))
 	}
 }
 

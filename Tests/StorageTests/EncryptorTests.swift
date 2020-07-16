@@ -12,7 +12,7 @@ import CryptoKit
 final class EncryptorTests: XCTestCase {
 	func testEncryption() {
 		let str = "Bubu is the king"
-		let data = str.data(using: .utf8)!
+		let data = Data(str.utf8)
 		
 		let enc = try! Encryptor.encrypt(data: data)
 		let dec = try! Encryptor.decrypt(data: enc)
@@ -29,7 +29,7 @@ final class EncryptorTests: XCTestCase {
 		let encUrl = baseURL.appendingPathComponent("enc_data.txt")
 		let decUrl = baseURL.appendingPathComponent("dec_data.txt")
 		
-		try! str.data(using: .utf8)!.write(to: url)
+		try! Data(str.utf8).write(to: url)
 		try! Encryptor.encrypt(file: url, to: encUrl)
 		try! Encryptor.decrypt(file: encUrl, to: decUrl)
 		let str2 = try! String(contentsOf: decUrl)
@@ -41,7 +41,7 @@ final class EncryptorTests: XCTestCase {
 	}
 	
 	func testDigestHexString() {
-		let data = "Bubu is the king".data(using: .utf8)!
+		let data = Data("Bubu is the king".utf8)
 		let hex = "d42254b4047044e74c45083fe483bf6708057d5b4579aae0bca9b30e7376e553" //data in SHA-256: https://xorbin.com/tools/sha256-hash-calculator
 		let sha256 = SHA256.hash(data: data).hexString
 		

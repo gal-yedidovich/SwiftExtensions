@@ -88,7 +88,7 @@ extension Filename {
 }
 
 //Usage
-let data = "Bubu is the king".data(encoding: .utf8)!
+let data = Data("Bubu is the king".utf8)
 FileSystem.write(data: data, to: .myFile1)
 ```
 

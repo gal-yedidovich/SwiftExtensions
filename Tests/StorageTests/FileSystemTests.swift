@@ -11,7 +11,7 @@ import XCTest
 final class FileSystemTests: XCTestCase {
 	func testWrite() {
 		let str = "Bubu is the king"
-		FileSystem.write(data: str.data(using: .utf8)!, to: .file)
+		FileSystem.write(data: Data(str.utf8), to: .file)
 		
 		XCTAssert(FileSystem.fileExists(.file))
 		
@@ -22,10 +22,10 @@ final class FileSystemTests: XCTestCase {
 	}
 	
 	func testOverwrite() {
-		FileSystem.write(data: "Bubu is the king".data(using: .utf8)!, to: .file)
+		FileSystem.write(data: Data("Bubu is the king".utf8), to: .file)
 		
 		let newText = "I am Groot"
-		FileSystem.write(data: newText.data(using: .utf8)!, to: .file)
+		FileSystem.write(data: Data(newText.utf8), to: .file)
 		
 		let fileData = FileSystem.read(file: .file)!
 		XCTAssert(String(data: fileData, encoding: .utf8) == newText)
@@ -34,7 +34,7 @@ final class FileSystemTests: XCTestCase {
 	}
 	
 	func testDelete() {
-		FileSystem.write(data: "Bubu is the king".data(using: .utf8)!, to: .file)
+		FileSystem.write(data: Data("Bubu is the king".utf8), to: .file)
 		
 		FileSystem.delete(file: .file)
 		XCTAssert(!FileSystem.fileExists(.file))

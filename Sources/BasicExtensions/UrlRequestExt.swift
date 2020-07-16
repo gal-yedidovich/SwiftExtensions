@@ -44,7 +44,7 @@ public extension URLRequest {
 	/// - Parameter body: the request body in string
 	/// - Returns: new request after settings the body
 	func set(body: String) -> URLRequest {
-		set(body: body.data(using: .utf8)!)
+		set(body: Data(body.utf8))
 	}
 	
 	/// convenience method for settings the body, using method chaining
