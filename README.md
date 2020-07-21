@@ -146,5 +146,57 @@ if let name = myPrefs.string(key: .name) {
 }
 ```
 
+### Result API - Conveneince extension in URLSession.
+Using Swift's "Associated values" the following convenience methods allow you to handle responses easily without the boilerplate like unwrapping data and checking for errors.
+
+You can easily get relevant values from response using a `switch` statement.
+
+```swift
+let req: URLRequest = ...
+URLSession.shared.dataTask(with: req) { (result: Result<Data, Data>) in
+	switch result {
+	case .success(let data): //handle success (status 2##) with given data
+	case .failure(let data): //handle failure (ex: status 400) with given data
+	case .error(let error):  //handle given error
+	}
+}.resume()
+```
+
+You can use the generic overload, to automatically decode the response data.
+```swift
+struct MySuccessType: Codable { 
+	//values
+}
+
+struct MyFailureType: Codable { 
+	//values
+}
+
+//in this example we will create an API function
+func someApi(completion: @escaping (Result<MySuccessType, MyFailureType>) -> Void)
+	let req: URLRequest = ...
+	URLSession.shared.dataTask(with: req, completion: completion).resume()
+}
+
+someApi { result in //result is of type: Result<MySuccessType, MyFailureType>
+	switch result {
+	case .success(let successPayload): //handle success, 'successPayload' is of type MySuccessType.
+	case .failure(let failurePayload): //handle failure, 'failurePayload' is of type MyFailureType.
+	case .error(let error):  //handle given error.
+	}
+}
+```
+
+You can also customize your usage, example with `someApi` that ignore some results and the associated payload
+
+```swift
+someApi { result in
+	switch result {
+	case .success: //handle success, but ignore the payload
+	default: //handle either failure or error, ignoring the payload
+	}
+}
+```
+
 ## License
 Apache License 2.0
