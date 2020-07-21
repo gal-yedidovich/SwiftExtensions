@@ -85,13 +85,13 @@ public struct ContentType: ExpressibleByStringLiteral {
 
 public enum Result<T, T2> {
 	case success(T)
-	case failure(T2)
+	case failure(Int, T2)
 	case error(Error)
 	
 	internal var debugValue: Any {
 		switch self {
 			case .success(let s): return s
-			case .failure(let f): return f
+			case .failure(_, let f): return f
 			case .error(let e): return e
 		}
 	}
@@ -115,12 +115,12 @@ public extension URLSession {
 		dataTask(with: request) { (d, r, e) in
 			post {
 				if let error = e { completion(.error(error)); return }
-				guard let data = d else { completion(.error(BasicErrors.emptyResposne)); return }
+				guard let data = d, let urlRes = r as? HTTPURLResponse else { completion(.error(BasicErrors.emptyResposne)); return }
 				
-				if let urlRes = r as? HTTPURLResponse,  urlRes.statusCode / 100 == 2 {
+				if urlRes.statusCode / 100 == 2 {
 					completion(.success(data))
 				} else {
-					completion(.failure(data))
+					completion(.failure(urlRes.statusCode, data))
 				}
 			}
 		}
@@ -136,7 +136,7 @@ public extension URLSession {
 			do {
 				switch result {
 					case .success(let data): completion(.success(try .from(json: data)))
-					case .failure(let data): completion(.failure(try .from(json: data)))
+					case .failure(let status, let data): completion(.failure(status, try .from(json: data)))
 					case .error(let error): completion(.error(error))
 				}
 			} catch {
