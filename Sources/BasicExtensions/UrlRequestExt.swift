@@ -61,10 +61,10 @@ public extension URLRequest {
 /// Convenince HTTP methods for `URLRequest`
 public enum Method: String {
 	case GET = "GET",
-		POST = "POST",
-		PUT = "PUT",
-		DELETE = "DELETE",
-		PATCH = "PATCH"
+	POST = "POST",
+	PUT = "PUT",
+	DELETE = "DELETE",
+	PATCH = "PATCH"
 }
 
 /// Convenience Content-type vlaues for `URLRequest`
@@ -80,4 +80,68 @@ public struct ContentType: ExpressibleByStringLiteral {
 	}
 	
 	let value: String
+}
+
+
+public enum Result<T, T2> {
+	case success(T)
+	case failure(T2)
+	case error(Error)
+	
+	internal var debugValue: Any {
+		switch self {
+			case .success(let s): return s
+			case .failure(let f): return f
+			case .error(let e): return e
+		}
+	}
+}
+
+public enum BasicErrors: Error {
+	case emptyResposne
+}
+
+public extension URLSession {
+	
+	/// Convenience request method.
+	/// Creates a `URLSeesionDataTask` with completion handler that trasform the basic paraemters into `Result<Data, Data>`
+	///
+	/// The result is holding the data/error from the request using enum + assosiated value
+	///
+	/// - Parameters:
+	///   - request: a request to send to a remote server
+	///   - completion: a completion handler that accepts the result from the response, can be either success/failure/error.
+	func dataTask(with request: URLRequest, completion: @escaping (Result<Data, Data>) -> Void) -> URLSessionDataTask {
+		dataTask(with: request) { (d, r, e) in
+			post {
+				if let error = e { completion(.error(error)); return }
+				guard let data = d else { completion(.error(BasicErrors.emptyResposne)); return }
+				
+				if let urlRes = r as? HTTPURLResponse,  urlRes.statusCode / 100 == 2 {
+					completion(.success(data))
+				} else {
+					completion(.failure(data))
+				}
+			}
+		}
+	}
+	
+	/// Convenience method for generic result type.
+	/// This overloadded method, calls `send(_: completion:)` and decode the response data to the generic type (unless there is an error)
+	/// - Parameters:
+	///   - request: a request to send to a remote server
+	///   - completion: a completion handler that accepts the generic result from the response, can be either success/failure/error.
+	func dataTask<Response: Decodable, FailRes: Decodable>(with request: URLRequest, completion: @escaping (Result<Response, FailRes>) -> Void) -> URLSessionDataTask {
+		dataTask(with: request) { result in
+			do {
+				switch result {
+					case .success(let data): completion(.success(try .from(json: data)))
+					case .failure(let data): completion(.failure(try .from(json: data)))
+					case .error(let error): completion(.error(error))
+				}
+			} catch {
+				completion(.error(error))
+			}
+		}
+	}
 }

@@ -67,14 +67,14 @@ public extension Decodable {
 	/// Decode data in JSON decoding
 	/// - Parameter json: JSON encoded data
 	/// - Returns: Generic Decodable value representing the JSON
-	static func from <T: Decodable> (json: Data) -> T {
-		try! JSONDecoder().decode(T.self, from: json)
+	static func from <T: Decodable> (json: Data) throws -> T {
+		try JSONDecoder().decode(T.self, from: json)
 	}
 	/// Decode data in JSON decoding
 	/// - Parameter json: JSON encoded string
 	/// - Returns: Generic Decodable value representing the JSON
-	static func from <T: Decodable> (json: String) -> T {
-		from(json: Data(json.utf8))
+	static func from <T: Decodable> (json: String) throws -> T {
+		try from(json: Data(json.utf8))
 	}
 }
 
