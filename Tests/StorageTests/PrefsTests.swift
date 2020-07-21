@@ -68,7 +68,7 @@ final class PrefsTests: XCTestCase {
 		XCTAssert(dict == prefs.codable(key: .numbers))
 		
 		afterWrite(at: prefs) { json in
-			XCTAssert(dict == .from(json: json[PrefKey.numbers.value]!))
+			XCTAssert(dict == (try! .from(json: json[PrefKey.numbers.value]!)))
 		}
 	}
 	
@@ -139,13 +139,13 @@ final class PrefsTests: XCTestCase {
 		
 		prefs.queue.async { //after written to storage
 			let data = FileSystem.read(file: prefs.filename)!
-			let json: [String: String] = .from(json: data)
+			let json: [String: String] = try! .from(json: data)
 			test(json)
 			
 			expectation.fulfill()
 		}
 		
-		wait(for: [expectation], timeout: 2)
+		wait(for: [expectation], timeout: 25)
 	}
 	
 	static var allTests = [

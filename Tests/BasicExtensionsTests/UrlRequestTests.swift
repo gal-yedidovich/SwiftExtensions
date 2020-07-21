@@ -12,9 +12,11 @@ final class UrlRequestTests: XCTestCase {
 	func testGet() {
 		let req = URLRequest(url: "https://jsonplaceholder.typicode.com/posts/1")
 
-		send(req) { response in
-			let post: Post = .from(json: response!)
-			XCTAssert(post.id == 1)
+		send(req, type: Post.self) { result in
+			switch result {
+				case .success(let post): XCTAssert(post.id == 1)
+				default: XCTFail()
+			}
 		}
 	}
 	
@@ -24,10 +26,12 @@ final class UrlRequestTests: XCTestCase {
 			.set(method: .POST)
 			.set(contentType: .json)
 			.set(body: localPost.json())
-
-		send(req) { response in
-			let newPost: Post = .from(json: response!)
-			XCTAssert(newPost.title == localPost.title)
+		
+		send(req, type: Post.self) { result in
+			switch result {
+				case .success(let newPost): XCTAssert(newPost.title == localPost.title)
+				default: XCTFail()
+			}
 		}
 	}
 	
@@ -37,10 +41,12 @@ final class UrlRequestTests: XCTestCase {
 			.set(method: .PUT)
 			.set(contentType: .json)
 			.set(body: localPost.json())
-
-		send(req) { response in
-			let newPost: Post = .from(json: response!)
-			XCTAssert(newPost.title == localPost.title)
+		
+		send(req, type: Post.self) { result in
+			switch result {
+				case .success(let newPost): XCTAssert(newPost.title == localPost.title)
+				default: XCTFail()
+			}
 		}
 	}
 	
@@ -50,10 +56,12 @@ final class UrlRequestTests: XCTestCase {
 			.set(method: .PATCH)
 			.set(contentType: .json)
 			.set(body: changes.json())
-
-		send(req) { response in
-			let patchedPost: Post = .from(json: response!)
-			XCTAssert(patchedPost.title == changes["title"])
+		
+		send(req, type: Post.self) { result in
+			switch result {
+				case .success(let patchedPost): XCTAssert(patchedPost.title == changes["title"])
+				default: XCTFail()
+			}
 		}
 	}
 	
@@ -61,17 +69,20 @@ final class UrlRequestTests: XCTestCase {
 		let req = URLRequest(url: "https://jsonplaceholder.typicode.com/posts/1")
 			.set(method: .DELETE)
 		
-		send(req) { response in
-			XCTAssert(response == Data("{}".utf8))
+		send(req, type: StringDict.self) { result in
+			switch result {
+				case .success(let dict): XCTAssert(dict.isEmpty)
+				default: XCTFail()
+			}
 		}
 	}
 	
-	private func send(_ request: URLRequest, comletion: @escaping (Data?)->()) {
+	private func send<T: Decodable>(_ request: URLRequest, type: T.Type, completion: @escaping (Result<T, StringDict>) -> ()) {
 		let expectation = XCTestExpectation(description: "waiting for request")
-
-		URLSession.shared.dataTask(with: request) { d, r, e in
-			print(String(data: d!, encoding: .utf8)!)
-			comletion(d)
+		
+		URLSession.shared.dataTask(with: request) { (result: Result<T, StringDict>) in
+			print(" - ", result.debugValue)
+			completion(result)
 			expectation.fulfill()
 		}.resume()
 		
@@ -92,4 +103,6 @@ final class UrlRequestTests: XCTestCase {
 		let title: String
 		let body: String
 	}
+	
+	private typealias StringDict = [String: String]
 }

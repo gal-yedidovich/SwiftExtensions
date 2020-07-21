@@ -26,8 +26,9 @@ public final class Prefs {
 		self.filename = file
 		
 		if FileSystem.fileExists(filename),
-			let data = FileSystem.read(file: filename) {
-			dict = .from(json: data)
+			let data = FileSystem.read(file: filename),
+			let json: [String: String] = try? .from(json: data) {
+			dict = json
 		}
 	}
 	
@@ -63,7 +64,7 @@ public final class Prefs {
 	/// - Returns: some Decodable, or nil if not found
 	public func codable<Type: Decodable>(key: PrefKey) -> Type? {
 		guard let str = dict[key.value] else { return nil }
-		return .from(json: str)
+		return try? .from(json: str)
 	}
 	
 	/// check if value exists at a given key
