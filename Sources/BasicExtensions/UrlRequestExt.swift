@@ -113,15 +113,13 @@ public extension URLSession {
 	///   - completion: a completion handler that accepts the result from the response, can be either success/failure/error.
 	func dataTask(with request: URLRequest, completion: @escaping (Result<Data, Data>) -> Void) -> URLSessionDataTask {
 		dataTask(with: request) { (d, r, e) in
-			post {
-				if let error = e { completion(.error(error)); return }
-				guard let data = d, let urlRes = r as? HTTPURLResponse else { completion(.error(BasicErrors.emptyResposne)); return }
-				
-				if urlRes.statusCode / 100 == 2 {
-					completion(.success(data))
-				} else {
-					completion(.failure(urlRes.statusCode, data))
-				}
+			if let error = e { completion(.error(error)); return }
+			guard let data = d, let urlRes = r as? HTTPURLResponse else { completion(.error(BasicErrors.emptyResposne)); return }
+			
+			if urlRes.statusCode / 100 == 2 {
+				completion(.success(data))
+			} else {
+				completion(.failure(urlRes.statusCode, data))
 			}
 		}
 	}
