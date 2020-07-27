@@ -25,6 +25,11 @@ public final class Prefs {
 	public init(file: Filename) {
 		self.filename = file
 		
+		reload()
+	}
+	
+	/// loads the content from the target JSON file, into memory
+	public func reload() {
 		if FileSystem.fileExists(filename),
 			let data = FileSystem.read(file: filename),
 			let json: [String: String] = try? .from(json: data) {
