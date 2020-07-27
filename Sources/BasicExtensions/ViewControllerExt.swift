@@ -16,7 +16,7 @@ public extension UIViewController {
 	func push<T: UIViewController>(to id: ControllerID, storyboard: UIStoryboard? = nil, config: ((T)->())? = nil) {
 		let vc = (storyboard ?? self.storyboard!).instantiateViewController(identifier: id.value) as! T
 		config?(vc)
-		navigationController?.pushViewController(vc, animated: true)
+		self.show(vc, sender: nil)
 	}
 	
 	/// Presents a view controller on the on screen
