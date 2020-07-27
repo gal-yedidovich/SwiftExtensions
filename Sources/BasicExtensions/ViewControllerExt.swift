@@ -112,6 +112,6 @@ public struct ControllerID {
 		value = id
 	}
 	
-	var value: String
+	public let value: String
 }
 #endif

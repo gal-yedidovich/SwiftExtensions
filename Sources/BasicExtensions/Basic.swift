@@ -49,7 +49,7 @@ public func post(delay: TimeInterval? = nil, block: @escaping ()->()) {
 	}
 }
 
-/// Run a block of code in a backgorund thread, the thread is controlled by iOS's GCD
+/// Run a block of code in a backgorund thread, the thread is controlled by GCD
 /// - Parameter block: a completion handler to run in the background
 public func async(quality: DispatchQoS.QoSClass = .background, block: @escaping ()->()) {
 	DispatchQueue.global(qos: quality).async(execute: block)
@@ -76,15 +76,4 @@ public extension Decodable {
 	static func from <T: Decodable> (json: String) throws -> T {
 		try from(json: Data(json.utf8))
 	}
-}
-
-/// Convenince error struct for custom string errors
-public struct MsgError: LocalizedError {
-	public init(msg: String) {
-		self.msg = msg
-	}
-	
-	let msg: String
-	
-	public var errorDescription: String? { msg }
 }
