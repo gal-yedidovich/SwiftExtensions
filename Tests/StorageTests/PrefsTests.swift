@@ -12,7 +12,7 @@ import BasicExtensions
 final class PrefsTests: XCTestCase {
 	
 	override func tearDown() { //clean up after each test
-		FileSystem.delete(file: prefs.filename)
+		try! FileSystem.delete(file: prefs.filename)
 		prefs.dict = [:]
 	}
 	

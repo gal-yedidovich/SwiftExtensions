@@ -175,10 +175,20 @@ public class Editor {
 				}
 				
 				prefs.queue.async { //write in background
-					FileSystem.write(data: self.prefs.dict.json(), to: self.prefs.filename)
+					do {
+						try FileSystem.write(data: self.prefs.dict.json(), to: self.prefs.filename)
+					} catch {
+						print("could not write to \"prefs\" file.")
+						print(error)
+					}
 				}
 			} else if self.clearFlag {
-				FileSystem.delete(file: prefs.filename)
+				do {
+					try FileSystem.delete(file: prefs.filename)
+				} catch {
+					print("could not delete \"prefs\" file.")
+					print(error)
+				}
 			}
 		}
 	}

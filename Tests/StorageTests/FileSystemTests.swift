@@ -11,32 +11,32 @@ import XCTest
 final class FileSystemTests: XCTestCase {
 	func testWrite() {
 		let str = "Bubu is the king"
-		FileSystem.write(data: Data(str.utf8), to: .file)
+		try! FileSystem.write(data: Data(str.utf8), to: .file)
 		
 		XCTAssert(FileSystem.fileExists(.file))
 		
 		let data = FileSystem.read(file: .file)!
 		XCTAssert(String(data: data, encoding: .utf8) == str)
 		
-		FileSystem.delete(file: .file)
+		try! FileSystem.delete(file: .file)
 	}
 	
 	func testOverwrite() {
-		FileSystem.write(data: Data("Bubu is the king".utf8), to: .file)
+		try! FileSystem.write(data: Data("Bubu is the king".utf8), to: .file)
 		
 		let newText = "I am Groot"
-		FileSystem.write(data: Data(newText.utf8), to: .file)
+		try! FileSystem.write(data: Data(newText.utf8), to: .file)
 		
 		let fileData = FileSystem.read(file: .file)!
 		XCTAssert(String(data: fileData, encoding: .utf8) == newText)
 		
-		FileSystem.delete(file: .file)
+		try! FileSystem.delete(file: .file)
 	}
 	
 	func testDelete() {
-		FileSystem.write(data: Data("Bubu is the king".utf8), to: .file)
+		try! FileSystem.write(data: Data("Bubu is the king".utf8), to: .file)
 		
-		FileSystem.delete(file: .file)
+		try! FileSystem.delete(file: .file)
 		XCTAssert(!FileSystem.fileExists(.file))
 		XCTAssert(!FileManager.default.fileExists(atPath: FileSystem.url(of: .file).path))
 	}
