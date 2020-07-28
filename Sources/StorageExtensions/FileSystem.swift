@@ -21,8 +21,8 @@ public final class FileSystem {
 	/// - Parameters:
 	///   - data: data to write
 	///   - file: target filename, represents file in storage.
-	public static func write(data: Data, to file: Filename) {
-		write(data: data, to: url(of: file))
+	public static func write(data: Data, to file: Filename) throws {
+		try write(data: data, to: url(of: file))
 	}
 	
 	/// Writes data into given URL, this method will create the parent folder if needed.
@@ -31,11 +31,11 @@ public final class FileSystem {
 	/// - Parameters:
 	///   - data: data to write
 	///   - url: taget url in storage.
-	public static func write(data: Data, to url: URL) {
-		try! fm.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true, attributes: nil)
+	public static func write(data: Data, to url: URL) throws {
+		try fm.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true, attributes: nil)
 		
-		let encData = try! Encryptor.encrypt(data: data)
-		try! encData.write(to: url, options: .atomic)
+		let encData = try Encryptor.encrypt(data: data)
+		try encData.write(to: url, options: .atomic)
 	}
 	
 	/// Read a file from storage and return is content
@@ -46,8 +46,8 @@ public final class FileSystem {
 		do {
 			let data = try Data(contentsOf: url(of: file))
 			return try Encryptor.decrypt(data: data)
-		} catch let e as NSError {
-			print(e)
+		} catch {
+			print(error)
 			return nil
 		}
 	}
@@ -61,19 +61,19 @@ public final class FileSystem {
 	
 	/// delete a Filename from storage
 	/// - Parameter file: target Filename to delete
-	public static func delete(file: Filename) {
+	public static func delete(file: Filename) throws {
 		let fileUrl = url(of: file)
 		if fm.fileExists(atPath: fileUrl.path) {
-			try! fm.removeItem(at: fileUrl)
+			try fm.removeItem(at: fileUrl)
 		}
 	}
 	
 	/// delete a Folder from storage, including its content
 	/// - Parameter file: target Folder to delete
-	public static func delete(folder: Folder) {
+	public static func delete(folder: Folder) throws {
 		let fileUrl = url(of: folder)
 		if fm.fileExists(atPath: fileUrl.path) {
-			try! fm.removeItem(at: fileUrl)
+			try fm.removeItem(at: fileUrl)
 		}
 	}
 	
