@@ -94,13 +94,13 @@ public final class FileSystem {
 
 /// String Wrapper for files, each value represent a filename under the FileSystem's `rootURL`
 public struct Filename {
-	static let prefs = Filename(name: "_")
+	public static let prefs = Filename(name: "_")
 	
 	public init(name: String) {
 		value = name
 	}
 	
-	let value: String
+	public let value: String
 }
 
 /// String Wrapper for folders, each value represent a folder-name under the FileSystem's `rootURL`
@@ -109,5 +109,5 @@ public struct Folder {
 		value = name
 	}
 	
-	let value: String
+	public let value: String
 }

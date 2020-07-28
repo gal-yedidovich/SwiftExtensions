@@ -51,7 +51,7 @@ async {
 #### URLRequest builder
 ```swift
 let req = URLRequest(url: "https://your.end.point")
-	.set(method: .POST) //Or .get, .put, .delete, .patch
+	.set(method: .POST) //OR .get, .put, .delete, .patch
 	.set(contentType: .json) //OR .xml, .urlEncoded etc.
 	.set(body: "some String or Data")
 ```
@@ -156,7 +156,7 @@ let req: URLRequest = ...
 URLSession.shared.dataTask(with: req) { (result: Result<Data, Data>) in
 	switch result {
 	case .success(let data): //handle success (status 2##) with given data
-	case .failure(let data): //handle failure (ex: status 400) with given data
+	case .failure(let statusCode, let data): //handle failure (ex: status 400) with given status+data
 	case .error(let error):  //handle given error
 	}
 }.resume()
@@ -181,7 +181,7 @@ func someApi(completion: @escaping (Result<MySuccessType, MyFailureType>) -> Voi
 someApi { result in //result is of type: Result<MySuccessType, MyFailureType>
 	switch result {
 	case .success(let successPayload): //handle success, 'successPayload' is of type MySuccessType.
-	case .failure(let failurePayload): //handle failure, 'failurePayload' is of type MyFailureType.
+	case .failure(_, let failurePayload): //handle failure, 'failurePayload' is of type MyFailureType. ignoring the status code
 	case .error(let error):  //handle given error.
 	}
 }
