@@ -61,7 +61,7 @@ public final class FileSystem {
 	///
 	/// - Parameter file: filename to read the data from
 	/// - Returns: an instance conforming to Decodable, or nil if failed to load.
-	static func load<Type: Decodable>(json file: Filename) -> Type? {
+	public static func load<Type: Decodable>(json file: Filename) -> Type? {
 		guard fileExists(file), let data = read(file: file) else { return nil }
 		
 		return try? Type.from(json: data)
