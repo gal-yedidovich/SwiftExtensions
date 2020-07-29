@@ -41,10 +41,25 @@ final class FileSystemTests: XCTestCase {
 		XCTAssert(!FileManager.default.fileExists(atPath: FileSystem.url(of: .file).path))
 	}
 	
+	func testLoadJson() {
+		struct Person: Codable, Equatable {
+			let name: String
+			let age: Int
+		}
+		
+		let bubu = Person(name: "Bubu", age: 120)
+		try! FileSystem.write(data: bubu.json(), to: .file)
+		let loaded: Person = FileSystem.load(json: .file)!
+		
+		XCTAssert(bubu == loaded)
+		try! FileSystem.delete(file: .file)
+	}
+	
 	static var allTests = [
 		("testWrite", testWrite),
 		("testOverwrite", testOverwrite),
 		("testDelete", testDelete),
+		("testLoadJson", testLoadJson),
 	]
 }
 

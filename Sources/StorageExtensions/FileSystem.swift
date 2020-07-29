@@ -52,6 +52,21 @@ public final class FileSystem {
 		}
 	}
 	
+	/// loads content of JSON file to a `Decodable` instance from a given filename
+	///
+	/// nil will be returned in the following cases:
+	///  - file does not exists
+	///  - reading/decrypting failed
+	///  - decoding failed
+	///
+	/// - Parameter file: filename to read the data from
+	/// - Returns: an instance conforming to Decodable, or nil if failed to load.
+	static func load<Type: Decodable>(json file: Filename) -> Type? {
+		guard fileExists(file), let data = read(file: file) else { return nil }
+		
+		return try? Type.from(json: data)
+	}
+	
 	/// check if a given Filename exists in storage
 	/// - Parameter file: target Filename
 	/// - Returns: true if exists, otherwise false.
