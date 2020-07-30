@@ -16,7 +16,6 @@ public final class FileSystem {
 	/// the URL in storage, where all fiels & folders under FileSystem, are managed.
 	public static var rootURL = fm.urls(for: .documentDirectory, in: .userDomainMask)[0]
 	
-	
 	/// Writes data into given Filename
 	/// - Parameters:
 	///   - data: data to write

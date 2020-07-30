@@ -111,7 +111,7 @@ public extension URLSession {
 	/// - Parameters:
 	///   - request: a request to send to a remote server
 	///   - completion: a completion handler that accepts the result from the response, can be either success/failure/error.
-	/// - Returns: Task, prepared to start with `resume()` call   
+	/// - Returns: Task, prepared to start with `resume()` call
 	func dataTask(with request: URLRequest, completion: @escaping (Result<Data, Data>) -> Void) -> URLSessionDataTask {
 		dataTask(with: request) { (d, r, e) in
 			if let error = e { completion(.error(error)); return }

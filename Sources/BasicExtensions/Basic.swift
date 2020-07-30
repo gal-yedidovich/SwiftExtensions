@@ -11,7 +11,7 @@ public extension String {
 	/// Initialize a string instance, in JSON format, from a given Encodable value
 	/// - Parameter json: An encodable value that can be parsed into JSON string
 	init(json: Encodable) {
-		self = String(data: json.json(), encoding: .utf8)!
+		self = String(decoding: json.json(), as: UTF8.self)
 	}
 	
 	/// get the localized version of a given string, using the string value as key.

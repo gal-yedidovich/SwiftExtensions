@@ -9,8 +9,10 @@ import XCTest
 @testable import BasicExtensions
 
 final class UrlRequestTests: XCTestCase {
+	let baseURL = "https://jsonplaceholder.typicode.com/posts"
+	
 	func testGet() {
-		let req = URLRequest(url: "https://jsonplaceholder.typicode.com/posts/1")
+		let req = URLRequest(url: baseURL + "/1")
 
 		send(req, type: Post.self) { result in
 			switch result {
@@ -22,7 +24,7 @@ final class UrlRequestTests: XCTestCase {
 	
 	func testPost() {
 		let localPost = Post(userId: 12, id: -1, title: "Bubu is the king", body: "I am Groot!")
-		let req = URLRequest(url: "https://jsonplaceholder.typicode.com/posts")
+		let req = URLRequest(url: baseURL)
 			.set(method: .POST)
 			.set(contentType: .json)
 			.set(body: localPost.json())
@@ -37,7 +39,7 @@ final class UrlRequestTests: XCTestCase {
 	
 	func testPut() {
 		let localPost = Post(userId: 1, id: 1, title: "Bubu is the king", body: "I am Groot!")
-		let req = URLRequest(url: "https://jsonplaceholder.typicode.com/posts/1")
+		let req = URLRequest(url: baseURL + "/1")
 			.set(method: .PUT)
 			.set(contentType: .json)
 			.set(body: localPost.json())
@@ -52,7 +54,7 @@ final class UrlRequestTests: XCTestCase {
 	
 	func testPatch() {
 		let changes = ["title": "testi"]
-		let req = URLRequest(url: "https://jsonplaceholder.typicode.com/posts/4")
+		let req = URLRequest(url: baseURL + "/4")
 			.set(method: .PATCH)
 			.set(contentType: .json)
 			.set(body: changes.json())
@@ -66,8 +68,7 @@ final class UrlRequestTests: XCTestCase {
 	}
 	
 	func testDelete() {
-		let req = URLRequest(url: "https://jsonplaceholder.typicode.com/posts/1")
-			.set(method: .DELETE)
+		let req = URLRequest(url: baseURL + "/1").set(method: .DELETE)
 		
 		send(req, type: StringDict.self) { result in
 			switch result {
