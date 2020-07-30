@@ -90,9 +90,9 @@ public enum Result<T, T2> {
 	
 	internal var debugValue: Any {
 		switch self {
-			case .success(let s): return s
-			case .failure(_, let f): return f
-			case .error(let e): return e
+		case .success(let s): return s
+		case .failure(_, let f): return f
+		case .error(let e): return e
 		}
 	}
 }
@@ -111,6 +111,7 @@ public extension URLSession {
 	/// - Parameters:
 	///   - request: a request to send to a remote server
 	///   - completion: a completion handler that accepts the result from the response, can be either success/failure/error.
+	/// - Returns: Task, prepared to start with `resume()` call   
 	func dataTask(with request: URLRequest, completion: @escaping (Result<Data, Data>) -> Void) -> URLSessionDataTask {
 		dataTask(with: request) { (d, r, e) in
 			if let error = e { completion(.error(error)); return }
@@ -129,6 +130,7 @@ public extension URLSession {
 	/// - Parameters:
 	///   - request: a request to send to a remote server
 	///   - completion: a completion handler that accepts the generic result from the response, can be either success/failure/error.
+	/// - Returns: Task, prepared to start with `resume()` call
 	func dataTask<Response: Decodable, FailRes: Decodable>(with request: URLRequest, completion: @escaping (Result<Response, FailRes>) -> Void) -> URLSessionDataTask {
 		dataTask(with: request) { result in
 			do {
