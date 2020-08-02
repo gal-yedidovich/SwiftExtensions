@@ -7,36 +7,6 @@
 
 import Foundation
 
-public extension String {
-	/// Initialize a string instance, in JSON format, from a given Encodable value
-	/// - Parameter json: An encodable value that can be parsed into JSON string
-	init(json: Encodable) {
-		self = String(decoding: json.json(), as: UTF8.self)
-	}
-	
-	/// get the localized version of a given string, using the string value as key.
-	var localized: String {
-		NSLocalizedString(self, comment: self)
-	}
-}
-
-public extension DateFormatter {
-	
-	/// Initialize new instance with string format
-	/// - Parameter format: date fromat string
-	convenience init(format: String) {
-		self.init()
-		dateFormat = format
-	}
-}
-
-public extension URL {
-	///computes file size at the url, if exists
-	var fileSize: UInt64? {
-		try? FileManager.default.attributesOfItem(atPath: path)[.size] as? UInt64
-	}
-}
-
 /// Run a block of code in the main thread, with a delay if exists
 /// - Parameters:
 ///   - delay: time to wait before running the task
@@ -53,6 +23,42 @@ public func post(delay: TimeInterval? = nil, block: @escaping ()->()) {
 /// - Parameter block: a completion handler to run in the background
 public func async(quality: DispatchQoS.QoSClass = .background, block: @escaping ()->()) {
 	DispatchQueue.global(qos: quality).async(execute: block)
+}
+
+
+public extension String {
+	/// Initialize a string instance, in JSON format, from a given Encodable value
+	/// - Parameter json: An encodable value that can be parsed into JSON string
+	init(json: Encodable) {
+		self = String(decoding: json.json(), as: UTF8.self)
+	}
+	
+	/// get the localized version of a given string, using the string value as key.
+	var localized: String {
+		NSLocalizedString(self, comment: self)
+	}
+}
+
+public extension DateFormatter {
+	/// Initialize new instance with string format
+	/// - Parameter format: date fromat string
+	convenience init(format: String) {
+		self.init()
+		dateFormat = format
+	}
+}
+
+public extension URL {
+	///computes file size at the URL, if exists
+	var fileSize: UInt64? {
+		try? FileManager.default.attributesOfItem(atPath: path)[.size] as? UInt64
+	}
+	
+	/// computes wheter URL poins to a folder, if exists.
+	var isDirectory: Bool {
+		let values = try? resourceValues(forKeys: [.isDirectoryKey])
+		return values?.isDirectory ?? false
+	}
 }
 
 public extension Encodable {

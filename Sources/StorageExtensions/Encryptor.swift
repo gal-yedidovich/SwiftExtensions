@@ -163,7 +163,7 @@ extension SymmetricKey {
 	}
 }
 
-extension Digest {
+public extension Digest {
 	///create an array of bytes from a digest.
 	var bytes: [UInt8] { Array(makeIterator()) }
 	
