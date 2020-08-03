@@ -87,9 +87,9 @@ public extension UIViewController {
 		return { completion in
 			done = true
 			
-			if self.presentedViewController === alert { //if done presenting
+			if let _ = alert.presentingViewController { //if fully presented
 				alert.dismiss(animated: true, completion: completion)
-			} else { //middle of presentating or non presented at all
+			} else { //middle of animation or non presented at all
 				canDismiss = true
 				completion()
 			}

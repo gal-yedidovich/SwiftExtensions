@@ -82,7 +82,7 @@ final class UrlRequestTests: XCTestCase {
 		let expectation = XCTestExpectation(description: "waiting for request")
 		
 		URLSession.shared.dataTask(with: request) { (result: Result<T, StringDict>) in
-			print(" - ", result.debugValue)
+			print("Response: ", result.debugValue)
 			completion(result)
 			expectation.fulfill()
 		}.resume()
