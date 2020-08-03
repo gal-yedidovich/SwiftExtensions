@@ -36,7 +36,7 @@ public class Encryptor {
 	/// This value control when the encryption key is accessible
 	///
 	/// This value is used when storing a newly created key in the Keychain. Since the key is resued this value is used once, as long as the key is exists in the Keychain.
-	public static var keyAccessability = kSecAttrAccessibleAfterFirstUnlock
+	public static var keyAccessibility = kSecAttrAccessibleAfterFirstUnlock
 	
 	/// Encrypt data with CGM encryption, and returns the encrypted data in result
 	/// - Parameter data: the data to encrypt
@@ -137,7 +137,7 @@ public class Encryptor {
 	private static func storeNewKey() -> SymmetricKey {
 		let key = SymmetricKey(size: .bits256) //create new key
 		var query = keyChainQuery
-		query[kSecAttrAccessible] = keyAccessability
+		query[kSecAttrAccessible] = keyAccessibility
 		query[kSecValueData] = key.dataRepresentation //request to get the result (key) as data
 		
 		let status = SecItemAdd(query as CFDictionary, nil)
