@@ -54,11 +54,17 @@ final class PrefsTests: XCTestCase {
 			.put(key: .name, "Gal")
 			.put(key: .age, 26)
 			.commit()
-		
+
 		prefs.edit().clear().commit()
 		
-		XCTAssert(prefs.dict.count == 0)
-		XCTAssert(!FileSystem.fileExists(prefs.filename))
+		let expectation = XCTestExpectation(description: "wait to delete Prefs")
+		prefs.queue.async {
+			XCTAssert(prefs.dict.count == 0)
+			XCTAssert(!FileSystem.fileExists(prefs.filename))
+			expectation.fulfill()
+		}
+		
+		wait(for: [expectation], timeout: 2)
 	}
 	
 	func testCodable() {
@@ -145,7 +151,7 @@ final class PrefsTests: XCTestCase {
 			expectation.fulfill()
 		}
 		
-		wait(for: [expectation], timeout: 25)
+		wait(for: [expectation], timeout: 10)
 	}
 	
 	static var allTests = [
