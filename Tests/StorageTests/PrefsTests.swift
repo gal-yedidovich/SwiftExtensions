@@ -140,6 +140,18 @@ final class PrefsTests: XCTestCase {
 		prefs2.edit().clear().commit()
 	}
 	
+	func testWrappedProperty() {
+		XCTAssertEqual(WrappedValues.name, "I am Groot")
+		
+		let str = "Bubu the king"
+		WrappedValues.name = str
+		
+		XCTAssertEqual(WrappedValues.name, str)
+		afterWrite(at: .standard) { json in
+			XCTAssertEqual(json[PrefKey.name.value], str)
+		}
+	}
+	
 	private func afterWrite(at prefs: Prefs, test: @escaping ([String:String]) -> ()) {
 		let expectation = XCTestExpectation(description: "wait to write to Prefs")
 		
@@ -173,4 +185,12 @@ fileprivate extension PrefKey {
 	static let age = PrefKey(value: "age")
 	static let isAlive = PrefKey(value: "isAlive")
 	static let numbers = PrefKey(value: "numbers")
+}
+
+fileprivate enum WrappedValues {
+	@PrefsValue(key: .name, default: "I am Groot")
+	static var name: String?
+	
+	@PrefsValue(key: .age)
+	static var age: Int?
 }

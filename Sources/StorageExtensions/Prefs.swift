@@ -31,8 +31,8 @@ public final class Prefs {
 	/// loads the content from the target JSON file, into memory
 	public func reload() {
 		if FileSystem.fileExists(filename),
-			let data = FileSystem.read(file: filename),
-			let json: [String: String] = try? .from(json: data) {
+		   let data = FileSystem.read(file: filename),
+		   let json: [String: String] = try? .from(json: data) {
 			dict = json
 		}
 	}
@@ -201,5 +201,31 @@ public struct PrefKey {
 	
 	public init(value: String) {
 		self.value = value
+	}
+}
+
+@propertyWrapper
+public struct PrefsValue<Value: Codable> {
+	private let key: PrefKey
+	private let prefs: Prefs
+	
+	public init(key: PrefKey, prefs: Prefs = .standard, default defValue: Value? = nil) {
+		self.key = key
+		self.prefs = prefs
+		self.wrappedValue = prefs.codable(key: key) ?? defValue
+	}
+	
+	public var wrappedValue: Value? {
+		didSet {
+			let editor = prefs.edit()
+			
+			if let value = wrappedValue {
+				_ = editor.put(key: key, value)
+			} else {
+				_ = editor.remove(key: key)
+			}
+			
+			editor.commit()
+		}
 	}
 }

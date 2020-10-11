@@ -21,7 +21,7 @@ public func post(delay: TimeInterval? = nil, block: @escaping ()->()) {
 
 /// Run a block of code in a backgorund thread, the thread is controlled by GCD
 /// - Parameter block: a completion handler to run in the background
-public func async(quality: DispatchQoS.QoSClass = .background, block: @escaping ()->()) {
+public func async(quality: DispatchQoS.QoSClass = .default, block: @escaping ()->()) {
 	DispatchQueue.global(qos: quality).async(execute: block)
 }
 
@@ -30,7 +30,11 @@ public extension String {
 	/// Initialize a string instance, in JSON format, from a given Encodable value
 	/// - Parameter json: An encodable value that can be parsed into JSON string
 	init(json: Encodable) {
-		self = String(decoding: json.json(), as: UTF8.self)
+		if let str = json as? String {
+			self = str
+		} else {
+			self = String(decoding: json.json(), as: UTF8.self)
+		}
 	}
 	
 	/// get the localized version of a given string, using the string value as key.
