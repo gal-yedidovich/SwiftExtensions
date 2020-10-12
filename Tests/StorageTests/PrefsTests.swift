@@ -152,6 +152,15 @@ final class PrefsTests: XCTestCase {
 		}
 	}
 	
+	func testStringAsCodable() {
+		prefs.edit().put(key: .name, "Bubu").commit()
+		
+		let str1 = prefs.string(key: .name)
+		let str2: String? = prefs.codable(key: .name)
+		
+		XCTAssertEqual(str1, str2)
+	}
+	
 	private func afterWrite(at prefs: Prefs, test: @escaping ([String:String]) -> ()) {
 		let expectation = XCTestExpectation(description: "wait to write to Prefs")
 		

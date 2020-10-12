@@ -69,6 +69,8 @@ public final class Prefs {
 	/// - Returns: some Decodable, or nil if not found
 	public func codable<Type: Decodable>(key: PrefKey) -> Type? {
 		guard let str = dict[key.value] else { return nil }
+		if Type.self == String.self { return str as? Type }
+				
 		return try? .from(json: str)
 	}
 	
