@@ -54,7 +54,7 @@ final class PrefsTests: XCTestCase {
 			.put(key: .name, "Gal")
 			.put(key: .age, 26)
 			.commit()
-
+		
 		prefs.edit().clear().commit()
 		
 		let expectation = XCTestExpectation(description: "wait to delete Prefs")
@@ -197,8 +197,8 @@ fileprivate extension PrefKey {
 }
 
 fileprivate enum WrappedValues {
-	@PrefsValue(key: .name, default: "I am Groot")
-	static var name: String?
+	@PrefsValue(key: .name)
+	static var name = "I am Groot"
 	
 	@PrefsValue(key: .age)
 	static var age: Int?

@@ -211,22 +211,25 @@ public struct PrefsValue<Value: Codable> {
 	private let key: PrefKey
 	private let prefs: Prefs
 	
-	public init(key: PrefKey, prefs: Prefs = .standard, default defValue: Value? = nil) {
+	public init(wrappedValue defValue: Value? = nil, key: PrefKey, prefs: Prefs = .standard) {
 		self.key = key
 		self.prefs = prefs
-		self.wrappedValue = prefs.codable(key: key) ?? defValue
+		if !prefs.contains(key: key), let defValue = defValue {
+			self.wrappedValue = defValue
+		}
 	}
 	
 	public var wrappedValue: Value? {
-		didSet {
+		get { prefs.codable(key: key) }		
+		nonmutating set {
 			let editor = prefs.edit()
 			
-			if let value = wrappedValue {
+			if let value = newValue {
 				_ = editor.put(key: key, value)
 			} else {
 				_ = editor.remove(key: key)
 			}
-			
+
 			editor.commit()
 		}
 	}
