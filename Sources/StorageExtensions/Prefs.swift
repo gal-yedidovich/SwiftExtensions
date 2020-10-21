@@ -206,6 +206,7 @@ public struct PrefKey {
 	}
 }
 
+/// A linked value in the Prefs, allowing to read & write.
 @propertyWrapper
 public struct PrefsValue<Value: Codable> {
 	private let key: PrefKey
@@ -220,7 +221,7 @@ public struct PrefsValue<Value: Codable> {
 	}
 	
 	public var wrappedValue: Value? {
-		get { prefs.codable(key: key) }		
+		get { prefs.codable(key: key) }
 		nonmutating set {
 			let editor = prefs.edit()
 			

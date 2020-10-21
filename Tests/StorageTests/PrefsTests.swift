@@ -183,6 +183,8 @@ final class PrefsTests: XCTestCase {
 		("testCodable", testCodable),
 		("testParallelWrites", testParallelWrites),
 		("testMultiplePrefs", testMultiplePrefs),
+		("testWrappedProperty", testWrappedProperty),
+		("testStringAsCodable", testStringAsCodable),
 	]
 	
 }
