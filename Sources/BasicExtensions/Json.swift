@@ -11,22 +11,22 @@ import Foundation
 public struct JsonObject {
 	var dict: [String: Any]
 	
-	init(from dict: [String: Any] = [:]) {
+	public init(from dict: [String: Any] = [:]) {
 		self.dict = dict
 	}
 	
-	init(from data: Data) throws {
+	public init(from data: Data) throws {
 		let json = try JSONSerialization.jsonObject(with: data)
 		guard let dict = json as? [String: Any] else { throw JsonErrors.wrongType }
 		
 		self.init(from: dict)
 	}
 	
-	init(from string: String) throws {
+	public init(from string: String) throws {
 		try self.init(from: Data(string.utf8))
 	}
 	
-	func data(options: JSONSerialization.WritingOptions = []) throws -> Data {
+	public func data(options: JSONSerialization.WritingOptions = []) throws -> Data {
 		try JSONSerialization.data(withJSONObject: dict, options: options)
 	}
 }
@@ -97,22 +97,22 @@ extension JsonObject: Sequence {
 public struct JsonArray {
 	var array: [Any]
 	
-	init(from array: [Any] = []) {
+	public init(from array: [Any] = []) {
 		self.array = array
 	}
 	
-	init(from data: Data) throws {
+	public init(from data: Data) throws {
 		let json = try JSONSerialization.jsonObject(with: data)
 		guard let arr = json as? [Any] else { throw JsonErrors.wrongType }
 		
 		self.init(from: arr)
 	}
 	
-	init(from string: String) throws {
+	public init(from string: String) throws {
 		try self.init(from: Data(string.utf8))
 	}
 	
-	func data(options: JSONSerialization.WritingOptions = []) throws -> Data {
+	public func data(options: JSONSerialization.WritingOptions = []) throws -> Data {
 		try JSONSerialization.data(withJSONObject: array, options: options)
 	}
 }
