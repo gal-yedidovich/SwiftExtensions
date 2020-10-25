@@ -11,12 +11,12 @@ import XCTest
 final class JsonObjectTests: XCTestCase {
 	func testCreateFromData() throws {
 		let data = Data(basicJsonStr.utf8)
-		let json = try JsonObject(from: data)
+		let json = try JsonObject(data: data)
 		XCTAssertEqual(json.dict.count, 3)
 	}
 	
 	func testCreateFromString() throws {
-		let json = try JsonObject(from: basicJsonStr)
+		let json = try JsonObject(string: basicJsonStr)
 		XCTAssertEqual(json.dict.count, 3)
 	}
 	
@@ -26,7 +26,7 @@ final class JsonObjectTests: XCTestCase {
 	}
 	
 	func testRead() throws {
-		let json = try JsonObject(from: JsonStr2)
+		let json = try JsonObject(string: JsonStr2)
 		
 		XCTAssertEqual(json.string(key: "name"), "Bubu")
 		XCTAssertEqual(json.int(key: "age"), 10)
@@ -54,7 +54,7 @@ final class JsonObjectTests: XCTestCase {
 	}
 	
 	func testIteration() throws {
-		let json = try JsonObject(from: JsonStr2)
+		let json = try JsonObject(string: JsonStr2)
 		
 		var copyDict: [String: Any] = [:]
 		for (key, value) in json {
@@ -65,7 +65,7 @@ final class JsonObjectTests: XCTestCase {
 	}
 	
 	func testDecodable() throws {
-		var json = try JsonObject(from: JsonStr2)
+		var json = try JsonObject(string: JsonStr2)
 		
 		struct Companian: Codable {
 			let name: String
@@ -94,7 +94,7 @@ final class JsonObjectTests: XCTestCase {
 		let jsonStr = String(decoding: try arr.data(), as: UTF8.self)
 		XCTAssertEqual(str, jsonStr)
 		
-		let arr2 = try JsonArray(from: str)
+		let arr2 = try JsonArray(string: str)
 		XCTAssertEqual(arr2.int(at: 0), 1)
 		XCTAssertEqual(arr2.int(at: 1), 2)
 		XCTAssertEqual(arr2.string(at: 2), "3")

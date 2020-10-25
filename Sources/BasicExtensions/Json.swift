@@ -15,19 +15,19 @@ public struct JsonObject {
 		self.dict = dict
 	}
 	
-	public init(from data: Data) throws {
+	public init(data: Data) throws {
 		let json = try JSONSerialization.jsonObject(with: data)
 		guard let dict = json as? [String: Any] else { throw JsonErrors.wrongType }
 		
 		self.init(from: dict)
 	}
 	
-	public init(from string: String) throws {
-		try self.init(from: Data(string.utf8))
+	public init(string: String) throws {
+		try self.init(data: Data(string.utf8))
 	}
 	
-	public init(from encodable: Encodable) throws {
-		try self.init(from: encodable.json())
+	public init(encodable: Encodable) throws {
+		try self.init(data: encodable.json())
 	}
 	
 	public func data(options: JSONSerialization.WritingOptions = []) throws -> Data {
@@ -106,19 +106,19 @@ public struct JsonArray {
 		self.array = array
 	}
 	
-	public init(from data: Data) throws {
+	public init(data: Data) throws {
 		let json = try JSONSerialization.jsonObject(with: data)
 		guard let arr = json as? [Any] else { throw JsonErrors.wrongType }
 		
 		self.init(from: arr)
 	}
 	
-	public init(from string: String) throws {
-		try self.init(from: Data(string.utf8))
+	public init(string: String) throws {
+		try self.init(data: Data(string.utf8))
 	}
 	
-	public init(from encodable: Encodable) throws {
-		try self.init(from: encodable.json())
+	public init(encodable: Encodable) throws {
+		try self.init(data: encodable.json())
 	}
 	
 	public func data(options: JSONSerialization.WritingOptions = []) throws -> Data {
