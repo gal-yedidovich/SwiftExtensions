@@ -149,19 +149,16 @@ public extension JsonArray {
 		return JsonArray(from: array)
 	}
 	
-	mutating func append(_ value: Any) -> JsonArray {
+	mutating func append(_ value: Any) {
 		array.append(unwrap(value: value))
-		return self
 	}
 	
-	mutating func insert(_ value: Any, at index: Int) -> JsonArray {
+	mutating func insert(_ value: Any, at index: Int) {
 		array.insert(unwrap(value: value), at: index)
-		return self
 	}
 	
-	mutating func remove(at index: Int) -> JsonArray {
+	mutating func remove(at index: Int) {
 		array.remove(at: index)
-		return self
 	}
 	
 	func appended(_ value: Any) -> JsonArray {
