@@ -163,19 +163,19 @@ public extension JsonArray {
 	
 	func appended(_ value: Any) -> JsonArray {
 		var copy = self
-		copy.array.append(unwrap(value: value))
+		copy.append(value)
 		return copy
 	}
 	
 	func inserted(_ value: Any, at index: Int) -> JsonArray {
 		var copy = self
-		copy.array.insert(unwrap(value: value), at: index)
+		copy.insert(value, at: index)
 		return copy
 	}
 	
 	func removed(at index: Int) -> JsonArray {
 		var copy = self
-		copy.array.remove(at: index)
+		copy.remove(at: index)
 		return copy
 	}
 }
@@ -190,7 +190,7 @@ extension JsonArray: MutableCollection {
 	
 	public subscript(position: Index) -> Element {
 		get { array[position] }
-		set { array[position] = newValue }
+		set { array[position] = unwrap(value: newValue) }
 	}
 	
 	public func index(after i: Int) -> Int {
