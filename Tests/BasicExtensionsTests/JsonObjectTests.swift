@@ -84,10 +84,10 @@ final class JsonObjectTests: XCTestCase {
 	
 	func testArray() throws {
 		let arr = JsonArray()
-			.append(1)
-			.append(2)
-			.append("3")
-			.append(true)
+			.appended(1)
+			.appended(2)
+			.appended("3")
+			.appended(true)
 		
 		let str = "[1,2,\"3\",true]"
 		
