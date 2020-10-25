@@ -26,6 +26,10 @@ public struct JsonObject {
 		try self.init(from: Data(string.utf8))
 	}
 	
+	public init(from encodable: Encodable) throws {
+		try self.init(from: encodable.json())
+	}
+	
 	public func data(options: JSONSerialization.WritingOptions = []) throws -> Data {
 		try JSONSerialization.data(withJSONObject: dict, options: options)
 	}
@@ -81,6 +85,7 @@ public extension JsonObject {
 		return copy
 	}
 	
+	@discardableResult
 	func remove(key: String) -> JsonObject {
 		var copy = self
 		copy.dict.removeValue(forKey: key)
@@ -110,6 +115,10 @@ public struct JsonArray {
 	
 	public init(from string: String) throws {
 		try self.init(from: Data(string.utf8))
+	}
+	
+	public init(from encodable: Encodable) throws {
+		try self.init(from: encodable.json())
 	}
 	
 	public func data(options: JSONSerialization.WritingOptions = []) throws -> Data {
