@@ -230,5 +230,40 @@ someApi { result in
 }
 ```
 
+### JsonObject & JsonArray - dynamic JSON structs
+Conveniece structs for working with dynamic JSON.
+
+
+```swift
+
+//new JSON example
+let json = JsonObject()
+	.put(key: "name", value: "Bubu")
+	.put(key: "age", value: 10)
+	
+do {
+	let data: Data = try json.data()
+} catch {
+	//handle encoding error
+}
+```
+
+
+```swift
+//receiving JSON as `Data` from an API
+
+do {
+	let json = JsonObject(data: dataFromApi) //given data from API
+
+	if let name = json.string(key: "name"), 
+		let age = json.int(key: "age") {
+		print("name: \(name), age: \(age)")
+	}
+} catch {
+	//handle decoding error
+}
+
+```
+
 ## License
 Apache License 2.0

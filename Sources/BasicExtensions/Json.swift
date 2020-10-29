@@ -99,6 +99,14 @@ extension JsonObject: Sequence {
 	}
 }
 
+extension JsonObject: CustomDebugStringConvertible {
+	public var debugDescription: String {
+		if dict.isEmpty { return "{}" }
+		
+		return String(decoding: try! data(options: .prettyPrinted), as: UTF8.self)
+	}
+}
+
 public struct JsonArray {
 	var array: [Any]
 	
@@ -199,6 +207,14 @@ extension JsonArray: MutableCollection {
 	
 	public func makeIterator() -> Array<Any>.Iterator {
 		array.makeIterator()
+	}
+}
+
+extension JsonArray: CustomDebugStringConvertible {
+	public var debugDescription: String {
+		if array.isEmpty { return "[]" }
+		
+		return String(decoding: try! data(options: .prettyPrinted), as: UTF8.self)
 	}
 }
 
