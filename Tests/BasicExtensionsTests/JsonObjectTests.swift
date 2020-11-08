@@ -117,6 +117,25 @@ final class JsonObjectTests: XCTestCase {
 		XCTAssertEqual(intArr, [1, 2, 3])
 	}
 	
+	func testRecursiveJsonBuilding() {
+		let json = JsonObject()
+			.put(key: "arr", [
+				JsonObject()
+					.put(key: "name", "Bubu"),
+				JsonObject()
+					.put(key: "name", "Groot"),
+			])
+		
+		let name1 = json.jsonArray(key: "arr")!
+			.jsonObject(at: 0)!
+			.string(key: "name")
+		let name2 = json.jsonArray(key: "arr")!
+			.jsonObject(at: 1)!
+			.string(key: "name")
+		XCTAssert(name1 == "Bubu")
+		XCTAssert(name2 == "Groot")
+	}
+	
 	static var allTests = [
 		("testCreateFromData", testCreateFromData),
 		("testCreateFromString", testCreateFromString),

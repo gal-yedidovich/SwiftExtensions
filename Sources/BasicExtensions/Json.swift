@@ -224,8 +224,10 @@ enum JsonErrors: Error {
 
 fileprivate func unwrap(value: Any) -> Any {
 	switch value {
-	case let arr as JsonArray: return arr.array
-	case let obj as JsonObject: return obj.dict
+	case let arr as JsonArray: return arr.array.map(unwrap(value:))
+	case let array as [Any]: return array.map(unwrap(value:))
+	case let obj as JsonObject: return obj.dict.mapValues(unwrap(value:))
+	case let dict as [String: Any]: return dict.mapValues(unwrap(value:))
 	default: return value
 	}
 }
