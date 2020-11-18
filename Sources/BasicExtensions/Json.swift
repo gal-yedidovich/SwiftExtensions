@@ -84,27 +84,23 @@ public extension JsonObject {
 	@discardableResult
 	func with(key: String, _ value: Any) -> JsonObject {
 		var copy = self
-		copy.dict[key] = unwrap(value: value)
+		copy.put(key: key, value)
 		return copy
 	}
 	
 	@discardableResult
 	func removing(key: String) -> JsonObject {
 		var copy = self
-		copy.dict.removeValue(forKey: key)
+		copy.remove(key: key)
 		return copy
 	}
 	
-	@discardableResult
-	mutating func put(key: String, _ value: Any) -> JsonObject {
+	mutating func put(key: String, _ value: Any) {
 		dict[key] = unwrap(value: value)
-		return self
 	}
 	
-	@discardableResult
-	mutating func remove(key: String) -> JsonObject {
+	mutating func remove(key: String) {
 		dict.removeValue(forKey: key)
-		return self
 	}
 }
 
