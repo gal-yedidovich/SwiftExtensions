@@ -45,8 +45,8 @@ final class JsonObjectTests: XCTestCase {
 	
 	func testWrite() {
 		let json = JsonObject()
-			.put(key: "name", "Deadpool")
-			.put(key: "age", 3)
+			.with(key: "name", "Deadpool")
+			.with(key: "age", 3)
 		
 		XCTAssertEqual(json.dict.count, 2)
 		XCTAssertEqual(json["name"], "Deadpool")
@@ -119,13 +119,12 @@ final class JsonObjectTests: XCTestCase {
 	
 	func testRecursiveJsonBuilding() {
 		let json = JsonObject()
-			.put(key: "arr", [
+			.with(key: "arr", [
 				JsonObject()
-					.put(key: "name", "Bubu"),
+					.with(key: "name", "Bubu"),
 				JsonObject()
-					.put(key: "name", "Groot"),
+					.with(key: "name", "Groot"),
 			])
-		
 		let name1 = json.jsonArray(key: "arr")!
 			.jsonObject(at: 0)!
 			.string(key: "name")

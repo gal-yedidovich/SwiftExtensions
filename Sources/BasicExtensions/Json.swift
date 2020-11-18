@@ -75,21 +75,36 @@ public extension JsonObject {
 	
 	subscript<Value>(key: String) -> Value? {
 		get { dict[key] as? Value }
-		set { dict[key] = unwrap(value: newValue as Any) }
+		set {
+			precondition(newValue != nil)
+			dict[key] = unwrap(value: newValue!)
+		}
 	}
 	
 	@discardableResult
-	func put(key: String, _ value: Any) -> JsonObject {
+	func with(key: String, _ value: Any) -> JsonObject {
 		var copy = self
 		copy.dict[key] = unwrap(value: value)
 		return copy
 	}
 	
 	@discardableResult
-	func remove(key: String) -> JsonObject {
+	func removing(key: String) -> JsonObject {
 		var copy = self
 		copy.dict.removeValue(forKey: key)
 		return copy
+	}
+	
+	@discardableResult
+	mutating func put(key: String, _ value: Any) -> JsonObject {
+		dict[key] = unwrap(value: value)
+		return self
+	}
+	
+	@discardableResult
+	mutating func remove(key: String) -> JsonObject {
+		dict.removeValue(forKey: key)
+		return self
 	}
 }
 
