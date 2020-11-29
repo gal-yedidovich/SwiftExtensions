@@ -206,9 +206,10 @@ public struct PrefKey {
 	}
 }
 
+import SwiftUI
 /// A linked value in the Prefs, allowing to read & write.
 @propertyWrapper
-public struct PrefsValue<Value: Codable> {
+public struct PrefsValue<Value>: DynamicProperty where Value: Codable {
 	private let key: PrefKey
 	private let prefs: Prefs
 	
@@ -222,7 +223,7 @@ public struct PrefsValue<Value: Codable> {
 	
 	public var wrappedValue: Value? {
 		get { prefs.codable(key: key) }
-		nonmutating set {
+		set {
 			let editor = prefs.edit()
 			
 			if let value = newValue {
@@ -232,6 +233,8 @@ public struct PrefsValue<Value: Codable> {
 			}
 
 			editor.commit()
+			
+			update()
 		}
 	}
 }
