@@ -89,7 +89,13 @@ extension Filename {
 
 //Usage
 let data = Data("Bubu is the king".utf8)
-FileSystem.write(data: data, to: .myFile1)
+try! FileSystem.write(data: data, to: .myFile1)
+
+if let sameData = FileSystem.read(file: .myFile1) {
+	print(String(decoding: sameData, as: UTF8.self)) //"Bubu is the king"
+}
+
+try! FileSystem.delete(file: .myFile1)
 ```
 
 #### TIP
@@ -222,8 +228,8 @@ Conveniece structs for working with dynamic JSON.
 
 //new JSON example
 let json = JsonObject()
-	.put(key: "name", value: "Bubu")
-	.put(key: "age", value: 10)
+	.with(key: "name", value: "Bubu")
+	.with(key: "age", value: 10)
 	
 do {
 	let data: Data = try json.data()
