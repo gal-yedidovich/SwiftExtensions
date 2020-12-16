@@ -142,41 +142,25 @@ extension PrefKey {
 And you can read them:
 ```swift
 if let name = myPrefs.string(key: .name) {
-	print("\(name), is the king") 
+	print("\(name), is the king")
 }
 ```
 
-#### PrefsValue - Wrapped property.
-adding `@PrefsValue` to manage a single value transparently.
+#### PrefsValue - Wrapped property for SwfitUI.
+Wrapping a variable with `@PrefsValue` allows to manage a single value transparently in the prefs
 
-Example with static variable
-```swift
-enum StoredValues {
-	@PrefsValue(key: .name, default: "I am Groot") //".name" is of type PrefKey
-	static var name: String?
-	
-	@PrefsValue(key: .age) //".age" is of type PrefKey
-	static var age: Int?
-}
-
-func doSome() {
-	StoredValues.name = "Bubu is the king" //automatically encrypt & write to storage
-}
-```
-
-Another example with SwiftUI (
 ```swift
 extension PrefKey {
-	static let displayName = PrefKey(value: "displayName")
+	static let displayName = PrefKey(value: "someObfuscatedKey")
 }
 
 struct ContentView: View {
-	@PrefsValue(key: .displayName)
-	var displayName: String?
+	@PrefsValue(key: .displayName) var displayName: String = ""
 
 	var body: some View {...}
 }
 ```
+Views will re-render when a `@PrefsValue` changes
 
 ### Result API - Conveneince extension in URLSession.
 Using Swift's "Associated values" the following convenience methods allow you to handle responses easily without the boilerplate like unwrapping data and checking for errors.
