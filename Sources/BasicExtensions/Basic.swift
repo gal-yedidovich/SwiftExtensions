@@ -66,7 +66,7 @@ public extension URL {
 	}
 }
 
-extension HashFunction {
+public extension HashFunction {
 	/// Convenient method for hashing a file in the file system.
 	///
 	/// - Parameter url: file url in the file system.
