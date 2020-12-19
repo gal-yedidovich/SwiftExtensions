@@ -67,11 +67,11 @@ public extension URL {
 }
 
 extension HashFunction {
-	/// Convenience method for hashing a file in the file system.
+	/// Convenient method for hashing a file in the file system.
 	///
 	/// - Parameter url: file url in the file system.
 	/// - Returns: Finalized Hash Digest or nil
-	static func hash(file url: URL) -> Self.Digest? {
+	static func checksum(file url: URL) -> Self.Digest? {
 		guard FileManager.default.fileExists(atPath: url.path),
 			  !url.isDirectory, let input = InputStream(url: url) else {
 			return nil
@@ -91,6 +91,13 @@ extension HashFunction {
 		}
 		
 		return hash.finalize()
+	}
+}
+
+public extension Digest {
+	///create a hexadecimal string representation from the digest.
+	var hexString: String {
+		map { String(format: "%02x", $0) }.joined()
 	}
 }
 
