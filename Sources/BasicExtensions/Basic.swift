@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import CryptoKit
 
 /// Run a block of code in the main thread, with a delay if exists
 /// - Parameters:
@@ -62,6 +63,34 @@ public extension URL {
 	var isDirectory: Bool {
 		let values = try? resourceValues(forKeys: [.isDirectoryKey])
 		return values?.isDirectory ?? false
+	}
+}
+
+extension HashFunction {
+	/// Convenience method for hashing a file in the file system.
+	///
+	/// - Parameter url: file url in the file system.
+	/// - Returns: Finalized Hash Digest or nil
+	static func hash(file url: URL) -> Self.Digest? {
+		guard FileManager.default.fileExists(atPath: url.path),
+			  !url.isDirectory, let input = InputStream(url: url) else {
+			return nil
+		}
+		
+		let buffer = UnsafeMutablePointer<UInt8>.allocate(capacity: Self.blockByteCount)
+		var hash = Self.init()
+		
+		input.open()
+		defer { input.close() }
+		
+		while input.hasBytesAvailable {
+			let bytesRead = input.read(buffer, maxLength: Self.blockByteCount)
+			guard bytesRead > 0 else { break }
+			let data = Data(bytes: buffer, count: bytesRead)
+			hash.update(data: data)
+		}
+		
+		return hash.finalize()
 	}
 }
 
