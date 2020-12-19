@@ -111,6 +111,7 @@ final class PrefsTests: XCTestCase {
 		let prefs1 = Prefs(file: Filename(name: "prefs1"))
 		let prefs2 = Prefs(file: Filename(name: "prefs2"))
 		
+		let e = XCTestExpectation(description: "waiting for concurrent prefs")
 		async {
 			prefs1.edit()
 				.put(key: .name, "Bubu")
@@ -118,7 +119,14 @@ final class PrefsTests: XCTestCase {
 				.commit()
 			
 			XCTAssert(prefs1.dict.count == 2)
+			
+			self.afterWrite(at: prefs1) { json in
+				XCTAssert(json.count == 2)
+			}
+			
+			e.fulfill()
 		}
+		wait(for: [e], timeout: 10)
 		
 		prefs2.edit()
 			.put(key: .name, "Groot")
@@ -127,10 +135,6 @@ final class PrefsTests: XCTestCase {
 			.commit()
 		
 		XCTAssert(prefs2.dict.count == 3)
-		
-		afterWrite(at: prefs1) { json in
-			XCTAssert(json.count == 2)
-		}
 		
 		afterWrite(at: prefs2) { json in
 			XCTAssert(json.count == 3)
