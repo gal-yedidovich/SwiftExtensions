@@ -77,7 +77,7 @@ public class Encryptor {
 	///   - dest: destination file to write processed data
 	///   - isEncryption: flag for determinating to encrypt or decrypt
 	///   - onProgress: a  progress event to track the progress of the writing
-	private static func process(file src: URL, to dest: URL, encrypt isEncryption: Bool , onProgress: ((Int)->())?) throws {
+	private static func process(file src: URL, to dest: URL, encrypt isEncryption: Bool, onProgress: ((Int)->())?) throws {
 		let bufferSize = isEncryption ? BUFFER_SIZE : BUFFER_SIZE + 28
 		let fm = FileManager.default
 		
@@ -87,28 +87,18 @@ public class Encryptor {
 		
 		let input = InputStream(url: src)!
 		let output = OutputStream(url: tempFile, append: false)!
-		let buffer = UnsafeMutablePointer<UInt8>.allocate(capacity: bufferSize)
 		let fileSize = src.fileSize!
 		var offset: UInt64 = 0
 		
-		input.open()
 		output.open()
+		defer { output.close() }
 		
-		defer {
-			input.close()
-			output.close()
-		}
-		
-		while input.hasBytesAvailable {
-			let bytesRead = input.read(buffer, maxLength: bufferSize)
-			guard bytesRead > 0 else { break }
+		try input.readAll(bufferSize: bufferSize) { (bytesRead, buffer) in
 			offset += UInt64(bytesRead)
 			onProgress?(Int((offset * 100) / fileSize))
 			let data = Data(bytes: buffer, count: bytesRead)
 			let processedData = isEncryption ? try encrypt(data: data) : try decrypt(data: data)
-			processedData.withUnsafeBytes { (writeBuffer: UnsafeRawBufferPointer) in
-				_ = output.write(writeBuffer.bindMemory(to: UInt8.self).baseAddress!, maxLength: processedData.count)
-			}
+			output.write(data: processedData)
 		}
 		
 		if fm.fileExists(atPath: dest.path) {

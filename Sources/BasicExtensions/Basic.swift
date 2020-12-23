@@ -66,6 +66,41 @@ public extension URL {
 	}
 }
 
+public extension InputStream {
+	typealias Buffer = UnsafeMutablePointer<UInt8>
+	
+	/// Read all the content in this input stream.
+	///
+	/// This method will open and close this stream, no need to open it first.
+	/// Once this method has completed the steam will be *closed*.
+	/// - Parameters:
+	///   - bufferSize: sample size to read on every cycle
+	///   - onBatch: a closure, handles newly read data
+	func readAll(bufferSize: Int = 1024 * 32, onBatch: (Int, Buffer) throws -> ()) rethrows {
+		open()
+		defer { close() }
+		
+		let buffer = Buffer.allocate(capacity: bufferSize)
+		while hasBytesAvailable {
+			let bytesRead = read(buffer, maxLength: bufferSize)
+			guard bytesRead > 0 else { break }
+			
+			try onBatch(bytesRead, buffer)
+		}
+	}
+}
+
+public extension OutputStream {
+	/// Convenient method to write `Data` into output stream.
+	/// - Parameter data: data to be written
+	/// - Returns: number of bytes written into the steam
+	@discardableResult
+	func write(data: Data) -> Int {
+		let bytes = [UInt8](data)
+		return write(bytes, maxLength: bytes.count)
+	}
+}
+
 public extension HashFunction {
 	/// Convenient method for hashing a file in the file system.
 	///
@@ -77,15 +112,8 @@ public extension HashFunction {
 			return nil
 		}
 		
-		let buffer = UnsafeMutablePointer<UInt8>.allocate(capacity: Self.blockByteCount)
 		var hash = Self.init()
-		
-		input.open()
-		defer { input.close() }
-		
-		while input.hasBytesAvailable {
-			let bytesRead = input.read(buffer, maxLength: Self.blockByteCount)
-			guard bytesRead > 0 else { break }
+		input.readAll(bufferSize: Self.blockByteCount) { (bytesRead, buffer) in
 			let data = Data(bytes: buffer, count: bytesRead)
 			hash.update(data: data)
 		}
