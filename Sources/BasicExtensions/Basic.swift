@@ -76,7 +76,7 @@ public extension InputStream {
 	/// - Parameters:
 	///   - bufferSize: sample size to read on every cycle
 	///   - onBatch: a closure, handles newly read data
-	func readAll(bufferSize: Int = 1024 * 32, onBatch: (Int, Buffer) throws -> ()) rethrows {
+	func readAll(bufferSize: Int = 1024 * 32, onBatch: (Buffer, Int) throws -> ()) rethrows {
 		open()
 		defer { close() }
 		
@@ -85,7 +85,7 @@ public extension InputStream {
 			let bytesRead = read(buffer, maxLength: bufferSize)
 			guard bytesRead > 0 else { break }
 			
-			try onBatch(bytesRead, buffer)
+			try onBatch(buffer, bytesRead)
 		}
 	}
 }
@@ -113,7 +113,7 @@ public extension HashFunction {
 		}
 		
 		var hash = Self.init()
-		input.readAll(bufferSize: Self.blockByteCount) { (bytesRead, buffer) in
+		input.readAll(bufferSize: Self.blockByteCount) { buffer, bytesRead in
 			let data = Data(bytes: buffer, count: bytesRead)
 			hash.update(data: data)
 		}

@@ -93,7 +93,7 @@ public class Encryptor {
 		output.open()
 		defer { output.close() }
 		
-		try input.readAll(bufferSize: bufferSize) { (bytesRead, buffer) in
+		try input.readAll(bufferSize: bufferSize) { buffer, bytesRead in
 			offset += UInt64(bytesRead)
 			onProgress?(Int((offset * 100) / fileSize))
 			let data = Data(bytes: buffer, count: bytesRead)
