@@ -45,7 +45,7 @@ final class BasicExtTests: XCTestCase {
 	
 	func testFileSize() {
 		guard let fileSize = Self.url.fileSize else { XCTFail("no file size"); return }
-		XCTAssertEqual(fileSize, UInt64(Self.content.count))
+		XCTAssertEqual(fileSize, Self.content.count)
 	}
 	
 	func testIsDirectory() {

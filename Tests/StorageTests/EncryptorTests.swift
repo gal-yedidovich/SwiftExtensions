@@ -22,7 +22,7 @@ final class EncryptorTests: XCTestCase {
 	}
 	
 	func testStreams() throws {
-		let str = [String](repeating: "Bubu is the king\n", count: 5000).reduce("", +)
+		let str = [String](repeating: "Bubu is the king", count: 5000).joined(separator: "\n")
 		
 		let baseURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
 		let url = baseURL.appendingPathComponent("data.txt")

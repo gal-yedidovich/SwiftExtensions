@@ -88,13 +88,13 @@ public class Encryptor {
 		let input = InputStream(url: src)!
 		let output = OutputStream(url: tempFile, append: false)!
 		let fileSize = src.fileSize!
-		var offset: UInt64 = 0
+		var offset: Int = 0
 		
 		output.open()
 		defer { output.close() }
 		
 		try input.readAll(bufferSize: bufferSize) { buffer, bytesRead in
-			offset += UInt64(bytesRead)
+			offset += bytesRead
 			onProgress?(Int((offset * 100) / fileSize))
 			let data = Data(bytes: buffer, count: bytesRead)
 			let processedData = isEncryption ? try encrypt(data: data) : try decrypt(data: data)

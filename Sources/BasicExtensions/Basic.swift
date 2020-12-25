@@ -55,8 +55,9 @@ public extension DateFormatter {
 
 public extension URL {
 	///computes file size at the URL, if exists
-	var fileSize: UInt64? {
-		try? FileManager.default.attributesOfItem(atPath: path)[.size] as? UInt64
+	var fileSize: Int? {
+		let values = try? resourceValues(forKeys: [.fileSizeKey])
+		return values?.fileSize
 	}
 	
 	/// computes wheter URL poins to a folder, if exists.
