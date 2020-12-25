@@ -20,7 +20,7 @@ public final class Prefs {
 	internal var dict: [String: String] = [:]
 	internal var filename: Filename
 	
-	/// Initialize new Prefs instance link to a given Filename
+	/// Initialize new Prefs instance link to a given Filename, and loading it`s content
 	/// - Parameter file: Target Filename in storage
 	public init(file: Filename) {
 		self.filename = file
@@ -30,9 +30,7 @@ public final class Prefs {
 	
 	/// loads the content from the target JSON file, into memory
 	public func reload() {
-		if FileSystem.fileExists(filename),
-		   let data = FileSystem.read(file: filename),
-		   let json: [String: String] = try? .from(json: data) {
+		if let json: [String: String] = FileSystem.load(json: filename) {
 			dict = json
 		}
 	}
