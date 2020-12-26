@@ -53,6 +53,14 @@ public extension DateFormatter {
 	}
 }
 
+public extension Sequence {
+	/// Returns the elements of the sequence, sorted using the given KeyPath as the comparison between elements.
+	/// - Parameter key: A comperable KeyPath
+	func sorted<T: Comparable>(by key: KeyPath<Element, T>) -> [Element] {
+		self.sorted { $0[keyPath: key] < $1[keyPath: key] }
+	}
+}
+
 public extension URL {
 	///computes file size at the URL, if exists
 	var fileSize: Int? {

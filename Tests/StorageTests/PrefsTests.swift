@@ -177,7 +177,6 @@ final class PrefsTests: XCTestCase {
 		("testMultiplePrefs", testMultiplePrefs),
 		("testStringAsCodable", testStringAsCodable),
 	]
-	
 }
 
 fileprivate let prefs = Prefs.standard
