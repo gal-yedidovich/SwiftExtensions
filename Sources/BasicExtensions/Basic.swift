@@ -122,7 +122,7 @@ public extension HashFunction {
 		}
 		
 		var hash = Self.init()
-		input.readAll(bufferSize: Self.blockByteCount) { buffer, bytesRead in
+		input.readAll { buffer, bytesRead in
 			let data = Data(bytes: buffer, count: bytesRead)
 			hash.update(data: data)
 		}
