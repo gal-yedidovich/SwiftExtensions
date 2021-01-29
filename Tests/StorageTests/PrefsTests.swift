@@ -11,9 +11,11 @@ import BasicExtensions
 
 final class PrefsTests: XCTestCase {
 	
-	override func tearDown() { //clean up after each test
-		try! FileSystem.delete(file: prefs.filename)
-		prefs.dict = [:]
+	override func tearDownWithError() throws {
+		try prefs.queue.sync {
+			try FileSystem.delete(file: prefs.filename)
+			prefs.dict = [:]
+		}
 	}
 	
 	func testInsert() {

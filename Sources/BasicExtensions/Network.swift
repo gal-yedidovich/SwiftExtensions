@@ -57,7 +57,6 @@ public extension URLRequest {
 	}
 }
 
-
 /// Convenince HTTP methods for `URLRequest`
 public enum Method: String {
 	case GET = "GET",
@@ -82,19 +81,10 @@ public struct ContentType: ExpressibleByStringLiteral {
 	let value: String
 }
 
-
 public enum Result<T, T2> {
 	case success(T)
 	case failure(Int, T2)
 	case error(Error)
-	
-	internal var debugValue: Any {
-		switch self {
-		case .success(let s): return s
-		case .failure(_, let f): return f
-		case .error(let e): return e
-		}
-	}
 }
 
 public enum BasicErrors: Error {
