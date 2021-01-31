@@ -68,11 +68,11 @@ public enum Method: String {
 
 /// Convenience Content-type vlaues for `URLRequest`
 public struct ContentType: ExpressibleByStringLiteral {
-	public static let json = ContentType("application/json")
-	public static let text = ContentType("text/plain")
-	public static let xml = ContentType("text/xml")
-	public static let urlEncoded = ContentType("application/x-www-form-urlencoded")
-	public static let multipartFormData = ContentType("multipart/form-data")
+	public static var json: ContentType { "application/json" }
+	public static var text: ContentType { "text/plain" }
+	public static var xml: ContentType { "text/xml" }
+	public static var urlEncoded: ContentType { "application/x-www-form-urlencoded" }
+	public static var multipartFormData: ContentType { "multipart/form-data" }
 	
 	public init(stringLiteral value: String) {
 		self.value = value

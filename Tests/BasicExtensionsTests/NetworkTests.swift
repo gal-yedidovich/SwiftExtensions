@@ -78,10 +78,10 @@ final class UrlRequestTests: XCTestCase {
 		}
 	}
 	
-	private func send<T: Decodable>(_ request: URLRequest, type: T.Type, completion: @escaping (Result<T, StringDict>) -> ()) {
+	private func send<T: Decodable>(_ request: URLRequest, type: T.Type, completion: @escaping (NetResponse<T, StringDict>) -> ()) {
 		let expectation = XCTestExpectation(description: "waiting for request")
 		
-		URLSession.shared.dataTask(with: request) { (result: Result<T, StringDict>) in
+		URLSession.shared.dataTask(with: request) { (result: NetResponse<T, StringDict>) in
 			print("Response: ", result)
 			completion(result)
 			expectation.fulfill()
