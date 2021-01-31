@@ -81,7 +81,7 @@ public struct ContentType: ExpressibleByStringLiteral {
 	let value: String
 }
 
-public enum Result<T, T2> {
+public enum NetResponse<T, T2> {
 	case success(T)
 	case failure(Int, T2)
 	case error(Error)
@@ -102,7 +102,7 @@ public extension URLSession {
 	///   - request: a request to send to a remote server
 	///   - completion: a completion handler that accepts the result from the response, can be either success/failure/error.
 	/// - Returns: Task, prepared to start with `resume()` call
-	func dataTask(with request: URLRequest, completion: @escaping (Result<Data, Data>) -> Void) -> URLSessionDataTask {
+	func dataTask(with request: URLRequest, completion: @escaping (NetResponse<Data, Data>) -> Void) -> URLSessionDataTask {
 		dataTask(with: request) { (d, r, e) in
 			if let error = e { completion(.error(error)); return }
 			guard let data = d, let urlRes = r as? HTTPURLResponse else { completion(.error(BasicErrors.emptyResposne)); return }
@@ -121,7 +121,7 @@ public extension URLSession {
 	///   - request: a request to send to a remote server
 	///   - completion: a completion handler that accepts the generic result from the response, can be either success/failure/error.
 	/// - Returns: Task, prepared to start with `resume()` call
-	func dataTask<Response: Decodable, FailRes: Decodable>(with request: URLRequest, completion: @escaping (Result<Response, FailRes>) -> Void) -> URLSessionDataTask {
+	func dataTask<Response: Decodable, FailRes: Decodable>(with request: URLRequest, completion: @escaping (NetResponse<Response, FailRes>) -> Void) -> URLSessionDataTask {
 		dataTask(with: request) { result in
 			do {
 				switch result {
