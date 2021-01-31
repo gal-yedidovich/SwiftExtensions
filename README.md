@@ -175,8 +175,8 @@ You can easily get relevant values from response using a `switch` statement.
 
 ```swift
 let req: URLRequest = ...
-URLSession.shared.dataTask(with: req) { (result: Result<Data, Data>) in
-	switch result {
+URLSession.shared.dataTask(with: req) { (response: NetResponse<Data, Data>) in
+	switch response {
 	case .success(let data): //handle success (status 2##) with given data
 	case .failure(let statusCode, let data): //handle failure (ex: status 400) with given status+data
 	case .error(let error):  //handle given error
@@ -195,13 +195,13 @@ struct MyFailureType: Codable {
 }
 
 //in this example we will create an API function
-func someApi(completion: @escaping (Result<MySuccessType, MyFailureType>) -> Void)
+func someApi(completion: @escaping (NetResponse<MySuccessType, MyFailureType>) -> Void)
 	let req: URLRequest = ...
 	URLSession.shared.dataTask(with: req, completion: completion).resume()
 }
 
-someApi { result in //result is of type: Result<MySuccessType, MyFailureType>
-	switch result {
+someApi { response in //response is of type: NetResponse<MySuccessType, MyFailureType>
+	switch response {
 	case .success(let successPayload): //handle success, 'successPayload' is of type MySuccessType.
 	case .failure(_, let failurePayload): //handle failure, 'failurePayload' is of type MyFailureType. ignoring the status code
 	case .error(let error):  //handle given error.
@@ -212,8 +212,8 @@ someApi { result in //result is of type: Result<MySuccessType, MyFailureType>
 You can also customize your usage, example with `someApi` that ignore some results and the associated payload
 
 ```swift
-someApi { result in
-	switch result {
+someApi { response in
+	switch response {
 	case .success: //handle success, but ignore the payload
 	default: //handle either failure or error, ignoring the payload
 	}
