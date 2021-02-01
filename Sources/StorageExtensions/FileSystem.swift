@@ -37,6 +37,16 @@ public final class FileSystem {
 		try encData.write(to: url, options: .atomic)
 	}
 	
+	
+	/// Create a directory at the url of the given `Folder` value.
+	/// - Parameters:
+	///   - folder: The folder to create
+	///   - withIntermediateDirectories: If true, this method creates any nonexistent parent directories as part of creating the directory in url. If false, this method fails if any of the intermediate parent directories does not exist.
+	///   - attributes: The file attributes for the new directory. When nil, the default attributes are used.
+	public static func create(folder: Folder, withIntermediateDirectories: Bool = true, attributes: [FileAttributeKey : Any]? = nil) throws {
+		try fm.createDirectory(at: url(of: folder), withIntermediateDirectories: withIntermediateDirectories, attributes: attributes)
+	}
+	
 	/// Read a file from storage and return is content
 	/// The data will be read using the Encryptor's `decrypt`
 	/// - Parameter file: target Filename to read from
