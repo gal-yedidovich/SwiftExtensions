@@ -12,7 +12,7 @@ import BasicExtensions
 final class PrefsTests: XCTestCase {
 	
 	override func tearDownWithError() throws {
-		prefs.strategy = Prefs.QueueStrategy(prefs: prefs)
+		prefs.writeStrategy = .default
 		try prefs.queue.sync {
 			try FileSystem.delete(file: prefs.filename)
 			prefs.dict = [:]
@@ -43,7 +43,11 @@ final class PrefsTests: XCTestCase {
 	}
 	
 	func testRemove() {
-		prefs.edit().put(key: .isAlive, true).commit()
+		prefs.edit()
+			.put(key: .name, "Bubu")
+			.put(key: .isAlive, true)
+			.commit()
+		
 		prefs.edit().remove(key: .isAlive).commit()
 		
 		XCTAssert(prefs.dict[PrefKey.isAlive.value] == nil)
@@ -63,7 +67,7 @@ final class PrefsTests: XCTestCase {
 		let expectation = XCTestExpectation(description: "wait to delete Prefs")
 		prefs.queue.async {
 			XCTAssert(prefs.dict.count == 0)
-			XCTAssert(!FileSystem.fileExists(prefs.filename))
+			XCTAssertFalse(FileSystem.fileExists(prefs.filename))
 			expectation.fulfill()
 		}
 		
@@ -157,13 +161,12 @@ final class PrefsTests: XCTestCase {
 	}
 	
 	func testBatchingStrategy() {
-		prefs.strategy = Prefs.BatchStrategy(prefs: prefs)
+		prefs.writeStrategy = .batch
 		
 		for i in 1...10 {
 			prefs.edit().put(key: .age, i).commit()
 			XCTAssertEqual(prefs.int(key: .age), i)
 		}
-		
 		
 		let expectation = XCTestExpectation(description: "wait to write batch to Prefs")
 		prefs.queue.asyncAfter(deadline: .now() + 0.5) {
