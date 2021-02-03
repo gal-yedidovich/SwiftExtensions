@@ -17,6 +17,11 @@ internal struct Commit {
 }
 
 public extension Prefs {
+	/// The Strategy to write to the prefs file in storage.
+	///
+	/// There are two Strategies:
+	///  - `default`: write every commit immediately to storage, it consumes more resources when when there are a lot of comming in succession.
+	///  - `batch`: writes all applied commits after a delay, it will reduce wrtie calls to file system when applying  large number of commits.
 	enum WritingStrategy {
 		case `default`
 		case batch(delay: Double)
@@ -31,24 +36,6 @@ public extension Prefs {
 				return BatchStrategy(prefs: prefs, delay: delay)
 			}
 		}
-	}
-}
-
-fileprivate func write(to prefs: Prefs) {
-	do {
-		try FileSystem.write(data: prefs.dict.json(), to: prefs.filename)
-	} catch {
-		print("could not write to \"prefs\" file.")
-		print(error)
-	}
-}
-
-fileprivate func delete(_ prefs: Prefs) {
-	do {
-		try FileSystem.delete(file: prefs.filename)
-	} catch {
-		print("could not delete \"prefs\" file.")
-		print(error)
 	}
 }
 
@@ -75,8 +62,8 @@ internal struct QueueStrategy: WriteStrategy {
 
 internal class BatchStrategy: WriteStrategy {
 	unowned let prefs: Prefs
-	private var pendingCommits: [Commit] = []
 	private let delay: Double
+	private var triggered = false
 	
 	init(prefs: Prefs, delay: Double) {
 		self.prefs = prefs
@@ -92,21 +79,38 @@ internal class BatchStrategy: WriteStrategy {
 				else { prefs.dict[key] = value }
 			}
 			
-			
-			pendingCommits.append(commit)
-			if pendingCommits.count == 1 {
+			if !triggered {
+				triggered = true
 				prefs.queue.asyncAfter(deadline: .now() + delay, execute: writeBatch)
 			}
 		}
 	}
 	
 	private func writeBatch() {
-		pendingCommits = []
+		triggered = false
 		
 		if prefs.dict.isEmpty {
 			delete(prefs)
 		} else {
 			write(to: prefs)
 		}
+	}
+}
+
+fileprivate func write(to prefs: Prefs) {
+	do {
+		try FileSystem.write(data: prefs.dict.json(), to: prefs.filename)
+	} catch {
+		print("could not write to \"prefs\" file.")
+		print(error)
+	}
+}
+
+fileprivate func delete(_ prefs: Prefs) {
+	do {
+		try FileSystem.delete(file: prefs.filename)
+	} catch {
+		print("could not delete \"prefs\" file.")
+		print(error)
 	}
 }

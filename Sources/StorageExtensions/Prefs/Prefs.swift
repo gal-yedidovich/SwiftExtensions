@@ -19,7 +19,9 @@ public final class Prefs {
 	internal let queue = DispatchQueue(label: "prefs", qos: .background)
 	internal var dict: [String: String] = [:]
 	internal var filename: Filename
-	private var strategy: WritingStrategy
+	
+	fileprivate lazy var strategy: WriteStrategy = strategyType.createStrategy(for: self)
+	private var strategyType: WritingStrategy
 	
 	/// Represent the strategy to write to the prefs file in storage.
 	///
@@ -28,12 +30,12 @@ public final class Prefs {
 	///  - `batch`: writes all applied commits after a delay, it will reduce wrtie calls to file system when applying  large number of commits.
 	///
 	/// It is thread-safe to mutate this value while working with the `prefs` instance. as it will effect changes after the pending writes have finished.
-	///
 	public var writeStrategy: WritingStrategy {
-		get { strategy }
+		get { strategyType }
 		set {
 			queue.async {
-				self.strategy = newValue
+				self.strategyType = newValue
+				self.strategy = newValue.createStrategy(for: self)
 			}
 		}
 	}
@@ -42,7 +44,7 @@ public final class Prefs {
 	/// - Parameter file: Target Filename in storage
 	public init(file: Filename, writeStrategy: WritingStrategy = .default) {
 		self.filename = file
-		self.strategy = writeStrategy
+		self.strategyType = writeStrategy
 		reload()
 	}
 	
@@ -184,8 +186,7 @@ public class Editor {
 	/// - in case there are changes, they are written to Prefs file asynchronously
 	public func commit() {
 		let commit = Commit(changes: changes, clearFlag: clearFlag)
-		let ws = prefs.writeStrategy.createStrategy(for: prefs)
-		ws.commit(commit)
+		prefs.strategy.commit(commit)
 	}
 }
 
