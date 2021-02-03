@@ -146,15 +146,6 @@ public class Encryptor {
 		return key
 	}
 	
-	/// convenince `xor` method for byte operation on given data. it will change each byte in the data (byte array) and will return the result.
-	/// - Parameters:
-	///   - src: Data to manipulate with `xor` operation
-	///   - xor: an integer to fo the `xor` with.
-	/// - Returns: manipulated data after the operation.
-	public static func xor(_ src: Data, with xor: UInt8) -> Data {
-		Data(src.map { byte in byte ^ xor })
-	}
-	
 	private enum Errors: LocalizedError {
 		case fetchKeyError(OSStatus)
 		case storeKeyError(OSStatus)

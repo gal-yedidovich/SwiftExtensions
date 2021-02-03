@@ -160,3 +160,13 @@ public extension Decodable {
 		try from(json: Data(json.utf8))
 	}
 }
+
+public extension Data {
+	/// creates and returns data after `xor` operation. it will change each byte in the data (byte array) and will return the result.
+	/// - Parameters:
+	///   - xor: a `xor` operand.
+	/// - Returns: manipulated copy of the data after the operation.
+	func xor(with xor: UInt8) -> Data {
+		Data(map { $0 ^ xor })
+	}
+}
