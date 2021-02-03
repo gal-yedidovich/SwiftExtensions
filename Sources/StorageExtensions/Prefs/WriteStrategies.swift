@@ -17,18 +17,19 @@ internal struct Commit {
 }
 
 public extension Prefs {
-	/// The Strategy to write to the prefs file in storage.
+	/// The Strategy of writing the prefs to storage.
 	///
 	/// There are two Strategies:
-	///  - `default`: write every commit immediately to storage, it consumes more resources when when there are a lot of comming in succession.
-	///  - `batch`: writes all applied commits after a delay, it will reduce wrtie calls to file system when applying  large number of commits.
+	///  - `immediate`: writes every commit immediately to storage, it will consume more resources when when applying large number of commits.
+	///  - `batch`: writes all applied commits after a delay, it will reduce 'write' calls to the file-system when applying large number of commits.
 	enum WriteStrategyType {
 		case immediate
 		case batch(delay: Double)
 		
-		static let batch = Self.batch(delay: 0.5)
+		/// a batch strategy with delay of 0.5 seconds
+		public static let batch = Self.batch(delay: 0.5)
 		
-		func createStrategy(for prefs: Prefs) -> WriteStrategy {
+		internal func createStrategy(for prefs: Prefs) -> WriteStrategy {
 			switch self {
 			case .immediate:
 				return ImmediateWriteStrategy(prefs: prefs)

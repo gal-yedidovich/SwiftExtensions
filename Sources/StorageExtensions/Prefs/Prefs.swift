@@ -25,10 +25,6 @@ public final class Prefs {
 	
 	/// Represent the strategy to write to the prefs file in storage.
 	///
-	/// There are two Strategies:
-	///  - `default`: write every commit immediately to storage, it consumes more resources when when there are a lot of comming in succession.
-	///  - `batch`: writes all applied commits after a delay, it will reduce wrtie calls to file system when applying  large number of commits.
-	///
 	/// It is thread-safe to mutate this value while working with the `prefs` instance. as it will effect changes after the pending writes have finished.
 	public var writeStrategy: WriteStrategyType {
 		get { strategyType }
