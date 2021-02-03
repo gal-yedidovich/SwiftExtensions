@@ -21,7 +21,7 @@ public final class Prefs {
 	internal var filename: Filename
 	
 	fileprivate lazy var strategy: WriteStrategy = strategyType.createStrategy(for: self)
-	private var strategyType: WritingStrategy
+	private var strategyType: WriteStrategyType
 	
 	/// Represent the strategy to write to the prefs file in storage.
 	///
@@ -30,7 +30,7 @@ public final class Prefs {
 	///  - `batch`: writes all applied commits after a delay, it will reduce wrtie calls to file system when applying  large number of commits.
 	///
 	/// It is thread-safe to mutate this value while working with the `prefs` instance. as it will effect changes after the pending writes have finished.
-	public var writeStrategy: WritingStrategy {
+	public var writeStrategy: WriteStrategyType {
 		get { strategyType }
 		set {
 			queue.async {
@@ -42,7 +42,7 @@ public final class Prefs {
 	
 	/// Initialize new Prefs instance link to a given Filename, and loading it`s content
 	/// - Parameter file: Target Filename in storage
-	public init(file: Filename, writeStrategy: WritingStrategy = .default) {
+	public init(file: Filename, writeStrategy: WriteStrategyType = .default) {
 		self.filename = file
 		self.strategyType = writeStrategy
 		reload()
