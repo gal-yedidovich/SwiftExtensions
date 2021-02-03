@@ -103,7 +103,7 @@ fileprivate func write(to prefs: Prefs) {
 		try FileSystem.write(data: prefs.dict.json(), to: prefs.filename)
 	} catch {
 		print("could not write to \"prefs\" file.")
-		print(error)
+		print(error.localizedDescription)
 	}
 }
 
