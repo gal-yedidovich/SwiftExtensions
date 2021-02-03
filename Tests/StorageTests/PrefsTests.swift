@@ -12,6 +12,7 @@ import BasicExtensions
 final class PrefsTests: XCTestCase {
 	
 	override func tearDownWithError() throws {
+		prefs.writeStrategy = .immediate
 		try prefs.queue.sync {
 			try FileSystem.delete(file: prefs.filename)
 			prefs.dict = [:]
@@ -42,7 +43,11 @@ final class PrefsTests: XCTestCase {
 	}
 	
 	func testRemove() {
-		prefs.edit().put(key: .isAlive, true).commit()
+		prefs.edit()
+			.put(key: .name, "Bubu")
+			.put(key: .isAlive, true)
+			.commit()
+		
 		prefs.edit().remove(key: .isAlive).commit()
 		
 		XCTAssert(prefs.dict[PrefKey.isAlive.value] == nil)
@@ -62,7 +67,7 @@ final class PrefsTests: XCTestCase {
 		let expectation = XCTestExpectation(description: "wait to delete Prefs")
 		prefs.queue.async {
 			XCTAssert(prefs.dict.count == 0)
-			XCTAssert(!FileSystem.fileExists(prefs.filename))
+			XCTAssertFalse(FileSystem.fileExists(prefs.filename))
 			expectation.fulfill()
 		}
 		
@@ -155,18 +160,44 @@ final class PrefsTests: XCTestCase {
 		XCTAssertEqual(str1, str2)
 	}
 	
-	private func afterWrite(at prefs: Prefs, test: @escaping ([String:String]) -> ()) {
+	func testBatchingStrategy() {
+		prefs.writeStrategy = .batch(delay: 0.1)
+		
+		for i in 1...10 {
+			prefs.edit().put(key: .age, i).commit()
+			XCTAssertEqual(prefs.int(key: .age), i)
+		}
+		
+		let expectation = XCTestExpectation(description: "wait to write batch to Prefs")
+		prefs.queue.asyncAfter(deadline: .now() + 0.1) {
+			self.check(prefs, expectation) { json in
+				XCTAssertEqual(json[PrefKey.age.value], "10")
+			}
+		}
+		wait(for: [expectation], timeout: 10)
+	}
+	
+	private func afterWrite(at prefs: Prefs, test: @escaping TestHandler) {
 		let expectation = XCTestExpectation(description: "wait to write to Prefs")
 		
 		prefs.queue.async { //after written to storage
-			let data = FileSystem.read(file: prefs.filename)!
-			let json: [String: String] = try! .from(json: data)
-			test(json)
-			
-			expectation.fulfill()
+			self.check(prefs, expectation, test: test)
 		}
 		
 		wait(for: [expectation], timeout: 10)
+	}
+	
+	private func check(_ prefs: Prefs, _ expectation: XCTestExpectation, test: @escaping TestHandler) {
+		defer { expectation.fulfill() }
+		guard let data = FileSystem.read(file: prefs.filename) else {
+			XCTFail("could not read file: \(prefs.filename.value)")
+			return
+		}
+		guard let json: [String: String] = try? .from(json: data) else {
+			XCTFail("could not decode file: \(prefs.filename.value)")
+			return
+		}
+		test(json)
 	}
 	
 	static var allTests = [
@@ -180,6 +211,8 @@ final class PrefsTests: XCTestCase {
 		("testStringAsCodable", testStringAsCodable),
 	]
 }
+
+fileprivate typealias TestHandler = ([String:String]) -> Void
 
 fileprivate let prefs = Prefs.standard
 

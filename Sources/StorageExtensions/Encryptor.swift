@@ -38,11 +38,15 @@ public class Encryptor {
 	/// This value is used when storing a newly created key in the Keychain. Since the key is resued this value is used once, as long as the key is exists in the Keychain.
 	public static var keyAccessibility = kSecAttrAccessibleAfterFirstUnlock
 	
+	/// cache encryption key from keychain.
+	private static var key: SymmetricKey?
+	
 	/// Encrypt data with CGM encryption, and returns the encrypted data in result
 	/// - Parameter data: the data to encrypt
 	/// - Returns: encrypted data
 	public static func encrypt(data: Data) throws -> Data {
-		try AES.GCM.seal(data, using: key).combined!
+		let key = try getKey()
+		return try AES.GCM.seal(data, using: key).combined!
 	}
 	
 	/// Deccrypt data with CGM decryption, and returns the original (clear-text) data in result
@@ -50,7 +54,9 @@ public class Encryptor {
 	/// - Throws: check exception
 	/// - Returns: original, Clear-Text data
 	public static func decrypt(data: Data) throws -> Data {
-		try AES.GCM.open(try AES.GCM.SealedBox(combined: data), using: key)
+		let box = try AES.GCM.SealedBox(combined: data)
+		let key = try getKey()
+		return try AES.GCM.open(box, using: key)
 	}
 	
 	/// Encrypt a file and save the encrypted content in a different file, this function let you encrypt scaleable chunck of content without risking memory to run out
@@ -109,22 +115,24 @@ public class Encryptor {
 	}
 	
 	/// Encryption key for cipher operations, lazy loaded, it will get the current key in Keychain or will generate new one.
-	private static var key: SymmetricKey = {
+	private static func getKey() throws -> SymmetricKey {
+		if let key = key { return key }
+		
 		var query = keyChainQuery
 		query[kSecReturnData] = true
 		
 		var item: CFTypeRef? //reference to the result
 		let readStatus = SecItemCopyMatching(query as CFDictionary, &item)
 		switch readStatus {
-			case errSecSuccess: return SymmetricKey(data: item as! Data) // Convert back to a key.
-			case errSecItemNotFound: return storeNewKey()
-			default: fatalError("unable to fetch key. error: '\(readStatus)'")
+		case errSecSuccess: return SymmetricKey(data: item as! Data) // Convert back to a key.
+		case errSecItemNotFound: return try storeNewKey()
+		default: throw Errors.fetchKeyError(readStatus)
 		}
-	}()
+	}
 	
 	/// Generate a new Symmetric encryption key and stores it in the Keychain
 	/// - Returns: newly created encryption key.
-	private static func storeNewKey() -> SymmetricKey {
+	private static func storeNewKey() throws -> SymmetricKey {
 		let key = SymmetricKey(size: .bits256) //create new key
 		var query = keyChainQuery
 		query[kSecAttrAccessible] = keyAccessibility
@@ -132,7 +140,7 @@ public class Encryptor {
 		
 		let status = SecItemAdd(query as CFDictionary, nil)
 		guard status == errSecSuccess else {
-			fatalError("Unable to store key, error: '\(status)'")
+			throw Errors.storeKeyError(status)
 		}
 		
 		return key
@@ -145,6 +153,20 @@ public class Encryptor {
 	/// - Returns: manipulated data after the operation.
 	public static func xor(_ src: Data, with xor: UInt8) -> Data {
 		Data(src.map { byte in byte ^ xor })
+	}
+	
+	private enum Errors: LocalizedError {
+		case fetchKeyError(OSStatus)
+		case storeKeyError(OSStatus)
+		
+		var errorDescription: String? {
+			switch self {
+			case .fetchKeyError(let status):
+				return "unable to fetch key, os-status: '\(status)'"
+			case .storeKeyError(let status):
+				return "Unable to store key, os-status: '\(status)'"
+			}
+		}
 	}
 }
 

@@ -20,11 +20,27 @@ public final class Prefs {
 	internal var dict: [String: String] = [:]
 	internal var filename: Filename
 	
+	fileprivate lazy var strategy: WriteStrategy = strategyType.createStrategy(for: self)
+	private var strategyType: WriteStrategyType
+	
+	/// Represent the strategy to write to the prefs file in storage.
+	///
+	/// It is thread-safe to mutate this value while working with the `prefs` instance. as it will effect changes after the pending writes have finished.
+	public var writeStrategy: WriteStrategyType {
+		get { strategyType }
+		set {
+			queue.async {
+				self.strategyType = newValue
+				self.strategy = newValue.createStrategy(for: self)
+			}
+		}
+	}
+	
 	/// Initialize new Prefs instance link to a given Filename, and loading it`s content
 	/// - Parameter file: Target Filename in storage
-	public init(file: Filename) {
+	public init(file: Filename, writeStrategy: WriteStrategyType = .immediate) {
 		self.filename = file
-		
+		self.strategyType = writeStrategy
 		reload()
 	}
 	
@@ -84,7 +100,7 @@ public final class Prefs {
 
 /// An object that operate changes on a linked Prefs instance.
 public class Editor {
-	internal let prefs: Prefs
+	internal unowned let prefs: Prefs
 	internal var changes: [String: String?] = [:]
 	internal var clearFlag = false
 	
@@ -165,35 +181,10 @@ public class Editor {
 	/// - in case there are no changes & `clearFlag` is true, delete the Prefs flie
 	/// - in case there are changes, they are written to Prefs file asynchronously
 	public func commit() {
-		prefs.queue.sync { //sync changes
-			if self.clearFlag { prefs.dict = [:] }
-			
-			if !self.changes.isEmpty {
-				for (key, value) in self.changes {
-					if value == nil { prefs.dict.removeValue(forKey: key) }
-					else { prefs.dict[key] = value }
-				}
-				
-				prefs.queue.async { //write in background
-					do {
-						try FileSystem.write(data: self.prefs.dict.json(), to: self.prefs.filename)
-					} catch {
-						print("could not write to \"prefs\" file.")
-						print(error)
-					}
-				}
-			} else if self.clearFlag {
-				do {
-					try FileSystem.delete(file: prefs.filename)
-				} catch {
-					print("could not delete \"prefs\" file.")
-					print(error)
-				}
-			}
-		}
+		let commit = Commit(changes: changes, clearFlag: clearFlag)
+		prefs.strategy.commit(commit)
 	}
 }
-
 
 /// String wrapper for representing a key in a `Prefs` instance.
 public struct PrefKey {
