@@ -161,7 +161,7 @@ final class PrefsTests: XCTestCase {
 	}
 	
 	func testBatchingStrategy() {
-		prefs.writeStrategy = .batch
+		prefs.writeStrategy = .batch(delay: 0.1)
 		
 		for i in 1...10 {
 			prefs.edit().put(key: .age, i).commit()
@@ -169,7 +169,7 @@ final class PrefsTests: XCTestCase {
 		}
 		
 		let expectation = XCTestExpectation(description: "wait to write batch to Prefs")
-		prefs.queue.asyncAfter(deadline: .now() + 0.5) {
+		prefs.queue.asyncAfter(deadline: .now() + 0.1) {
 			self.check(prefs, expectation) { json in
 				XCTAssertEqual(json[PrefKey.age.value], "10")
 			}

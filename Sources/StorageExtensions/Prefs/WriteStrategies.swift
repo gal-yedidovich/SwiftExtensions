@@ -1,6 +1,6 @@
 //
-//  File.swift
-//  
+//  WriteStrategies.swift
+//  Storage
 //
 //  Created by Gal Yedidovich on 03/02/2021.
 //
@@ -26,20 +26,20 @@ public extension Prefs {
 		case `default`
 		case batch(delay: Double)
 		
-		static let batch = WriteStrategyType.batch(delay: 0.5)
+		static let batch = Self.batch(delay: 0.5)
 		
 		func createStrategy(for prefs: Prefs) -> WriteStrategy {
 			switch self {
 			case .default:
-				return QueueStrategy(prefs: prefs)
+				return SingleWriteStrategy(prefs: prefs)
 			case .batch(let delay):
-				return BatchStrategy(prefs: prefs, delay: delay)
+				return BatchWriteStrategy(prefs: prefs, delay: delay)
 			}
 		}
 	}
 }
 
-internal struct QueueStrategy: WriteStrategy {
+fileprivate struct SingleWriteStrategy: WriteStrategy {
 	unowned let prefs: Prefs
 	
 	func commit(_ commit: Commit) {
@@ -60,7 +60,7 @@ internal struct QueueStrategy: WriteStrategy {
 	}
 }
 
-internal class BatchStrategy: WriteStrategy {
+fileprivate class BatchWriteStrategy: WriteStrategy {
 	unowned let prefs: Prefs
 	private let delay: Double
 	private var triggered = false
