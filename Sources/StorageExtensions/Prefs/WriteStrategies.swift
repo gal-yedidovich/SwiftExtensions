@@ -23,15 +23,15 @@ public extension Prefs {
 	///  - `default`: write every commit immediately to storage, it consumes more resources when when there are a lot of comming in succession.
 	///  - `batch`: writes all applied commits after a delay, it will reduce wrtie calls to file system when applying  large number of commits.
 	enum WriteStrategyType {
-		case `default`
+		case immediate
 		case batch(delay: Double)
 		
 		static let batch = Self.batch(delay: 0.5)
 		
 		func createStrategy(for prefs: Prefs) -> WriteStrategy {
 			switch self {
-			case .default:
-				return SingleWriteStrategy(prefs: prefs)
+			case .immediate:
+				return ImmediateWriteStrategy(prefs: prefs)
 			case .batch(let delay):
 				return BatchWriteStrategy(prefs: prefs, delay: delay)
 			}
@@ -39,7 +39,7 @@ public extension Prefs {
 	}
 }
 
-fileprivate struct SingleWriteStrategy: WriteStrategy {
+fileprivate struct ImmediateWriteStrategy: WriteStrategy {
 	unowned let prefs: Prefs
 	
 	func commit(_ commit: Commit) {

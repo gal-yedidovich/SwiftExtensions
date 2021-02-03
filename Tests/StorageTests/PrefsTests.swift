@@ -12,7 +12,7 @@ import BasicExtensions
 final class PrefsTests: XCTestCase {
 	
 	override func tearDownWithError() throws {
-		prefs.writeStrategy = .default
+		prefs.writeStrategy = .immediate
 		try prefs.queue.sync {
 			try FileSystem.delete(file: prefs.filename)
 			prefs.dict = [:]

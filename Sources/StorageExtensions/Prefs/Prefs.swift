@@ -42,7 +42,7 @@ public final class Prefs {
 	
 	/// Initialize new Prefs instance link to a given Filename, and loading it`s content
 	/// - Parameter file: Target Filename in storage
-	public init(file: Filename, writeStrategy: WriteStrategyType = .default) {
+	public init(file: Filename, writeStrategy: WriteStrategyType = .immediate) {
 		self.filename = file
 		self.strategyType = writeStrategy
 		reload()
