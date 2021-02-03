@@ -19,13 +19,22 @@ public final class Prefs {
 	internal let queue = DispatchQueue(label: "prefs", qos: .background)
 	internal var dict: [String: String] = [:]
 	internal var filename: Filename
+	internal lazy var innerStrategy: WriteStrategy = QueueStrategy(prefs: self)
 	
 	/// Initialize new Prefs instance link to a given Filename, and loading it`s content
 	/// - Parameter file: Target Filename in storage
 	public init(file: Filename) {
 		self.filename = file
-		
 		reload()
+	}
+	
+	public var strategy: WriteStrategy {
+		get { innerStrategy }
+		set {
+			queue.sync {
+				innerStrategy = newValue
+			}
+		}
 	}
 	
 	/// loads the content from the target JSON file, into memory
@@ -84,7 +93,7 @@ public final class Prefs {
 
 /// An object that operate changes on a linked Prefs instance.
 public class Editor {
-	internal let prefs: Prefs
+	internal unowned let prefs: Prefs
 	internal var changes: [String: String?] = [:]
 	internal var clearFlag = false
 	
@@ -165,35 +174,9 @@ public class Editor {
 	/// - in case there are no changes & `clearFlag` is true, delete the Prefs flie
 	/// - in case there are changes, they are written to Prefs file asynchronously
 	public func commit() {
-		prefs.queue.sync { //sync changes
-			if self.clearFlag { prefs.dict = [:] }
-			
-			if !self.changes.isEmpty {
-				for (key, value) in self.changes {
-					if value == nil { prefs.dict.removeValue(forKey: key) }
-					else { prefs.dict[key] = value }
-				}
-				
-				prefs.queue.async { //write in background
-					do {
-						try FileSystem.write(data: self.prefs.dict.json(), to: self.prefs.filename)
-					} catch {
-						print("could not write to \"prefs\" file.")
-						print(error)
-					}
-				}
-			} else if self.clearFlag {
-				do {
-					try FileSystem.delete(file: prefs.filename)
-				} catch {
-					print("could not delete \"prefs\" file.")
-					print(error)
-				}
-			}
-		}
+		prefs.innerStrategy.commit(Commit(changes: changes, clearFlag: clearFlag))
 	}
 }
-
 
 /// String wrapper for representing a key in a `Prefs` instance.
 public struct PrefKey {
@@ -203,6 +186,105 @@ public struct PrefKey {
 		self.value = value
 	}
 }
+
+
+
+
+
+
+public struct Commit {
+	let changes: [String: String?]
+	let clearFlag: Bool
+}
+
+public protocol WriteStrategy {
+	func commit(_ commit: Commit)
+}
+
+internal extension Prefs {
+	struct QueueStrategy: WriteStrategy {
+		unowned let prefs: Prefs
+		
+		func commit(_ commit: Commit) {
+			prefs.queue.sync { //sync changes
+				if commit.clearFlag { prefs.dict = [:] }
+				
+				if !commit.changes.isEmpty {
+					for (key, value) in commit.changes {
+						if value == nil { prefs.dict.removeValue(forKey: key) }
+						else { prefs.dict[key] = value }
+					}
+					
+					prefs.queue.async { //write in background
+						do {
+							try FileSystem.write(data: prefs.dict.json(), to: prefs.filename)
+						} catch {
+							print("could not write to \"prefs\" file.")
+							print(error)
+						}
+					}
+				} else if commit.clearFlag {
+					do {
+						try FileSystem.delete(file: prefs.filename)
+					} catch {
+						print("could not delete \"prefs\" file.")
+						print(error)
+					}
+				}
+			}
+		}
+	}
+	
+	class BatchStrategy: WriteStrategy {
+		unowned let prefs: Prefs
+		private var pendingCommits: [Commit] = []
+		
+		init(prefs: Prefs) {
+			self.prefs = prefs
+		}
+		
+		func commit(_ commit: Commit) {
+			prefs.queue.sync {
+				if commit.clearFlag { prefs.dict = [:] }
+				
+				for (key, value) in commit.changes {
+					if value == nil { prefs.dict.removeValue(forKey: key) }
+					else { prefs.dict[key] = value }
+				}
+				
+				
+				pendingCommits.append(commit)
+				if pendingCommits.count == 1 {
+					prefs.queue.asyncAfter(deadline: .now() + 0.5, execute: batchCommits)
+				}
+			}
+		}
+		
+		private func batchCommits() {
+			let commits = pendingCommits
+			pendingCommits = []
+			
+			if prefs.dict.isEmpty && commits.last?.clearFlag ?? false {
+				do {
+					try FileSystem.delete(file: prefs.filename)
+				} catch {
+					print("could not delete \"prefs\" file.")
+					print(error)
+				}
+			} else {
+				do {
+					try FileSystem.write(data: prefs.dict.json(), to: prefs.filename)
+				} catch {
+					print("could not write to \"prefs\" file.")
+					print(error)
+				}
+			}
+		}
+	}
+}
+
+
+
 
 import SwiftUI
 /// A linked value in the Prefs, allowing to read & write.
