@@ -23,7 +23,9 @@ public extension Prefs {
 	///  - `immediate`: writes every commit immediately to storage, it will consume more resources when when applying large number of commits.
 	///  - `batch`: writes all applied commits after a delay, it will reduce 'write' calls to the file-system when applying large number of commits.
 	enum WriteStrategyType {
+		/// Write every commit immediately to storage
 		case immediate
+		/// Batch commits together after a defined delay
 		case batch(delay: Double)
 		
 		/// a batch strategy with delay of 0.5 seconds
@@ -52,11 +54,7 @@ fileprivate struct ImmediateWriteStrategy: WriteStrategy {
 				else { prefs.dict[key] = value }
 			}
 			
-			if prefs.dict.isEmpty {
-				delete(prefs)
-			} else {
-				write(to: prefs)
-			}
+			writeOrDelete(prefs: prefs)
 		}
 	}
 }
@@ -90,11 +88,16 @@ fileprivate class BatchWriteStrategy: WriteStrategy {
 	private func writeBatch() {
 		triggered = false
 		
-		if prefs.dict.isEmpty {
-			delete(prefs)
-		} else {
-			write(to: prefs)
-		}
+		writeOrDelete(prefs: prefs)
+	}
+}
+
+//MARK: - Helper methods
+fileprivate func writeOrDelete(prefs: Prefs) {
+	if prefs.dict.isEmpty {
+		delete(prefs)
+	} else {
+		write(to: prefs)
 	}
 }
 
