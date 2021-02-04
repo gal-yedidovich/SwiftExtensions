@@ -84,7 +84,7 @@ public final class Prefs {
 	public func codable<Type: Decodable>(key: PrefKey) -> Type? {
 		guard let str = dict[key.value] else { return nil }
 		if Type.self == String.self { return str as? Type }
-				
+		
 		return try? .from(json: str)
 	}
 	
@@ -110,42 +110,7 @@ public class Editor {
 		self.prefs = prefs
 	}
 	
-	/// Insert a string value to uncommited changes under a given key
-	/// - Parameters:
-	///   - key: target uniqe key to link to the value
-	///   - value: a value to keep in Prefs
-	/// - Returns: this instance, for method chaining
-	public func put(key: PrefKey, _ value: String) -> Editor { put(key, value) }
-	
-	/// Insert an integer value to uncommited changes under a given key
-	/// - Parameters:
-	///   - key: target uniqe key to link to the value
-	///   - value: a value to keep in Prefs
-	/// - Returns: this instance, for method chaining
-	public func put(key: PrefKey, _ value: Int) -> Editor { put(key: key, value as Encodable) }
-	
-	/// Insert a boolean value to uncommited changes under a given key
-	/// - Parameters:
-	///   - key: target uniqe key to link to the value
-	///   - value: a value to keep in Prefs
-	/// - Returns: this instance, for method chaining
-	public func put(key: PrefKey, _ value: Bool) -> Editor { put(key: key, value as Encodable) }
-	
-	/// Insert a date value to uncommited changes under a given key
-	/// - Parameters:
-	///   - key: target uniqe key to link to the value
-	///   - value: a value to keep in Prefs
-	/// - Returns: this instance, for method chaining
-	public func put(key: PrefKey, _ value: Date) -> Editor { put(key: key, value as Encodable) }
-	
-	/// Insert a string array of values to uncommited changes under a given key
-	/// - Parameters:
-	///   - key: target uniqe key to link to the value
-	///   - values: string values to keep in Prefs
-	/// - Returns: this instance, for method chaining
-	public func put(key: PrefKey, _ values: [String]) -> Editor { put(key: key, values as Encodable) }
-	
-	/// Insert a date value to uncommited changes under a given key
+	/// Insert an `Encodable` value to uncommited changes under a given key
 	/// - Parameters:
 	///   - key: target uniqe key to link to the value
 	///   - value: a value to keep in Prefs
@@ -167,7 +132,7 @@ public class Editor {
 		return self
 	}
 	
-	/// remove previous uncommited changes by this instance, and raise an uncommited `clearFlag` flag,
+	/// Removes previous uncommited changes by this instance, and raise a `clearFlag` flag,
 	/// - Returns: this instance, for method chaining
 	public func clear() -> Editor {
 		changes = [:]
