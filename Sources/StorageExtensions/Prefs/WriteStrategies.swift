@@ -47,12 +47,7 @@ fileprivate struct ImmediateWriteStrategy: WriteStrategy {
 	
 	func commit(_ commit: Commit) {
 		prefs.queue.sync { //sync changes
-			if commit.clearFlag { prefs.dict = [:] }
-			
-			for (key, value) in commit.changes {
-				if value == nil { prefs.dict.removeValue(forKey: key) }
-				else { prefs.dict[key] = value }
-			}
+			apply(commit, on: prefs)
 			
 			writeOrDelete(prefs: prefs)
 		}
@@ -71,12 +66,7 @@ fileprivate class BatchWriteStrategy: WriteStrategy {
 	
 	func commit(_ commit: Commit) {
 		prefs.queue.sync {
-			if commit.clearFlag { prefs.dict = [:] }
-			
-			for (key, value) in commit.changes {
-				if value == nil { prefs.dict.removeValue(forKey: key) }
-				else { prefs.dict[key] = value }
-			}
+			apply(commit, on: prefs)
 			
 			if !triggered {
 				triggered = true
@@ -92,7 +82,23 @@ fileprivate class BatchWriteStrategy: WriteStrategy {
 	}
 }
 
-//MARK: - Helper methods
+//MARK: - Helper functions
+
+/// Applies commit changes on the prefs inner dictionary.
+///
+/// This method does not write the changes to the disk.
+/// - Parameters:
+///   - commit: The changes to apply
+///   - prefs: Target `prefs` instance
+fileprivate func apply(_ commit: Commit, on prefs: Prefs) {
+	if commit.clearFlag { prefs.dict = [:] }
+	
+	for (key, value) in commit.changes {
+		if value == nil { prefs.dict.removeValue(forKey: key) }
+		else { prefs.dict[key] = value }
+	}
+}
+
 fileprivate func writeOrDelete(prefs: Prefs) {
 	if prefs.dict.isEmpty {
 		delete(prefs)
