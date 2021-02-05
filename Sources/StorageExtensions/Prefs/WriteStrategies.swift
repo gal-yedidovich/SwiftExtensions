@@ -49,7 +49,9 @@ fileprivate struct ImmediateWriteStrategy: WriteStrategy {
 		prefs.queue.sync { //sync changes
 			apply(commit, on: prefs)
 			
-			writeOrDelete(prefs: prefs)
+			prefs.queue.async {
+				writeOrDelete(prefs: prefs)
+			}
 		}
 	}
 }
@@ -77,7 +79,6 @@ fileprivate class BatchWriteStrategy: WriteStrategy {
 	
 	private func writeBatch() {
 		triggered = false
-		
 		writeOrDelete(prefs: prefs)
 	}
 }
