@@ -90,8 +90,16 @@ public final class Prefs {
 	
 	/// check if value exists at a given key
 	/// - Parameter key: target key to check
-	/// - Returns: true is eists, otherwise false
+	/// - Returns: true if exists, otherwise false
+	@available(*, deprecated, renamed: "contains(_:)")
 	public func contains(key: PrefKey) -> Bool { dict[key.value] != nil }
+	
+	/// check if values exist for given keys. 
+	/// - Parameter keys: pref keys to check
+	/// - Returns: true if all of the keys exist, otherwise false
+	public func contains(_ keys: PrefKey...) -> Bool {
+		keys.allSatisfy { dict[$0.value] != nil }
+	}
 	
 	/// Create new editor instance, to start editing the Prefs
 	/// - Returns: new Editor isntance, referencing to this Prefs instance
