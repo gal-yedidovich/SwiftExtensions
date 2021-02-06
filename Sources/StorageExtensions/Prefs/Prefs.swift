@@ -108,13 +108,13 @@ public final class Prefs {
 
 /// An object that operate changes on a linked Prefs instance.
 public class Editor {
-	internal unowned let prefs: Prefs
-	internal var changes: [String: String?] = [:]
-	internal var clearFlag = false
+	private unowned let prefs: Prefs
+	private var changes: [String: String?] = [:]
+	private var clearFlag = false
 	
 	/// initialize new instance with linked Prefs instance.
 	/// - Parameter prefs: target Prefs to manipulate, depency injection
-	internal init(prefs: Prefs) {
+	fileprivate init(prefs: Prefs) {
 		self.prefs = prefs
 	}
 	
