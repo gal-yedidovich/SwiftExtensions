@@ -15,7 +15,7 @@ final class FileSystemTests: XCTestCase {
 		
 		XCTAssert(FileSystem.fileExists(.file))
 		
-		let data = FileSystem.read(file: .file)!
+		let data = try FileSystem.read(file: .file)
 		XCTAssert(String(data: data, encoding: .utf8) == str)
 		
 		try FileSystem.delete(file: .file)
@@ -27,7 +27,7 @@ final class FileSystemTests: XCTestCase {
 		let newText = "I am Groot"
 		try FileSystem.write(data: Data(newText.utf8), to: .file)
 		
-		let fileData = FileSystem.read(file: .file)!
+		let fileData = try FileSystem.read(file: .file)
 		XCTAssert(String(data: fileData, encoding: .utf8) == newText)
 		
 		try FileSystem.delete(file: .file)
@@ -49,9 +49,9 @@ final class FileSystemTests: XCTestCase {
 		
 		let bubu = Person(name: "Bubu", age: 120)
 		try FileSystem.write(data: bubu.json(), to: .file)
-		let loaded: Person = FileSystem.load(json: .file)!
+		let loaded: Person = try FileSystem.load(json: .file)
 		
-		XCTAssert(bubu == loaded)
+		XCTAssertEqual(bubu, loaded)
 		try FileSystem.delete(file: .file)
 	}
 	

@@ -46,7 +46,7 @@ public final class Prefs {
 	
 	/// loads the content from the target JSON file, into memory
 	public func reload() {
-		if let json: [String: String] = FileSystem.load(json: filename) {
+		if let json: [String: String] = try? FileSystem.load(json: filename) {
 			dict = json
 		}
 	}

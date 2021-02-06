@@ -51,14 +51,9 @@ public final class FileSystem {
 	/// The data will be read using the Encryptor's `decrypt`
 	/// - Parameter file: target Filename to read from
 	/// - Returns: the content of the file or nil if unsuccessful.
-	public static func read(file: Filename) -> Data? {
-		do {
-			let data = try Data(contentsOf: url(of: file))
-			return try Encryptor.decrypt(data: data)
-		} catch {
-			print(error)
-			return nil
-		}
+	public static func read(file: Filename) throws -> Data {
+		let data = try Data(contentsOf: url(of: file))
+		return try Encryptor.decrypt(data: data)
 	}
 	
 	/// loads content of JSON file to a `Decodable` instance from a given filename
@@ -70,10 +65,9 @@ public final class FileSystem {
 	///
 	/// - Parameter file: filename to read the data from
 	/// - Returns: an instance conforming to Decodable, or nil if failed to load.
-	public static func load<Type: Decodable>(json file: Filename) -> Type? {
-		guard fileExists(file), let data = read(file: file) else { return nil }
-		
-		return try? Type.from(json: data)
+	public static func load<Type: Decodable>(json file: Filename) throws -> Type {
+		let data = try read(file: file)
+		return try .from(json: data)
 	}
 	
 	/// check if a given Filename exists in storage
