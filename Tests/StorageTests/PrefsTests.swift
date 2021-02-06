@@ -200,7 +200,7 @@ final class PrefsTests: XCTestCase {
 	
 	private func check(_ prefs: Prefs, _ expectation: XCTestExpectation, test: @escaping TestHandler) {
 		defer { expectation.fulfill() }
-		guard let data: Data = try? FileSystem.read(file: prefs.filename) else {
+		guard let data = try? FileSystem.read(file: prefs.filename) else {
 			XCTFail("could not read file: \(prefs.filename.value)")
 			return
 		}
@@ -220,6 +220,8 @@ final class PrefsTests: XCTestCase {
 		("testParallelWrites", testParallelWrites),
 		("testMultiplePrefs", testMultiplePrefs),
 		("testStringAsCodable", testStringAsCodable),
+		("testBatchingStrategy", testBatchingStrategy),
+		("testContains", testContains),
 	]
 }
 

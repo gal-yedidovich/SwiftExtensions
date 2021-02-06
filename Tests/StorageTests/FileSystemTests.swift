@@ -16,7 +16,7 @@ final class FileSystemTests: XCTestCase {
 		XCTAssert(FileSystem.fileExists(.file))
 		
 		let data = try FileSystem.read(file: .file)
-		XCTAssert(String(data: data, encoding: .utf8) == str)
+		XCTAssertEqual(str, String(data: data, encoding: .utf8))
 		
 		try FileSystem.delete(file: .file)
 	}
@@ -28,7 +28,7 @@ final class FileSystemTests: XCTestCase {
 		try FileSystem.write(data: Data(newText.utf8), to: .file)
 		
 		let fileData = try FileSystem.read(file: .file)
-		XCTAssert(String(data: fileData, encoding: .utf8) == newText)
+		XCTAssertEqual(newText, String(data: fileData, encoding: .utf8))
 		
 		try FileSystem.delete(file: .file)
 	}
@@ -37,8 +37,8 @@ final class FileSystemTests: XCTestCase {
 		try FileSystem.write(data: Data("Bubu is the king".utf8), to: .file)
 		
 		try FileSystem.delete(file: .file)
-		XCTAssert(!FileSystem.fileExists(.file))
-		XCTAssert(!FileManager.default.fileExists(atPath: FileSystem.url(of: .file).path))
+		XCTAssertFalse(FileSystem.fileExists(.file))
+		XCTAssertFalse(FileManager.default.fileExists(atPath: FileSystem.url(of: .file).path))
 	}
 	
 	func testLoadJson() throws {
@@ -55,11 +55,16 @@ final class FileSystemTests: XCTestCase {
 		try FileSystem.delete(file: .file)
 	}
 	
+	func testReadFileNotFound() throws {
+		XCTAssertThrowsError(try FileSystem.read(file: .file))
+	}
+	
 	static var allTests = [
 		("testWrite", testWrite),
 		("testOverwrite", testOverwrite),
 		("testDelete", testDelete),
 		("testLoadJson", testLoadJson),
+		("testReadFileNotFound", testReadFileNotFound),
 	]
 }
 
