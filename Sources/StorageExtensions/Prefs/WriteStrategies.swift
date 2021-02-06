@@ -43,24 +43,21 @@ public extension Prefs {
 }
 
 fileprivate struct ImmediateWriteStrategy: WriteStrategy {
-	unowned let prefs: Prefs
+	fileprivate unowned let prefs: Prefs
 	
 	func commit(_ commit: Commit) {
 		prefs.queue.sync { //sync changes
-			if commit.clearFlag { prefs.dict = [:] }
+			apply(commit, on: prefs)
 			
-			for (key, value) in commit.changes {
-				if value == nil { prefs.dict.removeValue(forKey: key) }
-				else { prefs.dict[key] = value }
+			prefs.queue.async { [prefs] in
+				writeOrDelete(prefs: prefs)
 			}
-			
-			writeOrDelete(prefs: prefs)
 		}
 	}
 }
 
 fileprivate class BatchWriteStrategy: WriteStrategy {
-	unowned let prefs: Prefs
+	private unowned let prefs: Prefs
 	private let delay: Double
 	private var triggered = false
 	
@@ -71,12 +68,7 @@ fileprivate class BatchWriteStrategy: WriteStrategy {
 	
 	func commit(_ commit: Commit) {
 		prefs.queue.sync {
-			if commit.clearFlag { prefs.dict = [:] }
-			
-			for (key, value) in commit.changes {
-				if value == nil { prefs.dict.removeValue(forKey: key) }
-				else { prefs.dict[key] = value }
-			}
+			apply(commit, on: prefs)
 			
 			if !triggered {
 				triggered = true
@@ -87,12 +79,27 @@ fileprivate class BatchWriteStrategy: WriteStrategy {
 	
 	private func writeBatch() {
 		triggered = false
-		
 		writeOrDelete(prefs: prefs)
 	}
 }
 
-//MARK: - Helper methods
+//MARK: - Helper functions
+
+/// Applies commit changes on the prefs inner dictionary.
+///
+/// This method does not write the changes to the disk.
+/// - Parameters:
+///   - commit: The changes to apply
+///   - prefs: Target `prefs` instance
+fileprivate func apply(_ commit: Commit, on prefs: Prefs) {
+	if commit.clearFlag { prefs.dict = [:] }
+	
+	for (key, value) in commit.changes {
+		if value == nil { prefs.dict.removeValue(forKey: key) }
+		else { prefs.dict[key] = value }
+	}
+}
+
 fileprivate func writeOrDelete(prefs: Prefs) {
 	if prefs.dict.isEmpty {
 		delete(prefs)

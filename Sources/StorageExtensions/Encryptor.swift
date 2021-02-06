@@ -84,11 +84,10 @@ public class Encryptor {
 	///   - isEncryption: flag for determinating to encrypt or decrypt
 	///   - onProgress: a  progress event to track the progress of the writing
 	private static func process(file src: URL, to dest: URL, encrypt isEncryption: Bool, onProgress: ((Int)->())?) throws {
-		let bufferSize = isEncryption ? BUFFER_SIZE : BUFFER_SIZE + 28
 		let fm = FileManager.default
 		
 		let tempDir = fm.temporaryDirectory
-		try! fm.createDirectory(at: tempDir, withIntermediateDirectories: true, attributes: nil)
+		try fm.createDirectory(at: tempDir, withIntermediateDirectories: true, attributes: nil)
 		let tempFile = tempDir.appendingPathComponent(UUID().uuidString)
 		
 		let input = InputStream(url: src)!
@@ -99,12 +98,14 @@ public class Encryptor {
 		output.open()
 		defer { output.close() }
 		
+		let bufferSize = isEncryption ? BUFFER_SIZE : BUFFER_SIZE + 28
+		let method = isEncryption ? encrypt(data:) : decrypt(data:)
+		
 		try input.readAll(bufferSize: bufferSize) { buffer, bytesRead in
 			offset += bytesRead
 			onProgress?(Int((offset * 100) / fileSize))
 			let data = Data(bytes: buffer, count: bytesRead)
-			let processedData = isEncryption ? try encrypt(data: data) : try decrypt(data: data)
-			output.write(data: processedData)
+			output.write(data: try method(data))
 		}
 		
 		if fm.fileExists(atPath: dest.path) {

@@ -90,8 +90,16 @@ public final class Prefs {
 	
 	/// check if value exists at a given key
 	/// - Parameter key: target key to check
-	/// - Returns: true is eists, otherwise false
+	/// - Returns: true if exists, otherwise false
+	@available(*, deprecated, renamed: "contains(_:)")
 	public func contains(key: PrefKey) -> Bool { dict[key.value] != nil }
+	
+	/// check if values exist for given keys.
+	/// - Parameter keys: pref keys to check
+	/// - Returns: true if all of the keys exist, otherwise false
+	public func contains(_ keys: PrefKey...) -> Bool {
+		keys.allSatisfy { dict[$0.value] != nil }
+	}
 	
 	/// Create new editor instance, to start editing the Prefs
 	/// - Returns: new Editor isntance, referencing to this Prefs instance
@@ -100,13 +108,13 @@ public final class Prefs {
 
 /// An object that operate changes on a linked Prefs instance.
 public class Editor {
-	internal unowned let prefs: Prefs
-	internal var changes: [String: String?] = [:]
-	internal var clearFlag = false
+	private unowned let prefs: Prefs
+	private var changes: [String: String?] = [:]
+	private var clearFlag = false
 	
 	/// initialize new instance with linked Prefs instance.
 	/// - Parameter prefs: target Prefs to manipulate, depency injection
-	internal init(prefs: Prefs) {
+	fileprivate init(prefs: Prefs) {
 		self.prefs = prefs
 	}
 	

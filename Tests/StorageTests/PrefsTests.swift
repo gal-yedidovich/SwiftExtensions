@@ -177,6 +177,17 @@ final class PrefsTests: XCTestCase {
 		wait(for: [expectation], timeout: 10)
 	}
 	
+	func testContains() {
+		prefs.edit()
+			.put(key: .age, 10)
+			.put(key: .name, "gal")
+			.commit()
+		
+		XCTAssert(prefs.contains(.age))
+		XCTAssert(prefs.contains(.age, .name))
+		XCTAssertFalse(prefs.contains(.age, .name, .isAlive))
+	}
+	
 	private func afterWrite(at prefs: Prefs, test: @escaping TestHandler) {
 		let expectation = XCTestExpectation(description: "wait to write to Prefs")
 		
