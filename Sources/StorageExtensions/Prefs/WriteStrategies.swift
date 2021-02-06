@@ -43,13 +43,13 @@ public extension Prefs {
 }
 
 fileprivate struct ImmediateWriteStrategy: WriteStrategy {
-	unowned let prefs: Prefs
+	fileprivate unowned let prefs: Prefs
 	
 	func commit(_ commit: Commit) {
 		prefs.queue.sync { //sync changes
 			apply(commit, on: prefs)
 			
-			prefs.queue.async {
+			prefs.queue.async { [prefs] in
 				writeOrDelete(prefs: prefs)
 			}
 		}
@@ -57,7 +57,7 @@ fileprivate struct ImmediateWriteStrategy: WriteStrategy {
 }
 
 fileprivate class BatchWriteStrategy: WriteStrategy {
-	unowned let prefs: Prefs
+	private unowned let prefs: Prefs
 	private let delay: Double
 	private var triggered = false
 	
