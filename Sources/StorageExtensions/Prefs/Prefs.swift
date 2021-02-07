@@ -88,12 +88,6 @@ public final class Prefs {
 		return try? .from(json: str)
 	}
 	
-	/// check if value exists at a given key
-	/// - Parameter key: target key to check
-	/// - Returns: true if exists, otherwise false
-	@available(*, deprecated, renamed: "contains(_:)")
-	public func contains(key: PrefKey) -> Bool { dict[key.value] != nil }
-	
 	/// check if values exist for given keys.
 	/// - Parameter keys: pref keys to check
 	/// - Returns: true if all of the keys exist, otherwise false
