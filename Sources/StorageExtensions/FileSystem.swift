@@ -50,21 +50,15 @@ public final class FileSystem {
 	/// Read a file from storage and return is content
 	/// The data will be read using the Encryptor's `decrypt`
 	/// - Parameter file: target Filename to read from
-	/// - Returns: the content of the file or nil if unsuccessful.
+	/// - Returns: the content of the file or throws
 	public static func read(file: Filename) throws -> Data {
 		let data = try Data(contentsOf: url(of: file))
 		return try Encryptor.decrypt(data: data)
 	}
 	
 	/// loads content of JSON file to a `Decodable` instance from a given filename
-	///
-	/// nil will be returned in the following cases:
-	///  - file does not exists
-	///  - reading/decrypting failed
-	///  - decoding failed
-	///
 	/// - Parameter file: filename to read the data from
-	/// - Returns: an instance conforming to Decodable, or nil if failed to load.
+	/// - Returns: an instance conforming to Decodable, or throws if failed to load.
 	public static func load<Type: Decodable>(json file: Filename) throws -> Type {
 		let data = try read(file: file)
 		return try .from(json: data)
