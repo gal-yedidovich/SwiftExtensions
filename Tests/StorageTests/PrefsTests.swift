@@ -11,24 +11,33 @@ import BasicExtensions
 
 final class PrefsTests: XCTestCase {
 	
-	override func tearDownWithError() throws {
-		prefs.writeStrategy = .immediate
-		try prefs.queue.sync {
-			try FileSystem.delete(file: prefs.filename)
-			prefs.dict = [:]
+	private func createPrefs(name: String = #function, strategy: Prefs.WriteStrategyType = .immediate) -> Prefs {
+		Prefs(file: Filename(name: name), writeStrategy: strategy)
+	}
+	
+	private func teardown(_ prefs: Prefs...) throws {
+		for p in prefs {
+			try p.queue.sync {
+				try FileSystem.delete(file: p.filename)
+			}
 		}
 	}
 	
-	func testInsert() {
+	func testInsert() throws {
+		let prefs = createPrefs(name: #function)
 		prefs.edit().put(key: .name, "Gal").commit()
 		
 		XCTAssert(prefs.string(key: .name) == "Gal")
 		afterWrite(at: prefs) { json in
 			XCTAssert(json[PrefKey.name.value] == "Gal")
 		}
+		
+		try teardown(prefs)
 	}
 	
-	func testReplace() {
+	func testReplace() throws {
+		let prefs = createPrefs(name: #function)
+		
 		prefs.edit()
 			.put(key: .name, "Gal")
 			.put(key: .age, 26)
@@ -40,9 +49,13 @@ final class PrefsTests: XCTestCase {
 		afterWrite(at: prefs) { json in
 			XCTAssert(json[PrefKey.name.value] == "Bubu")
 		}
+		
+		try teardown(prefs)
 	}
 	
-	func testRemove() {
+	func testRemove() throws {
+		let prefs = createPrefs(name: #function)
+		
 		prefs.edit()
 			.put(key: .name, "Bubu")
 			.put(key: .isAlive, true)
@@ -54,9 +67,13 @@ final class PrefsTests: XCTestCase {
 		afterWrite(at: prefs) { (json) in
 			XCTAssert(json[PrefKey.isAlive.value] == nil)
 		}
+		
+		try teardown(prefs)
 	}
 	
-	func testClear() {
+	func testClear() throws {
+		let prefs = createPrefs(name: #function)
+		
 		prefs.edit()
 			.put(key: .name, "Gal")
 			.put(key: .age, 26)
@@ -72,9 +89,13 @@ final class PrefsTests: XCTestCase {
 		}
 		
 		wait(for: [expectation], timeout: 2)
+		
+		try teardown(prefs)
 	}
 	
-	func testCodable() {
+	func testCodable() throws {
+		let prefs = createPrefs(name: #function)
+		
 		let dict = ["one": 1, "two": 2]
 		prefs.edit().put(key: .numbers, dict).commit()
 		
@@ -83,9 +104,13 @@ final class PrefsTests: XCTestCase {
 		afterWrite(at: prefs) { json in
 			XCTAssert(dict == (try! .from(json: json[PrefKey.numbers.value]!)))
 		}
+		
+		try teardown(prefs)
 	}
 	
-	func testParallelWrites() {
+	func testParallelWrites() throws {
+		let prefs = createPrefs()
+		
 		let prefixes = ["Bubu", "Groot", "Deadpool"]
 		let range = 0...9
 		
@@ -112,11 +137,13 @@ final class PrefsTests: XCTestCase {
 				}
 			}
 		}
+		
+		try teardown(prefs)
 	}
 	
-	func testMultiplePrefs() {
-		let prefs1 = Prefs(file: Filename(name: "prefs1"))
-		let prefs2 = Prefs(file: Filename(name: "prefs2"))
+	func testMultiplePrefs() throws {
+		let prefs1 = createPrefs(name: #function + "1")
+		let prefs2 = createPrefs(name: #function + "2")
 		
 		let e = XCTestExpectation(description: "waiting for concurrent prefs")
 		async {
@@ -147,21 +174,24 @@ final class PrefsTests: XCTestCase {
 			XCTAssert(json.count == 3)
 		}
 		
-		prefs1.edit().clear().commit()
-		prefs2.edit().clear().commit()
+		try teardown(prefs1, prefs2)
 	}
 	
-	func testStringAsCodable() {
+	func testStringAsCodable() throws {
+		let prefs = createPrefs(name: #function)
+		
 		prefs.edit().put(key: .name, "Bubu").commit()
 		
 		let str1 = prefs.string(key: .name)
 		let str2: String? = prefs.codable(key: .name)
 		
 		XCTAssertEqual(str1, str2)
+		
+		try teardown(prefs)
 	}
 	
-	func testBatchingStrategy() {
-		prefs.writeStrategy = .batch(delay: 0.1)
+	func testBatchingStrategy() throws {
+		let prefs = createPrefs(name: #function, strategy: .batch(delay: 0.1))
 		
 		for i in 1...10 {
 			prefs.edit().put(key: .age, i).commit()
@@ -175,9 +205,13 @@ final class PrefsTests: XCTestCase {
 			}
 		}
 		wait(for: [expectation], timeout: 10)
+		
+		try teardown(prefs)
 	}
 	
-	func testContains() {
+	func testContains() throws {
+		let prefs = createPrefs(name: #function)
+		
 		prefs.edit()
 			.put(key: .age, 10)
 			.put(key: .name, "gal")
@@ -186,6 +220,8 @@ final class PrefsTests: XCTestCase {
 		XCTAssert(prefs.contains(.age))
 		XCTAssert(prefs.contains(.age, .name))
 		XCTAssertFalse(prefs.contains(.age, .name, .isAlive))
+		
+		try teardown(prefs)
 	}
 	
 	private func afterWrite(at prefs: Prefs, test: @escaping TestHandler) {
@@ -224,8 +260,6 @@ final class PrefsTests: XCTestCase {
 }
 
 fileprivate typealias TestHandler = ([String:String]) -> Void
-
-fileprivate let prefs = Prefs.standard
 
 fileprivate extension PrefKey {
 	static let name = PrefKey(value: "name")
