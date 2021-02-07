@@ -27,9 +27,9 @@ final class PrefsTests: XCTestCase {
 		let prefs = createPrefs(name: #function)
 		prefs.edit().put(key: .name, "Gal").commit()
 		
-		XCTAssert(prefs.string(key: .name) == "Gal")
+		XCTAssertEqual(prefs.string(key: .name), "Gal")
 		afterWrite(at: prefs) { json in
-			XCTAssert(json[PrefKey.name.value] == "Gal")
+			XCTAssertEqual(json[PrefKey.name.value], "Gal")
 		}
 		
 		try teardown(prefs)
@@ -45,9 +45,9 @@ final class PrefsTests: XCTestCase {
 		
 		prefs.edit().put(key: .name, "Bubu").commit()
 		
-		XCTAssert(prefs.string(key: .name) == "Bubu")
+		XCTAssertEqual(prefs.string(key: .name), "Bubu")
 		afterWrite(at: prefs) { json in
-			XCTAssert(json[PrefKey.name.value] == "Bubu")
+			XCTAssertEqual(json[PrefKey.name.value], "Bubu")
 		}
 		
 		try teardown(prefs)
@@ -63,9 +63,9 @@ final class PrefsTests: XCTestCase {
 		
 		prefs.edit().remove(key: .isAlive).commit()
 		
-		XCTAssert(prefs.dict[PrefKey.isAlive.value] == nil)
+		XCTAssertEqual(prefs.dict[PrefKey.isAlive.value], nil)
 		afterWrite(at: prefs) { (json) in
-			XCTAssert(json[PrefKey.isAlive.value] == nil)
+			XCTAssertEqual(json[PrefKey.isAlive.value], nil)
 		}
 		
 		try teardown(prefs)
@@ -83,7 +83,7 @@ final class PrefsTests: XCTestCase {
 		
 		let expectation = XCTestExpectation(description: "wait to delete Prefs")
 		prefs.queue.async {
-			XCTAssert(prefs.dict.count == 0)
+			XCTAssertEqual(prefs.dict.count, 0)
 			XCTAssertFalse(FileSystem.fileExists(prefs.filename))
 			expectation.fulfill()
 		}
@@ -99,10 +99,20 @@ final class PrefsTests: XCTestCase {
 		let dict = ["one": 1, "two": 2]
 		prefs.edit().put(key: .numbers, dict).commit()
 		
-		XCTAssert(dict == prefs.codable(key: .numbers))
+		XCTAssertEqual(dict, prefs.codable(key: .numbers))
 		
 		afterWrite(at: prefs) { json in
-			XCTAssert(dict == (try! .from(json: json[PrefKey.numbers.value]!)))
+			do {
+				guard let dictStr = json[PrefKey.numbers.value] else {
+					XCTFail("numbers dictionary is nil")
+					return
+				}
+				
+				let dict2: [String: Int] = try .from(json: dictStr)
+				XCTAssertEqual(dict, dict2)
+			} catch {
+				XCTFail(error.localizedDescription)
+			}
 		}
 		
 		try teardown(prefs)
@@ -129,11 +139,11 @@ final class PrefsTests: XCTestCase {
 		wait(for: [expectation], timeout: 2)
 		
 		afterWrite(at: prefs) { json in
-			XCTAssert(json.count == prefixes.count * range.count)
+			XCTAssertEqual(json.count, prefixes.count * range.count)
 			
 			for prefix in prefixes {
 				for i in range {
-					XCTAssert(json["\(prefix)-\(i)"] == "\(i)")
+					XCTAssertEqual(json["\(prefix)-\(i)"], "\(i)")
 				}
 			}
 		}
@@ -152,10 +162,10 @@ final class PrefsTests: XCTestCase {
 				.put(key: .age, 100)
 				.commit()
 			
-			XCTAssert(prefs1.dict.count == 2)
+			XCTAssertEqual(prefs1.dict.count, 2)
 			
 			self.afterWrite(at: prefs1) { json in
-				XCTAssert(json.count == 2)
+				XCTAssertEqual(json.count, 2)
 			}
 			
 			e.fulfill()
@@ -168,10 +178,10 @@ final class PrefsTests: XCTestCase {
 			.put(key: .isAlive, true)
 			.commit()
 		
-		XCTAssert(prefs2.dict.count == 3)
+		XCTAssertEqual(prefs2.dict.count, 3)
 		
 		afterWrite(at: prefs2) { json in
-			XCTAssert(json.count == 3)
+			XCTAssertEqual(json.count, 3)
 		}
 		
 		try teardown(prefs1, prefs2)
@@ -219,6 +229,7 @@ final class PrefsTests: XCTestCase {
 		
 		XCTAssert(prefs.contains(.age))
 		XCTAssert(prefs.contains(.age, .name))
+		XCTAssertFalse(prefs.contains(.isAlive))
 		XCTAssertFalse(prefs.contains(.age, .name, .isAlive))
 		
 		try teardown(prefs)
