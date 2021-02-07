@@ -14,11 +14,8 @@ final class UrlRequestTests: XCTestCase {
 	func testGet() {
 		let req = URLRequest(url: baseURL + "/1")
 
-		send(req, type: Post.self) { result in
-			switch result {
-				case .success(let post): XCTAssert(post.id == 1)
-				default: XCTFail()
-			}
+		send(req, type: Post.self) { post in
+			XCTAssertEqual(post.id, 1)
 		}
 	}
 	
@@ -29,11 +26,8 @@ final class UrlRequestTests: XCTestCase {
 			.set(contentType: .json)
 			.set(body: localPost.json())
 		
-		send(req, type: Post.self) { result in
-			switch result {
-				case .success(let newPost): XCTAssert(newPost.title == localPost.title)
-				default: XCTFail()
-			}
+		send(req, type: Post.self) { newPost in
+			XCTAssertEqual(newPost.title, localPost.title)
 		}
 	}
 	
@@ -44,11 +38,8 @@ final class UrlRequestTests: XCTestCase {
 			.set(contentType: .json)
 			.set(body: localPost.json())
 		
-		send(req, type: Post.self) { result in
-			switch result {
-				case .success(let newPost): XCTAssert(newPost.title == localPost.title)
-				default: XCTFail()
-			}
+		send(req, type: Post.self) { newPost in
+			XCTAssertEqual(newPost.title, localPost.title)
 		}
 	}
 	
@@ -59,31 +50,32 @@ final class UrlRequestTests: XCTestCase {
 			.set(contentType: .json)
 			.set(body: changes.json())
 		
-		send(req, type: Post.self) { result in
-			switch result {
-				case .success(let patchedPost): XCTAssert(patchedPost.title == changes["title"])
-				default: XCTFail()
-			}
+		send(req, type: Post.self) { patchedPost in
+			XCTAssertEqual(patchedPost.title, changes["title"])
 		}
 	}
 	
 	func testDelete() {
 		let req = URLRequest(url: baseURL + "/1").set(method: .DELETE)
 		
-		send(req, type: StringDict.self) { result in
-			switch result {
-				case .success(let dict): XCTAssert(dict.isEmpty)
-				default: XCTFail()
-			}
+		send(req, type: StringDict.self) { dict in
+			XCTAssert(dict.isEmpty)
 		}
 	}
 	
-	private func send<T: Decodable>(_ request: URLRequest, type: T.Type, completion: @escaping (NetResponse<T, StringDict>) -> ()) {
+	private func send<Value: Decodable>(_ request: URLRequest, type: Value.Type, test: @escaping (Value) -> Void) {
 		let expectation = XCTestExpectation(description: "waiting for request")
 		
-		URLSession.shared.dataTask(with: request) { (result: NetResponse<T, StringDict>) in
-			print("Response: ", result)
-			completion(result)
+		URLSession.shared.dataTask(with: request) { (result: NetResponse<Value, StringDict>) in
+			switch result {
+			case .success(let data):
+				test(data)
+			case .failure(let status, let dict):
+				XCTFail("failure: \(status), \(dict)")
+			case .error(let error):
+				XCTFail("error: \(error)")
+			}
+			
 			expectation.fulfill()
 		}.resume()
 		

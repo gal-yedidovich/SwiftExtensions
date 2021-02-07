@@ -18,7 +18,7 @@ final class EncryptorTests: XCTestCase {
 		let dec = try Encryptor.decrypt(data: enc)
 		
 		let strTest = String(decoding: dec, as: UTF8.self)
-		XCTAssert(str == strTest)
+		XCTAssertEqual(str, strTest)
 	}
 	
 	func testStreams() throws {
@@ -33,7 +33,7 @@ final class EncryptorTests: XCTestCase {
 		try Encryptor.encrypt(file: url, to: encUrl)
 		try Encryptor.decrypt(file: encUrl, to: decUrl)
 		let str2 = try String(contentsOf: decUrl)
-		XCTAssert(str == str2)
+		XCTAssertEqual(str, str2)
 		
 		try FileManager.default.removeItem(at: url)
 		try FileManager.default.removeItem(at: encUrl)
