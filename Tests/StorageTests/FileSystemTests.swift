@@ -54,13 +54,6 @@ final class FileSystemTests: XCTestCase {
 		XCTAssert(bubu == loaded)
 		try FileSystem.delete(file: .file)
 	}
-	
-	static var allTests = [
-		("testWrite", testWrite),
-		("testOverwrite", testOverwrite),
-		("testDelete", testDelete),
-		("testLoadJson", testLoadJson),
-	]
 }
 
 fileprivate extension Filename {

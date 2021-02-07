@@ -49,14 +49,7 @@ final class BasicExtTests: XCTestCase {
 	}
 	
 	func testIsDirectory() {
-		XCTAssert(!Self.url.isDirectory)
+		XCTAssert(Self.url.deletingLastPathComponent().isDirectory)
+		XCTAssertFalse(Self.url.isDirectory)
 	}
-	
-	static var allTests = [
-		("testDigestHexString", testDigestHexString),
-		("testHashingFile", testHashingFile),
-		("testHashingDirectory", testHashingDirectory),
-		("testFileSize", testFileSize),
-		("testIsDirectory", testIsDirectory),
-	]
 }

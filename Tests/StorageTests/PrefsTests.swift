@@ -257,17 +257,6 @@ final class PrefsTests: XCTestCase {
 		}
 		test(json)
 	}
-	
-	static var allTests = [
-		("testInsert", testInsert),
-		("testReplace", testReplace),
-		("testRemove", testRemove),
-		("testClear", testClear),
-		("testCodable", testCodable),
-		("testParallelWrites", testParallelWrites),
-		("testMultiplePrefs", testMultiplePrefs),
-		("testStringAsCodable", testStringAsCodable),
-	]
 }
 
 fileprivate typealias TestHandler = ([String:String]) -> Void

@@ -39,9 +39,4 @@ final class EncryptorTests: XCTestCase {
 		try FileManager.default.removeItem(at: encUrl)
 		try FileManager.default.removeItem(at: decUrl)
 	}
-	
-	static var allTests = [
-		("testEncryption", testEncryption),
-		("testStreams", testStreams),
-	]
 }

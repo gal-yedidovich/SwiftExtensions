@@ -134,17 +134,6 @@ final class JsonObjectTests: XCTestCase {
 		XCTAssert(name1 == "Bubu")
 		XCTAssert(name2 == "Groot")
 	}
-	
-	static var allTests = [
-		("testCreateFromData", testCreateFromData),
-		("testCreateFromString", testCreateFromString),
-		("testCreateFromDict", testCreateFromDict),
-		("testRead", testRead),
-		("testWrite", testWrite),
-		("testIteration", testIteration),
-		("testDecodable", testDecodable),
-		("testInnerArray", testInnerArray),
-	]
 }
 
 let basicJsonStr = """

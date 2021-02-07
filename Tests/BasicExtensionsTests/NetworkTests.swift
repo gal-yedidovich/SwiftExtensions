@@ -82,14 +82,6 @@ final class UrlRequestTests: XCTestCase {
 		wait(for: [expectation], timeout: 10)
 	}
 	
-	static let allTests = [
-		("testGet", testGet),
-		("testPost", testPost),
-		("testPut", testPut),
-		("testPatch", testPatch),
-		("testDelete", testDelete),
-	]
-	
 	struct Post: Codable {
 		let userId: Int
 		let id: Int
