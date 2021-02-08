@@ -16,6 +16,8 @@ internal struct Commit {
 	let clearFlag: Bool
 }
 
+internal let DEFAULT_BATCH_DELAY = 0.1
+
 public extension Prefs {
 	/// The Strategy of writing the prefs to storage.
 	///
@@ -28,8 +30,8 @@ public extension Prefs {
 		/// Batch commits together after a defined delay
 		case batch(delay: Double)
 		
-		/// a batch strategy with delay of 0.5 seconds
-		public static let batch = Self.batch(delay: 0.5)
+		/// default batch strategy with delay of 0.1 seconds
+		public static let batch = Self.batch(delay: DEFAULT_BATCH_DELAY)
 		
 		internal func createStrategy(for prefs: Prefs) -> WriteStrategy {
 			switch self {

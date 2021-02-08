@@ -29,9 +29,9 @@ public final class Prefs {
 	public var writeStrategy: WriteStrategyType {
 		get { strategyType }
 		set {
-			queue.async {
-				self.strategyType = newValue
-				self.strategy = newValue.createStrategy(for: self)
+			queue.sync {
+				strategyType = newValue
+				strategy = newValue.createStrategy(for: self)
 			}
 		}
 	}
