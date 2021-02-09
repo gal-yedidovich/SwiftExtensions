@@ -13,8 +13,8 @@ public extension UIViewController {
 	///   - id: the identifier of the controlle in the storyboard
 	///   - storyboard: the target storayboard the contains the target view controller id
 	///   - config: a configuration clouse, that accepts the newly created view controller instance, use this clouse to initilize any specific vlaue before the transition.
-	func push<T: UIViewController>(to id: ControllerID, storyboard: UIStoryboard? = nil, config: ((T)->())? = nil) {
-		let vc = (storyboard ?? self.storyboard!).instantiateViewController(identifier: id.value) as! T
+	func push<Controller: UIViewController>(to id: ControllerID, storyboard: UIStoryboard? = nil, config: ((Controller)->())? = nil) {
+		let vc = (storyboard ?? self.storyboard!).instantiateViewController(identifier: id.value) as! Controller
 		config?(vc)
 		self.show(vc, sender: nil)
 	}
@@ -24,8 +24,8 @@ public extension UIViewController {
 	///   - id: the identifier of the controlle in the storyboard
 	///   - storyboard: the target storayboard the contains the target view controller id
 	///   - config: a configuration clouse, that accepts the newly created view controller instance, use this clouse to initilize any specific vlaue before the transition.
-	func present<T: UIViewController>(_ id: ControllerID, storyboard: UIStoryboard? = nil, config: ((T)->())? = nil) {
-		let vc = (storyboard ?? self.storyboard!).instantiateViewController(identifier: id.value) as! T
+	func present<Controller: UIViewController>(_ id: ControllerID, storyboard: UIStoryboard? = nil, config: ((Controller)->())? = nil) {
+		let vc = (storyboard ?? self.storyboard!).instantiateViewController(identifier: id.value) as! Controller
 		config?(vc)
 		present(vc, animated: true)
 	}
