@@ -55,15 +55,11 @@ public extension URLRequest {
 		req.httpBody = body
 		return req
 	}
-}
-
-/// Convenince HTTP methods for `URLRequest`
-public enum Method: String {
-	case GET = "GET",
-	POST = "POST",
-	PUT = "PUT",
-	DELETE = "DELETE",
-	PATCH = "PATCH"
+	
+	/// Convenince HTTP methods for `URLRequest`
+	enum Method: String {
+		case GET, POST, PUT, DELETE, PATCH
+	}
 }
 
 /// Convenience Content-type vlaues for `URLRequest`

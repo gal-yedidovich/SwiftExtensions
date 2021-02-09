@@ -116,7 +116,7 @@ public enum FileSystem {
 
 /// String Wrapper for files, each value represent a filename under the FileSystem's `rootURL`
 public struct Filename {
-	public static let prefs = Filename(name: "_")
+	public static var prefs: Filename { .init(name: "_") }
 	
 	public init(name: String) {
 		value = name

@@ -26,7 +26,6 @@ public func async(quality: DispatchQoS.QoSClass = .default, block: @escaping ()-
 	DispatchQueue.global(qos: quality).async(execute: block)
 }
 
-
 public extension String {
 	/// Initialize a string instance, in JSON format, from a given Encodable value
 	/// - Parameter json: An encodable value that can be parsed into JSON string
@@ -115,7 +114,7 @@ public extension HashFunction {
 	///
 	/// - Parameter url: file url in the file system.
 	/// - Returns: Finalized Hash Digest or nil
-	static func checksum(file url: URL) -> Self.Digest? {
+	static func checksum(file url: URL) -> Digest? {
 		guard FileManager.default.fileExists(atPath: url.path),
 			  !url.isDirectory, let input = InputStream(url: url) else {
 			return nil
