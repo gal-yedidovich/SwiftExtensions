@@ -62,7 +62,7 @@ public extension URLRequest {
 	}
 }
 
-/// Convenience Content-type vlaues for `URLRequest`
+/// Convenience Content-type values for `URLRequest`
 public struct ContentType: ExpressibleByStringLiteral {
 	public static var json: ContentType { "application/json" }
 	public static var text: ContentType { "text/plain" }
@@ -77,9 +77,10 @@ public struct ContentType: ExpressibleByStringLiteral {
 	let value: String
 }
 
-public enum NetResponse<T, T2> {
-	case success(T)
-	case failure(Int, T2)
+/// Convenient Netwrok Response, with Two types, Success & Failure
+public enum NetResponse<Success, Failure> {
+	case success(Success)
+	case failure(Int, Failure)
 	case error(Error)
 }
 

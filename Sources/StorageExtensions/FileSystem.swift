@@ -35,7 +35,6 @@ public enum FileSystem {
 		try encData.write(to: url, options: .atomic)
 	}
 	
-	
 	/// Create a directory at the url of the given `Folder` value.
 	/// - Parameters:
 	///   - folder: The folder to create

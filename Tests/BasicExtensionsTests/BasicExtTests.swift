@@ -52,4 +52,17 @@ final class BasicExtTests: XCTestCase {
 		XCTAssert(Self.url.deletingLastPathComponent().isDirectory)
 		XCTAssertFalse(Self.url.isDirectory)
 	}
+	
+	func testSorted() {
+		struct Item: Equatable {
+			let num: Int
+		}
+		
+		let items = (1...100).map(Item.init(num:))
+		let random = items.shuffled()
+		XCTAssertNotEqual(random, items)
+		
+		let sorted = random.sorted(by: \.num)
+		XCTAssertEqual(sorted, items)
+	}
 }

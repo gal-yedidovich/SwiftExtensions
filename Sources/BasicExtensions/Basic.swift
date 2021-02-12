@@ -55,7 +55,7 @@ public extension DateFormatter {
 public extension Sequence {
 	/// Returns the elements of the sequence, sorted using the given KeyPath as the comparison between elements.
 	/// - Parameter key: A comperable KeyPath
-	func sorted<T: Comparable>(by key: KeyPath<Element, T>) -> [Element] {
+	func sorted<Value: Comparable>(by key: KeyPath<Element, Value>) -> [Element] {
 		self.sorted { $0[keyPath: key] < $1[keyPath: key] }
 	}
 }
