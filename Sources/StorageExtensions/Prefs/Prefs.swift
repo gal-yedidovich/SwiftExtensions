@@ -20,7 +20,7 @@ public final class Prefs {
 	internal var dict: [String: String] = [:]
 	internal var filename: Filename
 	
-	fileprivate lazy var strategy: WriteStrategy = strategyType.createStrategy(for: self)
+	private(set) internal lazy var strategy: WriteStrategy = strategyType.createStrategy(for: self)
 	private var strategyType: WriteStrategyType
 	
 	/// Represent the strategy to write to the prefs file in storage.
@@ -106,96 +106,11 @@ public final class Prefs {
 	public func edit() -> Editor { Editor(prefs: self) }
 }
 
-/// An object that operate changes on a linked Prefs instance.
-public class Editor {
-	private unowned let prefs: Prefs
-	private var changes: [String: String?] = [:]
-	private var clearFlag = false
-	
-	/// initialize new instance with linked Prefs instance.
-	/// - Parameter prefs: target Prefs to manipulate, depency injection
-	fileprivate init(prefs: Prefs) {
-		self.prefs = prefs
-	}
-	
-	/// Insert an `Encodable` value to uncommited changes under a given key
-	/// - Parameters:
-	///   - key: target uniqe key to link to the value
-	///   - value: a value to keep in Prefs
-	/// - Returns: this instance, for method chaining
-	public func put(key: PrefKey, _ value: Encodable) -> Editor { put(key, String(json: value)) }
-	
-	/// insert an uncommited removal to given key
-	/// - Parameter key: target key to remove from Prefs
-	/// - Returns: this instance, for method chaining
-	public func remove(key: PrefKey) -> Editor { put(key, nil) }
-	
-	/// Reusable method to assign value to key in the changes dictionary.
-	/// - Parameters:
-	///   - key: key to assign in the changes dctionary
-	///   - value: optional string value to link to the given key, nil means to remove
-	/// - Returns: this instance, for method chaining
-	private func put(_ key: PrefKey, _ value: String?) -> Editor {
-		changes[key.value] = value
-		return self
-	}
-	
-	/// Removes previous uncommited changes by this instance, and raise a `clearFlag` flag,
-	/// - Returns: this instance, for method chaining
-	public func clear() -> Editor {
-		changes = [:]
-		self.clearFlag = true
-		return self
-	}
-	
-	/// Commit the all uncommited changes in the `changes` dictionary.
-	/// - if the `clearFlag` if true, remove all values in the Prefs dctionary.
-	/// - if the `changes` dictionary is not empty, override the Prefs dictionary with the changes, including removals.
-	/// - in case there are no changes & `clearFlag` is true, delete the Prefs flie
-	/// - in case there are changes, they are written to Prefs file asynchronously
-	public func commit() {
-		let commit = Commit(changes: changes, clearFlag: clearFlag)
-		prefs.strategy.commit(commit)
-	}
-}
-
 /// String wrapper for representing a key in a `Prefs` instance.
 public struct PrefKey {
 	let value: String
 	
 	public init(value: String) {
 		self.value = value
-	}
-}
-
-import SwiftUI
-/// A linked value in the Prefs, allowing to read & write.
-/// This wrapper will call update on UI when its value changes
-@propertyWrapper
-public struct PrefsValue<Value>: DynamicProperty where Value: Codable {
-	@State private var value: Value
-	private let key: PrefKey
-	private let prefs: Prefs
-	
-	public init(wrappedValue defValue: Value, key: PrefKey, prefs: Prefs = .standard) {
-		self.key = key
-		self.prefs = prefs
-		_value = State(initialValue: prefs.codable(key: key) ?? defValue)
-	}
-	
-	public var wrappedValue: Value {
-		get { value }
-		nonmutating set {
-			prefs.edit().put(key: key, newValue).commit()
-			
-			value = newValue
-		}
-	}
-	
-	public var projectedValue: Binding<Value> {
-		Binding (
-			get: { wrappedValue },
-			set: { wrappedValue = $0 }
-		)
 	}
 }
