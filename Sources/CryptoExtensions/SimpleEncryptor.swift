@@ -14,7 +14,7 @@ internal let BUFFER_SIZE = 1024 * 32
 ///
 /// The `SimpleEncryptor` class provides basic cipher (encryption & decryption) operations on `Data` or files, using the `CryptoKit` framework.
 /// All cipher operations are using a Symmetric key that is stored in the device's KeyChain. 
-public enum SimpleEncryptor {
+public class SimpleEncryptor {
 	/// A Dictionary, representing query ths is used to store & fetch the encryption key.
 	/// 
 	/// You can change this value to as you see fit, default value is:
@@ -25,7 +25,7 @@ public enum SimpleEncryptor {
 	///     kSecAttrAccount: "SwiftStorage"
 	/// ]
 	/// ```
-	public static var keyChainQuery: [CFString : Any] = [
+	public var keyChainQuery: [CFString : Any] = [
 		kSecClass: kSecClassGenericPassword,
 		kSecAttrService: "encryption key", //role
 		kSecAttrAccount: "SwiftStorage", //login
@@ -34,20 +34,22 @@ public enum SimpleEncryptor {
 	/// This value control when the encryption key is accessible
 	///
 	/// This value is used when storing a newly created key in the Keychain. Since the key is resued this value is used once, as long as the key is exists in the Keychain.
-	public static var keyAccessibility = kSecAttrAccessibleAfterFirstUnlock
+	public var keyAccessibility = kSecAttrAccessibleAfterFirstUnlock
 	
-	/// The strategy of the encryptor, control how data is encrypted and decrypted
-	public static var strategyType: CryptoStrategyType = .gcm
+	/// iinternal crypto implementation for this instance
+	private let strategy: CryptoStrategy
 	
 	/// cache encryption key from keychain.
-	private static var key: SymmetricKey?
+	private var key: SymmetricKey?
 	
-	private static let strategy: CryptoStrategy = strategyType.strategy
+	public init(strategy: CryptoStrategyType) {
+		self.strategy = strategy.strategy
+	}
 	
 	/// Encrypt data with CGM encryption, and returns the encrypted data in result
 	/// - Parameter data: the data to encrypt
 	/// - Returns: encrypted data
-	public static func encrypt(data: Data) throws -> Data {
+	public func encrypt(data: Data) throws -> Data {
 		let key = try getKey()
 		return try strategy.encrypt(data, using: key)
 	}
@@ -56,7 +58,7 @@ public enum SimpleEncryptor {
 	/// - Parameter data: Encrypted data to decipher.
 	/// - Throws: check exception
 	/// - Returns: original, Clear-Text data
-	public static func decrypt(data: Data) throws -> Data {
+	public func decrypt(data: Data) throws -> Data {
 		let key = try getKey()
 		return try strategy.decrypt(data, using: key)
 	}
@@ -66,7 +68,7 @@ public enum SimpleEncryptor {
 	///   - src: source file to encrypt
 	///   - dest: destination file to save the encrypted content
 	///   - onProgress: a progress event to track the progress of the writing
-	public static func encrypt(file src: URL, to dest: URL, onProgress: OnProgress? = nil) throws {
+	public func encrypt(file src: URL, to dest: URL, onProgress: OnProgress? = nil) throws {
 		let key = try getKey()
 		try strategy.encrypt(file: src, to: dest, using: key, onProgress: onProgress)
 	}
@@ -76,13 +78,13 @@ public enum SimpleEncryptor {
 	///   - src: An encrypted, source file to decrypt
 	///   - dest: destination file to save the decrypted content
 	///   - onProgress: a progress event to track the progress of the writing
-	public static func decrypt(file src: URL, to dest: URL, onProgress: OnProgress? = nil) throws {
+	public func decrypt(file src: URL, to dest: URL, onProgress: OnProgress? = nil) throws {
 		let key = try getKey()
 		try strategy.decrypt(file: src, to: dest, using: key, onProgress: onProgress)
 	}
 	
 	/// Encryption key for cipher operations, lazy loaded, it will get the current key in Keychain or will generate new one.
-	private static func getKey() throws -> SymmetricKey {
+	private func getKey() throws -> SymmetricKey {
 		if let key = key { return key }
 		
 		var query = keyChainQuery
@@ -99,7 +101,7 @@ public enum SimpleEncryptor {
 	
 	/// Generate a new Symmetric encryption key and stores it in the Keychain
 	/// - Returns: newly created encryption key.
-	private static func storeNewKey() throws -> SymmetricKey {
+	private func storeNewKey() throws -> SymmetricKey {
 		let key = SymmetricKey(size: .bits256) //create new key
 		var query = keyChainQuery
 		query[kSecAttrAccessible] = keyAccessibility
@@ -152,7 +154,6 @@ protocol CryptoStrategy {
 
 public typealias OnProgress = (Int) -> Void
 
-import CryptoExtensions
 struct CBC: CryptoStrategy {
 	let iv: Data
 	

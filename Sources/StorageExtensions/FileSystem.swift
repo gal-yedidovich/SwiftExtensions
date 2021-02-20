@@ -16,6 +16,9 @@ public enum FileSystem {
 	/// the URL in storage, where all fiels & folders under FileSystem, are managed.
 	public static var rootURL = fm.urls(for: .documentDirectory, in: .userDomainMask)[0]
 	
+	/// Underline encryptor that handles crypto operations.
+	public static var encryptor = SimpleEncryptor(strategy: .gcm)
+	
 	/// Writes data into given Filename
 	/// - Parameters:
 	///   - data: data to write
@@ -33,7 +36,7 @@ public enum FileSystem {
 	public static func write(data: Data, to url: URL) throws {
 		try fm.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true, attributes: nil)
 		
-		let encData = try SimpleEncryptor.encrypt(data: data)
+		let encData = try encryptor.encrypt(data: data)
 		try encData.write(to: url, options: .atomic)
 	}
 	
@@ -52,7 +55,7 @@ public enum FileSystem {
 	/// - Returns: the content of the file or throws
 	public static func read(file: Filename) throws -> Data {
 		let data = try Data(contentsOf: url(of: file))
-		return try SimpleEncryptor.decrypt(data: data)
+		return try encryptor.decrypt(data: data)
 	}
 	
 	/// loads content of JSON file to a `Decodable` instance from a given filename
