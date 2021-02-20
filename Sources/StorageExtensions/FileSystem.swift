@@ -10,7 +10,7 @@ import CryptoExtensions
 
 /// An interface to work with the local storage of the device using a layer of Encryption.
 ///
-/// The `FileSystem` class provides easy IO (read/write) operations to local files, that are automatically encrypted with `Encryptor` functions for cipher data.
+/// The `FileSystem` class provides easy IO (read/write) operations to local files, that are automatically encrypted with `SimpleEncryptor` functions for cipher data.
 public enum FileSystem {
 	private static let fm = FileManager.default
 	/// the URL in storage, where all fiels & folders under FileSystem, are managed.

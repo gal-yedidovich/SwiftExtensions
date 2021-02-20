@@ -99,6 +99,7 @@ struct GCM: CryptoStrategy {
 			try input.readAll(bufferSize: bufferSize) { buffer, bytesRead in
 				offset += bytesRead
 				onProgress?(Int((offset * 100) / fileSize))
+				
 				let data = Data(bytes: buffer, count: bytesRead)
 				output.write(data: try method(data, key))
 			}
