@@ -10,7 +10,7 @@ import CryptoKit
 import CryptoExtensions
 
 final class SimpleEncryptorTests: XCTestCase {
-	let encryptor = SimpleEncryptor(strategy: .gcm)
+	let encryptor = SimpleEncryptor(strategy: .gcm) //.cbc(iv: Data("Bubu is the king".utf8)))
 	
 	func testEncryption() throws {
 		let str = "Bubu is the king"
