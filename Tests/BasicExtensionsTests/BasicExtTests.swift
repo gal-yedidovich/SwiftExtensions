@@ -22,7 +22,7 @@ final class BasicExtTests: XCTestCase {
 	}
 	
 	func testDigestHexString() {
-		let data = Data("Bubu is the king".utf8)
+		let data = Data(Self.content.utf8)
 		let hex = "d42254b4047044e74c45083fe483bf6708057d5b4579aae0bca9b30e7376e553" //data in SHA-256: https://xorbin.com/tools/sha256-hash-calculator
 		let sha256 = SHA256.hash(data: data).hexString
 		
