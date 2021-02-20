@@ -150,36 +150,21 @@ struct CBC: CryptoStrategy {
 	}
 	
 	private func process(file src: URL, to dest: URL, using key: SymmetricKey, encrypt isEncryption: Bool, onProgress: OnProgress?) throws {
-		let fm = FileManager.default
-		
-		let tempDir = fm.temporaryDirectory
-		try fm.createDirectory(at: tempDir, withIntermediateDirectories: true, attributes: nil)
-		let tempFile = tempDir.appendingPathComponent(UUID().uuidString)
-		
-		let input = InputStream(url: src)!
-		let output = OutputStream(url: tempFile, append: false)!
 		let fileSize = src.fileSize!
 		var offset: Int = 0
 		
-		output.open()
-		defer { output.close() }
-		
-		let cipher = try AES.CBC.Cipher(isEncryption ? .encrypt : .decrypt, using: key, iv: iv)
-		
-		try input.readAll { buffer, bytesRead in
-			offset += bytesRead
-			onProgress?(Int((offset * 100) / fileSize))
+		try stream(from: src, to: dest) { input, output in
+			let cipher = try AES.CBC.Cipher(isEncryption ? .encrypt : .decrypt, using: key, iv: iv)
 			
-			let data = Data(bytes: buffer, count: bytesRead)
-			output.write(data: try cipher.update(data))
+			try input.readAll { buffer, bytesRead in
+				offset += bytesRead
+				onProgress?(Int((offset * 100) / fileSize))
+				
+				let data = Data(bytes: buffer, count: bytesRead)
+				output.write(data: try cipher.update(data))
+			}
+			output.write(data: try cipher.finalize())
 		}
-		output.write(data: try cipher.finalize())
-		
-		if fm.fileExists(atPath: dest.path) {
-			try fm.removeItem(at: dest)
-		}
-		
-		try fm.moveItem(at: tempFile, to: dest)
 	}
 }
 
@@ -202,34 +187,41 @@ struct GCM: CryptoStrategy {
 	}
 	
 	private func process(file src: URL, to dest: URL, using key: SymmetricKey, encrypt isEncryption: Bool, onProgress: OnProgress?) throws {
-		let fm = FileManager.default
-		
-		let tempDir = fm.temporaryDirectory
-		try fm.createDirectory(at: tempDir, withIntermediateDirectories: true, attributes: nil)
-		let tempFile = tempDir.appendingPathComponent(UUID().uuidString)
-		
-		let input = InputStream(url: src)!
-		let output = OutputStream(url: tempFile, append: false)!
 		let fileSize = src.fileSize!
 		var offset: Int = 0
-		
-		output.open()
-		defer { output.close() }
 		
 		let bufferSize = isEncryption ? BUFFER_SIZE : BUFFER_SIZE + 28
 		let method = isEncryption ? encrypt(_: using:) : decrypt(_: using:)
 		
-		try input.readAll(bufferSize: bufferSize) { buffer, bytesRead in
-			offset += bytesRead
-			onProgress?(Int((offset * 100) / fileSize))
-			let data = Data(bytes: buffer, count: bytesRead)
-			output.write(data: try method(data, key))
+		try stream(from: src, to: dest) { (input, output) in
+			try input.readAll(bufferSize: bufferSize) { buffer, bytesRead in
+				offset += bytesRead
+				onProgress?(Int((offset * 100) / fileSize))
+				let data = Data(bytes: buffer, count: bytesRead)
+				output.write(data: try method(data, key))
+			}
 		}
-		
-		if fm.fileExists(atPath: dest.path) {
-			try fm.removeItem(at: dest)
-		}
-		
-		try fm.moveItem(at: tempFile, to: dest)
 	}
+}
+
+fileprivate func stream(from src: URL, to dest: URL, crypt: (InputStream, OutputStream) throws -> ()) throws {
+	let fm = FileManager.default
+	
+	let tempDir = fm.temporaryDirectory
+	try fm.createDirectory(at: tempDir, withIntermediateDirectories: true, attributes: nil)
+	let tempFile = tempDir.appendingPathComponent(UUID().uuidString)
+	
+	let input = InputStream(url: src)!
+	let output = OutputStream(url: tempFile, append: false)!
+	
+	output.open()
+	defer { output.close() }
+	
+	try crypt(input, output)
+	
+	if fm.fileExists(atPath: dest.path) {
+		try fm.removeItem(at: dest)
+	}
+	
+	try fm.moveItem(at: tempFile, to: dest)
 }
