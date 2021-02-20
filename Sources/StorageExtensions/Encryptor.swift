@@ -36,10 +36,13 @@ public enum Encryptor {
 	/// This value is used when storing a newly created key in the Keychain. Since the key is resued this value is used once, as long as the key is exists in the Keychain.
 	public static var keyAccessibility = kSecAttrAccessibleAfterFirstUnlock
 	
+	/// The strategy of the encryptor, control how data is encrypted and decrypted
+	public static var strategyType: CryptoStrategyType = .gcm
+	
 	/// cache encryption key from keychain.
 	private static var key: SymmetricKey?
 	
-	private static var strategy: CryptoStrategy = GCM()
+	private static let strategy: CryptoStrategy = strategyType.strategy
 	
 	/// Encrypt data with CGM encryption, and returns the encrypted data in result
 	/// - Parameter data: the data to encrypt
