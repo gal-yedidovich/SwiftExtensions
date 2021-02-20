@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import CryptoExtensions
 
 /// An interface to work with the local storage of the device using a layer of Encryption.
 ///
@@ -24,7 +25,7 @@ public enum FileSystem {
 	}
 	
 	/// Writes data into given URL, this method will create the parent folder if needed.
-	/// The data will be written using the Encryptor's `encrypt` method for security.
+	/// The data will be written using the `SimpleEncryptor.encrypt` method for security.
 	/// The write operation is atomic, to encsure the integrity of the file.
 	/// - Parameters:
 	///   - data: data to write
@@ -32,7 +33,7 @@ public enum FileSystem {
 	public static func write(data: Data, to url: URL) throws {
 		try fm.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true, attributes: nil)
 		
-		let encData = try Encryptor.encrypt(data: data)
+		let encData = try SimpleEncryptor.encrypt(data: data)
 		try encData.write(to: url, options: .atomic)
 	}
 	
@@ -46,12 +47,12 @@ public enum FileSystem {
 	}
 	
 	/// Read a file from storage and return is content
-	/// The data will be read using the Encryptor's `decrypt`
+	/// The data will be read using the `SimpleEncryptor.decrypt`
 	/// - Parameter file: target Filename to read from
 	/// - Returns: the content of the file or throws
 	public static func read(file: Filename) throws -> Data {
 		let data = try Data(contentsOf: url(of: file))
-		return try Encryptor.decrypt(data: data)
+		return try SimpleEncryptor.decrypt(data: data)
 	}
 	
 	/// loads content of JSON file to a `Decodable` instance from a given filename

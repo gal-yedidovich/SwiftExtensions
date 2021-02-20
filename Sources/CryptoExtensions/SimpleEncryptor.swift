@@ -12,9 +12,9 @@ internal let BUFFER_SIZE = 1024 * 32
 
 /// An interface to cipher sensetive infomation using GCM encryption.
 ///
-/// The `Encryptor` class provides basic cipher (encryption & decryption) operations on `Data` or files, using the `CryptoKit` framework.
+/// The `SimpleEncryptor` class provides basic cipher (encryption & decryption) operations on `Data` or files, using the `CryptoKit` framework.
 /// All cipher operations are using a Symmetric key that is stored in the device's KeyChain. 
-public enum Encryptor {
+public enum SimpleEncryptor {
 	/// A Dictionary, representing query ths is used to store & fetch the encryption key.
 	/// 
 	/// You can change this value to as you see fit, default value is:

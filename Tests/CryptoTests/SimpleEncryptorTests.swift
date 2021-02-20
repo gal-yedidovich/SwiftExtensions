@@ -1,21 +1,21 @@
 //
-//  EncryptorTests.swift
-//  StorageTests
+//  SimpleEncryptorTests.swift
+//  CryptoTests
 //
 //  Created by Gal Yedidovich on 13/06/2020.
 //
 
 import XCTest
 import CryptoKit
-@testable import StorageExtensions
+import CryptoExtensions
 
-final class EncryptorTests: XCTestCase {
+final class SimpleEncryptorTests: XCTestCase {
 	func testEncryption() throws {
 		let str = "Bubu is the king"
 		let data = Data(str.utf8)
 		
-		let enc = try Encryptor.encrypt(data: data)
-		let dec = try Encryptor.decrypt(data: enc)
+		let enc = try SimpleEncryptor.encrypt(data: data)
+		let dec = try SimpleEncryptor.decrypt(data: enc)
 		
 		let strTest = String(decoding: dec, as: UTF8.self)
 		XCTAssertEqual(str, strTest)
@@ -30,8 +30,8 @@ final class EncryptorTests: XCTestCase {
 		let decUrl = baseURL.appendingPathComponent("dec_data.txt")
 		
 		try Data(str.utf8).write(to: url)
-		try Encryptor.encrypt(file: url, to: encUrl)
-		try Encryptor.decrypt(file: encUrl, to: decUrl)
+		try SimpleEncryptor.encrypt(file: url, to: encUrl)
+		try SimpleEncryptor.decrypt(file: encUrl, to: decUrl)
 		let str2 = try String(contentsOf: decUrl)
 		XCTAssertEqual(str, str2)
 		
