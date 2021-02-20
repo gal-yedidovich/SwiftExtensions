@@ -39,12 +39,14 @@ public enum Encryptor {
 	/// cache encryption key from keychain.
 	private static var key: SymmetricKey?
 	
+	private static var strategy: CryptoStrategy = GCM()
+	
 	/// Encrypt data with CGM encryption, and returns the encrypted data in result
 	/// - Parameter data: the data to encrypt
 	/// - Returns: encrypted data
 	public static func encrypt(data: Data) throws -> Data {
 		let key = try getKey()
-		return try AES.GCM.seal(data, using: key).combined!
+		return try strategy.encrypt(data, using: key)
 	}
 	
 	/// Deccrypt data with CGM decryption, and returns the original (clear-text) data in result
@@ -52,65 +54,28 @@ public enum Encryptor {
 	/// - Throws: check exception
 	/// - Returns: original, Clear-Text data
 	public static func decrypt(data: Data) throws -> Data {
-		let box = try AES.GCM.SealedBox(combined: data)
 		let key = try getKey()
-		return try AES.GCM.open(box, using: key)
+		return try strategy.decrypt(data, using: key)
 	}
 	
 	/// Encrypt a file and save the encrypted content in a different file, this function let you encrypt scaleable chunck of content without risking memory to run out
 	/// - Parameters:
 	///   - src: source file to encrypt
 	///   - dest: destination file to save the encrypted content
-	///   - onProgress: a  progress event to track the progress of the writing
-	public static func encrypt(file src: URL, to dest: URL, onProgress: ((Int)->())? = nil) throws {
-		try process(file: src, to: dest, encrypt: true, onProgress: onProgress)
+	///   - onProgress: a progress event to track the progress of the writing
+	public static func encrypt(file src: URL, to dest: URL, onProgress: OnProgress? = nil) throws {
+		let key = try getKey()
+		try strategy.encrypt(file: src, to: dest, using: key, onProgress: onProgress)
 	}
 	
 	/// Decrypt a file and save the "clear text" content in a different file, this function let you decrypt scaleable chunck of content without risking memory to run out
 	/// - Parameters:
 	///   - src: An encrypted, source file to decrypt
 	///   - dest: destination file to save the decrypted content
-	///   - onProgress: a  progress event to track the progress of the writing
-	public static func decrypt(file src: URL, to dest: URL, onProgress: ((Int)->())? = nil) throws {
-		try process(file: src, to: dest, encrypt: false, onProgress: onProgress)
-	}
-	
-	/// Streaming a cipher action from source file to destination file, and updating progress.
-	/// - Parameters:
-	///   - src: source file to cipher
-	///   - dest: destination file to write processed data
-	///   - isEncryption: flag for determinating to encrypt or decrypt
-	///   - onProgress: a  progress event to track the progress of the writing
-	private static func process(file src: URL, to dest: URL, encrypt isEncryption: Bool, onProgress: ((Int)->())?) throws {
-		let fm = FileManager.default
-		
-		let tempDir = fm.temporaryDirectory
-		try fm.createDirectory(at: tempDir, withIntermediateDirectories: true, attributes: nil)
-		let tempFile = tempDir.appendingPathComponent(UUID().uuidString)
-		
-		let input = InputStream(url: src)!
-		let output = OutputStream(url: tempFile, append: false)!
-		let fileSize = src.fileSize!
-		var offset: Int = 0
-		
-		output.open()
-		defer { output.close() }
-		
-		let bufferSize = isEncryption ? BUFFER_SIZE : BUFFER_SIZE + 28
-		let method = isEncryption ? encrypt(data:) : decrypt(data:)
-		
-		try input.readAll(bufferSize: bufferSize) { buffer, bytesRead in
-			offset += bytesRead
-			onProgress?(Int((offset * 100) / fileSize))
-			let data = Data(bytes: buffer, count: bytesRead)
-			output.write(data: try method(data))
-		}
-		
-		if fm.fileExists(atPath: dest.path) {
-			try fm.removeItem(at: dest)
-		}
-		
-		try fm.moveItem(at: tempFile, to: dest)
+	///   - onProgress: a progress event to track the progress of the writing
+	public static func decrypt(file src: URL, to dest: URL, onProgress: OnProgress? = nil) throws {
+		let key = try getKey()
+		try strategy.decrypt(file: src, to: dest, using: key, onProgress: onProgress)
 	}
 	
 	/// Encryption key for cipher operations, lazy loaded, it will get the current key in Keychain or will generate new one.
@@ -157,5 +122,134 @@ public enum Encryptor {
 				return "Unable to store key, os-status: '\(status)'"
 			}
 		}
+	}
+}
+
+public enum CryptoStrategyType {
+	case cbc(iv: Data)
+	case gcm
+	
+	internal var strategy: CryptoStrategy {
+		switch self {
+		case .cbc(let iv):
+			return CBC(iv: iv)
+		default:
+			return GCM()
+		}
+	}
+}
+
+protocol CryptoStrategy {
+	func encrypt(_ data: Data, using key: SymmetricKey) throws -> Data
+	func decrypt(_ data: Data, using key: SymmetricKey) throws -> Data
+	
+	func encrypt(file: URL, to: URL, using key: SymmetricKey, onProgress: OnProgress?) throws
+	func decrypt(file: URL, to: URL, using key: SymmetricKey, onProgress: OnProgress?) throws
+}
+
+public typealias OnProgress = (Int) -> Void
+
+import CryptoExtensions
+struct CBC: CryptoStrategy {
+	let iv: Data
+	
+	func encrypt(_ data: Data, using key: SymmetricKey) throws -> Data {
+		try AES.CBC.encrypt(data, using: key, iv: iv)
+	}
+	
+	func decrypt(_ data: Data, using key: SymmetricKey) throws -> Data {
+		try AES.CBC.decrypt(data, using: key, iv: iv)
+	}
+	
+	func encrypt(file: URL, to: URL, using key: SymmetricKey, onProgress: OnProgress?) throws {
+		try process(file: file, to: to, using: key, encrypt: true, onProgress: onProgress)
+	}
+	
+	func decrypt(file: URL, to: URL, using key: SymmetricKey, onProgress: OnProgress?) throws {
+		try process(file: file, to: to, using: key, encrypt: false, onProgress: onProgress)
+	}
+	
+	private func process(file src: URL, to dest: URL, using key: SymmetricKey, encrypt isEncryption: Bool, onProgress: OnProgress?) throws {
+		let fm = FileManager.default
+		
+		let tempDir = fm.temporaryDirectory
+		try fm.createDirectory(at: tempDir, withIntermediateDirectories: true, attributes: nil)
+		let tempFile = tempDir.appendingPathComponent(UUID().uuidString)
+		
+		let input = InputStream(url: src)!
+		let output = OutputStream(url: tempFile, append: false)!
+		let fileSize = src.fileSize!
+		var offset: Int = 0
+		
+		output.open()
+		defer { output.close() }
+		
+		let cipher = try AES.CBC.Cipher(isEncryption ? .encrypt : .decrypt, using: key, iv: iv)
+		
+		try input.readAll { buffer, bytesRead in
+			offset += bytesRead
+			onProgress?(Int((offset * 100) / fileSize))
+			
+			let data = Data(bytes: buffer, count: bytesRead)
+			output.write(data: try cipher.update(data))
+		}
+		output.write(data: try cipher.finalize())
+		
+		if fm.fileExists(atPath: dest.path) {
+			try fm.removeItem(at: dest)
+		}
+		
+		try fm.moveItem(at: tempFile, to: dest)
+	}
+}
+
+struct GCM: CryptoStrategy {
+	func encrypt(_ data: Data, using key: SymmetricKey) throws -> Data {
+		try AES.GCM.seal(data, using: key).combined!
+	}
+	
+	func decrypt(_ data: Data, using key: SymmetricKey) throws -> Data {
+		let box = try AES.GCM.SealedBox(combined: data)
+		return try AES.GCM.open(box, using: key)
+	}
+	
+	func encrypt(file: URL, to: URL, using key: SymmetricKey, onProgress: OnProgress?) throws {
+		try process(file: file, to: to, using: key, encrypt: true, onProgress: onProgress)
+	}
+	
+	func decrypt(file: URL, to: URL, using key: SymmetricKey, onProgress: OnProgress?) throws {
+		try process(file: file, to: to, using: key, encrypt: false, onProgress: onProgress)
+	}
+	
+	private func process(file src: URL, to dest: URL, using key: SymmetricKey, encrypt isEncryption: Bool, onProgress: OnProgress?) throws {
+		let fm = FileManager.default
+		
+		let tempDir = fm.temporaryDirectory
+		try fm.createDirectory(at: tempDir, withIntermediateDirectories: true, attributes: nil)
+		let tempFile = tempDir.appendingPathComponent(UUID().uuidString)
+		
+		let input = InputStream(url: src)!
+		let output = OutputStream(url: tempFile, append: false)!
+		let fileSize = src.fileSize!
+		var offset: Int = 0
+		
+		output.open()
+		defer { output.close() }
+		
+		let bufferSize = isEncryption ? BUFFER_SIZE : BUFFER_SIZE + 28
+		let method = isEncryption ? encrypt(_: using:) : decrypt(_: using:)
+		
+		try input.readAll(bufferSize: bufferSize) { buffer, bytesRead in
+			offset += bytesRead
+			onProgress?(Int((offset * 100) / fileSize))
+			let data = Data(bytes: buffer, count: bytesRead)
+			output.write(data: try method(data, key))
+		}
+		
+		if fm.fileExists(atPath: dest.path) {
+			try fm.removeItem(at: dest)
+		}
+		
+		try fm.moveItem(at: tempFile, to: dest)
 	}
 }
