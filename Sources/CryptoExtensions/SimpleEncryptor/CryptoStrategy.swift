@@ -15,9 +15,9 @@ public enum CryptoStrategyType {
 	internal var strategy: CryptoStrategy {
 		switch self {
 		case .cbc(let iv):
-			return CBC(iv: iv)
+			return CBCStrategy(iv: iv)
 		default:
-			return GCM()
+			return GCMStrategy()
 		}
 	}
 }
@@ -32,7 +32,7 @@ protocol CryptoStrategy {
 
 public typealias OnProgress = (Int) -> Void
 
-struct CBC: CryptoStrategy {
+struct CBCStrategy: CryptoStrategy {
 	let iv: Data
 	
 	func encrypt(_ data: Data, using key: SymmetricKey) throws -> Data {
@@ -70,7 +70,7 @@ struct CBC: CryptoStrategy {
 	}
 }
 
-struct GCM: CryptoStrategy {
+struct GCMStrategy: CryptoStrategy {
 	func encrypt(_ data: Data, using key: SymmetricKey) throws -> Data {
 		try AES.GCM.seal(data, using: key).combined!
 	}

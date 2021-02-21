@@ -13,6 +13,9 @@ import BasicExtensions
 public extension AES {
 	/// The Advanced Encryption Standard (AES) Cipher Block Chaining (CBC) cipher suite.
 	enum CBC {
+		
+		public static var pkcs7Padding: CCOptions { CCOptions(kCCOptionPKCS7Padding) }
+		
 		/// Encrypt data using CBC algorithm with PKCS7 padding
 		/// - Parameters:
 		///   - data: the data to encrypt
@@ -51,7 +54,6 @@ public extension AES {
 				&buffer, bufferSize, &numBytesProcessed //output data
 			)
 			
-			
 			guard cryptStatus == CCCryptorStatus(kCCSuccess) else {
 				throw CBCError(message: "Operation Failed", status: cryptStatus)
 			}
@@ -59,7 +61,5 @@ public extension AES {
 			buffer.removeSubrange(numBytesProcessed..<buffer.count)
 			return Data(buffer)
 		}
-		
-		public static var pkcs7Padding: CCOptions { CCOptions(kCCOptionPKCS7Padding) }
 	}
 }
