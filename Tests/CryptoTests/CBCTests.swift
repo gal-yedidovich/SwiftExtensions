@@ -7,8 +7,6 @@
 
 import XCTest
 import CryptoKit
-import CommonCrypto
-import BasicExtensions
 import CryptoExtensions
 
 final class CBCTests: XCTestCase {
@@ -23,7 +21,7 @@ final class CBCTests: XCTestCase {
 		XCTAssertEqual(data, decrypted)
 	}
 	
-	func testInc() throws {
+	func testCipher() throws {
 		let cipher1 = try AES.CBC.Cipher(.encrypt, using: key, iv: iv)
 		let e1 = try cipher1.update(data)
 		let e2 = try cipher1.finalize()
@@ -36,7 +34,7 @@ final class CBCTests: XCTestCase {
 		XCTAssertEqual(data, decrypted)
 	}
 	
-	func testFileInc() throws {
+	func testFileCipher() throws {
 		let encrypted = try AES.CBC.encrypt(data, using: key, iv: iv)
 		
 		let url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0].appendingPathComponent("test.txt")
