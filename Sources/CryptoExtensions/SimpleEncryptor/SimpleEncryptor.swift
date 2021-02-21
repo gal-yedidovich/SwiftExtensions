@@ -8,42 +8,32 @@
 import Foundation
 import CryptoKit
 
-internal let BUFFER_SIZE = 1024 * 32
-
 /// An interface to cipher sensetive infomation.
 ///
 /// The `SimpleEncryptor` class provides basic cipher (encryption & decryption) operations on `Data` or files, using the `CryptoKit` framework.
 /// All cipher operations are using a Symmetric key that is stored in the device's KeyChain. 
 public class SimpleEncryptor {
-	/// A Dictionary, representing query ths is used to store & fetch the encryption key.
-	/// 
-	/// You can change this value to as you see fit, default value is:
-	/// ```
-	/// [
-	///	    kSecClass: kSecClassGenericPassword,
-	///	    kSecAttrService: "encryption key",
-	///     kSecAttrAccount: "SwiftStorage"
-	/// ]
-	/// ```
-	public var keyChainQuery: [CFString : Any] = [
+	
+	public static let defaultKeychainQuery: [CFString : Any] = [
 		kSecClass: kSecClassGenericPassword,
 		kSecAttrService: "encryption key", //role
 		kSecAttrAccount: "SwiftStorage", //login
 	]
 	
-	/// This value control when the encryption key is accessible
-	///
-	/// This value is used when storing a newly created key in the Keychain. Since the key is resued this value is used once, as long as the key is exists in the Keychain.
-	public var keyAccessibility = kSecAttrAccessibleAfterFirstUnlock
-	
-	/// iinternal crypto implementation for this instance
+	private let keyAccess: CFString
+	private let keychainQuery: [CFString : Any]
 	private let strategy: CryptoStrategy
-	
-	/// cache encryption key from keychain.
 	private var key: SymmetricKey?
 	
-	public init(strategy: CryptoStrategyType) {
+	/// Initialize new SimpleEncryptor
+	/// - Parameters:
+	///   - strategy: the cipher implementation, can be either GCM or CBC.
+	///   - keyAccess: control when the encryption key is accessible, default is `AfterFirstUnlock`.
+	///   - keychainQuery: A Dictionary, representing keychain query params. it is used to store & fetch the encryption key.
+	public init(strategy: CryptoStrategyType, keyAccess: CFString = kSecAttrAccessibleAfterFirstUnlock, keychainQuery: [CFString: Any] = defaultKeychainQuery) {
 		self.strategy = strategy.strategy
+		self.keyAccess = keyAccess
+		self.keychainQuery = keychainQuery
 	}
 	
 	/// Encrypt data with CGM encryption, and returns the encrypted data in result
@@ -87,7 +77,7 @@ public class SimpleEncryptor {
 	private func getKey() throws -> SymmetricKey {
 		if let key = key { return key }
 		
-		var query = keyChainQuery
+		var query = keychainQuery
 		query[kSecReturnData] = true
 		
 		var item: CFTypeRef? //reference to the result
@@ -103,8 +93,8 @@ public class SimpleEncryptor {
 	/// - Returns: newly created encryption key.
 	private func storeNewKey() throws -> SymmetricKey {
 		let key = SymmetricKey(size: .bits256) //create new key
-		var query = keyChainQuery
-		query[kSecAttrAccessible] = keyAccessibility
+		var query = keychainQuery
+		query[kSecAttrAccessible] = keyAccess
 		query[kSecValueData] = key.dataRepresentation //request to get the result (key) as data
 		
 		let status = SecItemAdd(query as CFDictionary, nil)

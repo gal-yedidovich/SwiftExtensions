@@ -71,6 +71,8 @@ struct CBCStrategy: CryptoStrategy {
 }
 
 struct GCMStrategy: CryptoStrategy {
+	private static let BUFFER_SIZE = 1024 * 32
+	
 	func encrypt(_ data: Data, using key: SymmetricKey) throws -> Data {
 		try AES.GCM.seal(data, using: key).combined!
 	}
@@ -92,7 +94,7 @@ struct GCMStrategy: CryptoStrategy {
 		let fileSize = src.fileSize!
 		var offset: Int = 0
 		
-		let bufferSize = isEncryption ? BUFFER_SIZE : BUFFER_SIZE + 28
+		let bufferSize = isEncryption ? Self.BUFFER_SIZE : Self.BUFFER_SIZE + 28
 		let method = isEncryption ? encrypt(_: using:) : decrypt(_: using:)
 		
 		try stream(from: src, to: dest) { (input, output) in
