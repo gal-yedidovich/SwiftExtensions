@@ -89,13 +89,16 @@ extension Filename {
 
 //Usage
 let data = Data("Bubu is the king".utf8)
-try! FileSystem.write(data: data, to: .myFile1)
+do {
+	try FileSystem.write(data: data, to: .myFile1)
+	let sameData = try FileSystem.read(file: .myFile1)
 
-if let sameData = FileSystem.read(file: .myFile1) {
 	print(String(decoding: sameData, as: UTF8.self)) //"Bubu is the king"
-}
 
-try! FileSystem.delete(file: .myFile1)
+	try FileSystem.delete(file: .myFile1)
+} catch {
+	//Handle errors
+}
 ```
 
 #### TIP
@@ -110,17 +113,11 @@ You are able to change some values in the library.
 FileSystem.rootURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "your.app.group")
 ```
 
-`Encryptor.keyChainQuery`: defaults with basic password class. Here is a customized example:
+`FileSystem.encryptor`: controls the underlining SimpleEncryptor that handles cryptographics:
 
 ```swift
-Encryptor.keyChainQuery[kSecAttrAccessGroup] = "your.app.group"
-
-//OR - override the whole dictionary
-Encryptor.keyChainQuery = [
-	key: value
-]
+FileSystem.encryptor = SimpleEncryptor(strategy: .gcm)
 ```
-
 
 ### Prefs - Secure Key-Value pairs in storage. 
 Insapired after iOS's `UserDefaults` & Android's `SharedPreferences`, The `Prefs` class enables you to manage Key-Value pairs easily and securely using the same encryption layer from `Encryptor`, also comes with a caching logic for fast & non blocking read/writes operation in memory.
