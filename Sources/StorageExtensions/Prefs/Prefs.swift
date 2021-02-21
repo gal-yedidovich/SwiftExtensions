@@ -46,7 +46,7 @@ public final class Prefs {
 	
 	/// loads the content from the target JSON file, into memory
 	public func reload() {
-		if let json: [String: String] = FileSystem.load(json: filename) {
+		if let json: [String: String] = try? FileSystem.load(json: filename) {
 			dict = json
 		}
 	}
@@ -87,12 +87,6 @@ public final class Prefs {
 		
 		return try? .from(json: str)
 	}
-	
-	/// check if value exists at a given key
-	/// - Parameter key: target key to check
-	/// - Returns: true if exists, otherwise false
-	@available(*, deprecated, renamed: "contains(_:)")
-	public func contains(key: PrefKey) -> Bool { dict[key.value] != nil }
 	
 	/// check if values exist for given keys.
 	/// - Parameter keys: pref keys to check

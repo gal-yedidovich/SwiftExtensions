@@ -6,14 +6,18 @@
 //
 
 import Foundation
+import CryptoExtensions
 
 /// An interface to work with the local storage of the device using a layer of Encryption.
 ///
-/// The `FileSystem` class provides easy IO (read/write) operations to local files, that are automatically encrypted with `Encryptor` functions for cipher data.
+/// The `FileSystem` class provides easy IO (read/write) operations to local files, that are automatically encrypted with `SimpleEncryptor` functions for cipher data.
 public enum FileSystem {
 	private static let fm = FileManager.default
 	/// the URL in storage, where all fiels & folders under FileSystem, are managed.
 	public static var rootURL = fm.urls(for: .documentDirectory, in: .userDomainMask)[0]
+	
+	/// Underline encryptor that handles crypto operations.
+	public static var encryptor = SimpleEncryptor(strategy: .gcm)
 	
 	/// Writes data into given Filename
 	/// - Parameters:
@@ -24,7 +28,7 @@ public enum FileSystem {
 	}
 	
 	/// Writes data into given URL, this method will create the parent folder if needed.
-	/// The data will be written using the Encryptor's `encrypt` method for security.
+	/// The data will be written using the `SimpleEncryptor.encrypt` method for security.
 	/// The write operation is atomic, to encsure the integrity of the file.
 	/// - Parameters:
 	///   - data: data to write
@@ -32,7 +36,7 @@ public enum FileSystem {
 	public static func write(data: Data, to url: URL) throws {
 		try fm.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true, attributes: nil)
 		
-		let encData = try Encryptor.encrypt(data: data)
+		let encData = try encryptor.encrypt(data: data)
 		try encData.write(to: url, options: .atomic)
 	}
 	
@@ -46,32 +50,20 @@ public enum FileSystem {
 	}
 	
 	/// Read a file from storage and return is content
-	/// The data will be read using the Encryptor's `decrypt`
+	/// The data will be read using the `SimpleEncryptor.decrypt`
 	/// - Parameter file: target Filename to read from
-	/// - Returns: the content of the file or nil if unsuccessful.
-	public static func read(file: Filename) -> Data? {
-		do {
-			let data = try Data(contentsOf: url(of: file))
-			return try Encryptor.decrypt(data: data)
-		} catch {
-			print(error)
-			return nil
-		}
+	/// - Returns: the content of the file or throws
+	public static func read(file: Filename) throws -> Data {
+		let data = try Data(contentsOf: url(of: file))
+		return try encryptor.decrypt(data: data)
 	}
 	
 	/// loads content of JSON file to a `Decodable` instance from a given filename
-	///
-	/// nil will be returned in the following cases:
-	///  - file does not exists
-	///  - reading/decrypting failed
-	///  - decoding failed
-	///
 	/// - Parameter file: filename to read the data from
-	/// - Returns: an instance conforming to Decodable, or nil if failed to load.
-	public static func load<Type: Decodable>(json file: Filename) -> Type? {
-		guard fileExists(file), let data = read(file: file) else { return nil }
-		
-		return try? Type.from(json: data)
+	/// - Returns: an instance conforming to Decodable, or throws if failed to load.
+	public static func load<Type: Decodable>(json file: Filename) throws -> Type {
+		let data = try read(file: file)
+		return try .from(json: data)
 	}
 	
 	/// check if a given Filename exists in storage
