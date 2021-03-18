@@ -58,14 +58,6 @@ final class FileSystemTests: XCTestCase {
 	func testReadFileNotFound() throws {
 		XCTAssertThrowsError(try FileSystem.read(file: .file))
 	}
-	
-	static var allTests = [
-		("testWrite", testWrite),
-		("testOverwrite", testOverwrite),
-		("testDelete", testDelete),
-		("testLoadJson", testLoadJson),
-		("testReadFileNotFound", testReadFileNotFound),
-	]
 }
 
 fileprivate extension Filename {

@@ -275,19 +275,6 @@ extension PrefsTests {
 		}
 		test(json)
 	}
-	
-	static var allTests = [
-		("testInsert", testInsert),
-		("testReplace", testReplace),
-		("testRemove", testRemove),
-		("testClear", testClear),
-		("testCodable", testCodable),
-		("testParallelWrites", testParallelWrites),
-		("testMultiplePrefs", testMultiplePrefs),
-		("testStringAsCodable", testStringAsCodable),
-		("testBatchingStrategy", testBatchingStrategy),
-		("testContains", testContains),
-	]
 }
 
 fileprivate typealias TestHandler = ([String:String]) -> Void
