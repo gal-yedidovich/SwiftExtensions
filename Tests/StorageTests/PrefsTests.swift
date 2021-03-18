@@ -227,8 +227,8 @@ final class PrefsTests: XCTestCase {
 		let prefs = createPrefs(name: #function)
 		var didNotify = [false, false]
 		
-		let key1 = prefs.observe { didNotify[0] = true }
-		let key2 = prefs.observe { didNotify[1] = true }
+		let key1 = prefs.observe { _ in didNotify[0] = true }
+		let key2 = prefs.observe { _ in didNotify[1] = true }
 		
 		prefs.edit().put(key: .name, "gal").commit()
 		

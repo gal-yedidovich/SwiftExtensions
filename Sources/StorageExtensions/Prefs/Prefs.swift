@@ -19,7 +19,7 @@ public final class Prefs {
 	internal let queue = DispatchQueue(label: "prefs", qos: .background)
 	internal var dict: [String: String] = [:]
 	internal var filename: Filename
-	internal var observers: [AnyHashable: () -> Void] = [:]
+	internal var observers: [AnyHashable: Callback] = [:]
 	
 	private(set) internal lazy var strategy: WriteStrategy = strategyType.createStrategy(for: self)
 	private var strategyType: WriteStrategyType
@@ -103,14 +103,16 @@ public final class Prefs {
 
 //MARK: - Observation
 public extension Prefs {
+	typealias Callback = (Prefs) -> Void
+	
 	/// Registers an obersver to changes on this `prefs` instance.
 	///
 	/// The callback will fire from the thread that called on `Editor.commit` method. You should not rely on the callback to be called from a the Main Thread.
 	/// - Parameter action: A callback which will fire everytime `prefs` changed.
 	/// - Returns: a token key, used to identify the given callback.
-	func observe(_ action: @escaping () -> Void) -> AnyHashable {
+	func observe(_ callback: @escaping Callback) -> AnyHashable {
 		let id = UUID()
-		observers[id] = action
+		observers[id] = callback
 		return id
 	}
 	
@@ -129,8 +131,8 @@ public extension Prefs {
 	
 	/// Alert all observers that changes were made.
 	internal func notifyObservers() {
-		for (_, action) in observers {
-			action()
+		for (_, callback) in observers {
+			callback(self)
 		}
 	}
 }

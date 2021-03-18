@@ -152,7 +152,7 @@ if let name = myPrefs.string(key: .name) {
 Observing changes
 ```swift
 //Registering observer
-let observerKey = myPrefs.observe {
+let observerKey = myPrefs.observe { prefs in
 	print("prefs changed")
 }
 
