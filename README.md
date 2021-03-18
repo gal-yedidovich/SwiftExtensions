@@ -149,6 +149,18 @@ if let name = myPrefs.string(key: .name) {
 }
 ```
 
+Observing changes
+```swift
+//Registering observer
+let observerKey = myPrefs.observe {
+	print("prefs changed")
+}
+
+
+//Removing observers
+myPrefs.removeObservers(withKeys: observerKey)
+```
+
 #### PrefsValue - Wrapped property for SwfitUI.
 Wrapping a variable with `@PrefsValue` allows to manage a single value transparently in the prefs
 
