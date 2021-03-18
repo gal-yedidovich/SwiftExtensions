@@ -11,18 +11,6 @@ import BasicExtensions
 
 final class PrefsTests: XCTestCase {
 	
-	private func createPrefs(name: String = #function, strategy: Prefs.WriteStrategyType = .immediate) -> Prefs {
-		Prefs(file: Filename(name: name), writeStrategy: strategy)
-	}
-	
-	private func teardown(_ prefs: Prefs...) throws {
-		for p in prefs {
-			try p.queue.sync {
-				try FileSystem.delete(file: p.filename)
-			}
-		}
-	}
-	
 	func testInsert() throws {
 		let prefs = createPrefs(name: #function)
 		prefs.edit().put(key: .name, "Gal").commit()
@@ -249,6 +237,20 @@ final class PrefsTests: XCTestCase {
 		prefs.removeObservers(withKeys: key1, key2)
 		
 		try teardown(prefs)
+	}
+}
+	
+extension PrefsTests {
+	private func createPrefs(name: String = #function, strategy: Prefs.WriteStrategyType = .immediate) -> Prefs {
+		Prefs(file: Filename(name: name), writeStrategy: strategy)
+	}
+	
+	private func teardown(_ prefs: Prefs...) throws {
+		for p in prefs {
+			try p.queue.sync {
+				try FileSystem.delete(file: p.filename)
+			}
+		}
 	}
 	
 	private func afterWrite(at prefs: Prefs, test: @escaping TestHandler) {
