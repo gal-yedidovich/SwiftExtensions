@@ -235,6 +235,22 @@ final class PrefsTests: XCTestCase {
 		try teardown(prefs)
 	}
 	
+	func testObservers() throws {
+		let prefs = createPrefs(name: #function)
+		var didNotify = [false, false]
+		
+		let key1 = prefs.observe { didNotify[0] = true }
+		let key2 = prefs.observe { didNotify[1] = true }
+		
+		prefs.edit().put(key: .name, "gal").commit()
+		
+		XCTAssertTrue(didNotify[0])
+		XCTAssertTrue(didNotify[1])
+		prefs.removeObservers(withKeys: key1, key2)
+		
+		try teardown(prefs)
+	}
+	
 	private func afterWrite(at prefs: Prefs, test: @escaping TestHandler) {
 		let expectation = XCTestExpectation(description: "wait to write to Prefs")
 		

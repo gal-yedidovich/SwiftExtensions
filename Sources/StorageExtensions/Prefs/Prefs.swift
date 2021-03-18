@@ -19,6 +19,7 @@ public final class Prefs {
 	internal let queue = DispatchQueue(label: "prefs", qos: .background)
 	internal var dict: [String: String] = [:]
 	internal var filename: Filename
+	internal var observers: [AnyHashable: () -> Void] = [:]
 	
 	private(set) internal lazy var strategy: WriteStrategy = strategyType.createStrategy(for: self)
 	private var strategyType: WriteStrategyType
@@ -98,6 +99,40 @@ public final class Prefs {
 	/// Create new editor instance, to start editing the Prefs
 	/// - Returns: new Editor isntance, referencing to this Prefs instance
 	public func edit() -> Editor { Editor(prefs: self) }
+}
+
+//MARK: - Observation
+public extension Prefs {
+	/// Registers an obersver to changes on this `prefs` instance.
+	///
+	/// The callback will fire from the thread that called on `Editor.commit` method. You should not rely on the callback to be called from a the Main Thread.
+	/// - Parameter action: A callback which will fire everytime `prefs` changed.
+	/// - Returns: a token key, used to identify the given callback.
+	func observe(_ action: @escaping () -> Void) -> AnyHashable {
+		let id = UUID()
+		observers[id] = action
+		return id
+	}
+	
+	/// Removes existing obervers from this instance, that associated with the given keys.
+	/// - Parameter keys: token keys, that were generated when the observers were created.
+	func removeObservers(withKeys keys: AnyHashable...) {
+		for key in keys {
+			observers.removeValue(forKey: key)
+		}
+	}
+	
+	/// Removes all observers from this instance
+	func removeAllObservers() {
+		observers = [:]
+	}
+	
+	/// Alert all observers that changes were made.
+	internal func notifyObservers() {
+		for (_, action) in observers {
+			action()
+		}
+	}
 }
 
 /// String wrapper for representing a key in a `Prefs` instance.
