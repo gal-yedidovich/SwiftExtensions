@@ -34,7 +34,9 @@ struct MyType: Codable {
 
 let data = MyType(...).json() //convert to JSON encoded data
 
-let instance: MyType = .from(json: data) //convert back to your type
+do {
+	let instance: MyType = try .from(json: data) //convert back to your type
+} catch { ... }
 ```
 
 #### Asynchronous block  
@@ -90,8 +92,8 @@ extension Filename {
 //Usage
 let data = Data("Bubu is the king".utf8)
 do {
-	try FileSystem.write(data: data, to: .myFile1)
-	let sameData = try FileSystem.read(file: .myFile1)
+	try FileSystem.write(data: data, to: .myFile1) //encrypts & write to file
+	let sameData = try FileSystem.read(file: .myFile1) //reads & decrypts
 
 	print(String(decoding: sameData, as: UTF8.self)) //"Bubu is the king"
 
@@ -120,7 +122,7 @@ FileSystem.encryptor = SimpleEncryptor(strategy: .gcm)
 ```
 
 ### Prefs - Secure Key-Value pairs in storage. 
-Insapired after iOS's `UserDefaults` & Android's `SharedPreferences`, The `Prefs` class enables you to manage Key-Value pairs easily and securely using the same encryption layer from `Encryptor`, also comes with a caching logic for fast & non blocking read/writes operation in memory.
+Insapired after iOS's `UserDefaults` & Android's `SharedPreferences`, The `Prefs` class enables you to manage Key-Value pairs easily and securely using the same encryption layer from `CryptoExtensions`, also comes with a caching logic for fast & non blocking read/writes operation in memory.
 
 You can either use the Standard instance, which is also using an obfuscated filename, or create your own instances for multiple files, like so:
 
@@ -132,14 +134,14 @@ let myPrefs = Prefs(file: .myFile1) //new instance using the Filename struct
 ```
 
 You can put values: 
-```swift
-let myPrefs.edit() //start editing
-	.put(key: .name, "Bubu") //using the static constant '.name'
-	.commit() //save your changes in memory & lcoal storage
-	
+```swift	
 extension PrefKey {
 	static let name = PrefKey(value: "obfuscatedKey") //value should be obfuscated
 }
+
+let myPrefs.edit() //start editing
+	.put(key: .name, "Bubu") //using the static constant '.name'
+	.commit() //save your changes in memory & lcoal storage
 ```
 
 And you can read them:
@@ -149,7 +151,7 @@ if let name = myPrefs.string(key: .name) {
 }
 ```
 
-Observing changes
+New in 3.1.0 - Observing changes
 ```swift
 //Registering observer
 let observerKey = myPrefs.observe { prefs in
