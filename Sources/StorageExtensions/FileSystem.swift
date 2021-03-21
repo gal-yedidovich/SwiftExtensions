@@ -126,19 +126,35 @@ public struct Folder {
 	public let value: String
 }
 
-extension Folder {
+public extension Folder {
+	/// Concatenate two folders, to crate a combined folder path.
+	/// - Parameters:
+	///   - left: parent folder.
+	///   - right: subfolder.
+	/// - Returns: folder with a path of the combined folders.
 	static func /(left: Folder, right: Folder) -> Folder {
 		left.append(right)
 	}
 	
+	/// Concatenate folder & a filename, to create a combined path.
+	/// - Parameters:
+	///   - left: parent folder.
+	///   - right: filename, as a sub file to the folder.
+	/// - Returns: filename with the parent folder in its path.
 	static func /(left: Folder, right: Filename) -> Filename {
 		left.append(right)
 	}
 	
+	/// Concatenate a folder to this folder, to crate a combined folder path.
+	/// - Parameter folder: a subfolder.
+	/// - Returns: new folder, with the combined path.
 	func append(_ folder: Folder) -> Folder {
 		Folder(name: value + "/" + folder.value)
 	}
 	
+	/// Concatenate a filename to this folder, to crate a combined filename path.
+	/// - Parameter file: filename, as a sub file to the folder.
+	/// - Returns: new filename, with this folder as parent folder in its path.
 	func append(_ file: Filename) -> Filename {
 		Filename(name: value + "/" + file.value)
 	}
