@@ -11,18 +11,6 @@ import BasicExtensions
 
 final class PrefsTests: XCTestCase {
 	
-	private func createPrefs(name: String = #function, strategy: Prefs.WriteStrategyType = .immediate) -> Prefs {
-		Prefs(file: Filename(name: name), writeStrategy: strategy)
-	}
-	
-	private func teardown(_ prefs: Prefs...) throws {
-		for p in prefs {
-			try p.queue.sync {
-				try FileSystem.delete(file: p.filename)
-			}
-		}
-	}
-	
 	func testInsert() throws {
 		let prefs = createPrefs(name: #function)
 		prefs.edit().put(key: .name, "Gal").commit()
@@ -235,7 +223,37 @@ final class PrefsTests: XCTestCase {
 		try teardown(prefs)
 	}
 	
-	private func afterWrite(at prefs: Prefs, test: @escaping TestHandler) {
+	func testObservers() throws {
+		let prefs = createPrefs(name: #function)
+		var didNotify = [false, false]
+		
+		let key1 = prefs.observe { _ in didNotify[0] = true }
+		let key2 = prefs.observe { _ in didNotify[1] = true }
+		
+		prefs.edit().put(key: .name, "gal").commit()
+		
+		XCTAssertTrue(didNotify[0])
+		XCTAssertTrue(didNotify[1])
+		prefs.removeObservers(withKeys: key1, key2)
+		
+		try teardown(prefs)
+	}
+}
+	
+private extension PrefsTests {
+	func createPrefs(name: String = #function, strategy: Prefs.WriteStrategyType = .immediate) -> Prefs {
+		Prefs(file: Filename(name: name), writeStrategy: strategy)
+	}
+	
+	func teardown(_ prefs: Prefs...) throws {
+		for p in prefs {
+			try p.queue.sync {
+				try FileSystem.delete(file: p.filename)
+			}
+		}
+	}
+	
+	func afterWrite(at prefs: Prefs, test: @escaping TestHandler) {
 		let expectation = XCTestExpectation(description: "wait to write to Prefs")
 		
 		prefs.queue.async { //after written to storage
@@ -245,7 +263,7 @@ final class PrefsTests: XCTestCase {
 		wait(for: [expectation], timeout: 10)
 	}
 	
-	private func check(_ prefs: Prefs, _ expectation: XCTestExpectation, test: @escaping TestHandler) {
+	func check(_ prefs: Prefs, _ expectation: XCTestExpectation, test: @escaping TestHandler) {
 		defer { expectation.fulfill() }
 		guard let data = try? FileSystem.read(file: prefs.filename) else {
 			XCTFail("could not read file: \(prefs.filename.value)")
@@ -257,19 +275,6 @@ final class PrefsTests: XCTestCase {
 		}
 		test(json)
 	}
-	
-	static var allTests = [
-		("testInsert", testInsert),
-		("testReplace", testReplace),
-		("testRemove", testRemove),
-		("testClear", testClear),
-		("testCodable", testCodable),
-		("testParallelWrites", testParallelWrites),
-		("testMultiplePrefs", testMultiplePrefs),
-		("testStringAsCodable", testStringAsCodable),
-		("testBatchingStrategy", testBatchingStrategy),
-		("testContains", testContains),
-	]
 }
 
 fileprivate typealias TestHandler = ([String:String]) -> Void
