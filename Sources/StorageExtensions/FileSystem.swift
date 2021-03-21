@@ -125,3 +125,21 @@ public struct Folder {
 	
 	public let value: String
 }
+
+extension Folder {
+	static func /(left: Folder, right: Folder) -> Folder {
+		left.append(right)
+	}
+	
+	static func /(left: Folder, right: Filename) -> Filename {
+		left.append(right)
+	}
+	
+	func append(_ folder: Folder) -> Folder {
+		Folder(name: value + "/" + folder.value)
+	}
+	
+	func append(_ file: Filename) -> Filename {
+		Filename(name: value + "/" + file.value)
+	}
+}

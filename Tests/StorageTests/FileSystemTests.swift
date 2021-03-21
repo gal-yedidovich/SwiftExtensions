@@ -58,6 +58,20 @@ final class FileSystemTests: XCTestCase {
 	func testReadFileNotFound() throws {
 		XCTAssertThrowsError(try FileSystem.read(file: .file))
 	}
+	
+	func testConcatingPaths() {
+		let folder1 = Folder(name: "folder1")
+		let folder2 = Folder(name: "folder2")
+		let file2 = Filename(name: "file2")
+		
+		let path1 = folder1 / .file
+		let path2 = folder1 / folder2
+		let path3 = folder1.append(folder2).append(file2)
+		
+		XCTAssert(path1.value.hasSuffix("folder1/file1"))
+		XCTAssert(path2.value.hasSuffix("folder1/folder2"))
+		XCTAssert(path3.value.hasSuffix("folder1/folder2/file2"))
+	}
 }
 
 fileprivate extension Filename {
