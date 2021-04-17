@@ -159,23 +159,3 @@ public extension Decodable {
 		try from(json: Data(json.utf8))
 	}
 }
-
-public extension Data {
-	/// creates and returns data after `xor` operation. it will change each byte in the data (byte array) and will return the result.
-	/// - Parameters:
-	///   - xor: a `xor` operand.
-	/// - Returns: manipulated copy of the data after the operation.
-	func xor(with xor: UInt8) -> Data {
-		Data(map { $0 ^ xor })
-	}
-}
-
-public extension SymmetricKey {
-	/// A Data instance created safely from the contiguous bytes without making any copies.
-	var dataRepresentation: Data {
-		return withUnsafeBytes { bytes in
-			let cfdata = CFDataCreateWithBytesNoCopy(nil, bytes.baseAddress?.assumingMemoryBound(to: UInt8.self), bytes.count, kCFAllocatorNull)
-			return (cfdata as Data?) ?? Data()
-		}
-	}
-}
