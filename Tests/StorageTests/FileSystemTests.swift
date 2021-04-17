@@ -68,9 +68,9 @@ final class FileSystemTests: XCTestCase {
 		let path2 = folder1 / folder2
 		let path3 = folder1.append(folder2).append(file2)
 		
-		XCTAssert(path1.value.hasSuffix("folder1/file1"))
-		XCTAssert(path2.value.hasSuffix("folder1/folder2"))
-		XCTAssert(path3.value.hasSuffix("folder1/folder2/file2"))
+		XCTAssertEqual(path1.value, "folder1/file1")
+		XCTAssertEqual(path2.value, "folder1/folder2")
+		XCTAssertEqual(path3.value, "folder1/folder2/file2")
 	}
 }
 
