@@ -13,10 +13,9 @@ import BasicExtensions
 public extension AES {
 	/// The Advanced Encryption Standard (AES) Cipher Block Chaining (CBC) cipher suite.
 	enum CBC {
-		
 		public static var pkcs7Padding: CCOptions { CCOptions(kCCOptionPKCS7Padding) }
 		
-		/// Encrypt data using CBC algorithm with PKCS7 padding
+		/// Encrypt data with AES-CBC algorithm
 		/// - Parameters:
 		///   - data: the data to encrypt
 		///   - key: a symmetric key for encryption
@@ -27,7 +26,7 @@ public extension AES {
 			try process(data, using: key, iv: iv, operation: kCCEncrypt, options: options)
 		}
 		
-		/// Decrypts encrypted data using CBC algorithm with PKCS7 padding
+		/// Decrypts encrypted data with AES-CBC algorithm
 		/// - Parameters:
 		///   - data: encrypted data to decrypt
 		///   - key: a symmetric key for encryption
@@ -40,26 +39,26 @@ public extension AES {
 		
 		/// Process data, either encrypt or decrypt it
 		private static func process(_ data: Data, using key: SymmetricKey, iv: Data, operation: Int, options: CCOptions) throws -> Data {
-			let rawData = [UInt8](data)
-			let keyData = [UInt8](key.dataRepresentation)
-			let ivData = [UInt8](iv)
+			let inputBuffer = data.bytes
+			let keyData = key.dataRepresentation.bytes
+			let ivData = iv.bytes
 			
-			let bufferSize = rawData.count + kCCBlockSizeAES128
-			var buffer = [UInt8](repeating: 0, count: bufferSize)
+			let bufferSize = inputBuffer.count + kCCBlockSizeAES128
+			var outputBuffer = [UInt8](repeating: 0, count: bufferSize)
 			var numBytesProcessed = 0
 			
 			let cryptStatus = CCCrypt(
 				CCOperation(operation), CCAlgorithm(kCCAlgorithmAES), options, //params
-				keyData, keyData.count, ivData, rawData, rawData.count, //input data
-				&buffer, bufferSize, &numBytesProcessed //output data
+				keyData, keyData.count, ivData, inputBuffer, inputBuffer.count, //input data
+				&outputBuffer, bufferSize, &numBytesProcessed //output data
 			)
 			
 			guard cryptStatus == CCCryptorStatus(kCCSuccess) else {
 				throw CBCError(message: "Operation Failed", status: cryptStatus)
 			}
 			
-			buffer.removeSubrange(numBytesProcessed..<buffer.count)
-			return Data(buffer)
+			outputBuffer.removeSubrange(numBytesProcessed..<outputBuffer.count) //trim extra padding
+			return Data(outputBuffer)
 		}
 	}
 }

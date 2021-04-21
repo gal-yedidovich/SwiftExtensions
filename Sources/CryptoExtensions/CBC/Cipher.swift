@@ -21,12 +21,12 @@ extension AES.CBC {
 		///   - key: a symmetric key for operation
 		///   - iv: initial vector data
 		/// - Throws: when fails to create a cryptografic context
-		public init(_ operation: Operation, using key: SymmetricKey, iv: Data) throws {
-			let keyData = [UInt8](key.dataRepresentation)
-			let ivData = [UInt8](iv)
+		public init(_ operation: Operation, using key: SymmetricKey, iv: Data, options: CCOptions = pkcs7Padding) throws {
+			let keyData = key.dataRepresentation.bytes
+			let ivData = iv.bytes
 			var cryptorRef: CCCryptorRef?
 			let status = CCCryptorCreate(
-				operation.operation, CCAlgorithm(kCCAlgorithmAES128), CCOptions(kCCOptionPKCS7Padding),
+				operation.operation, CCAlgorithm(kCCAlgorithmAES), options,
 				keyData, keyData.count, ivData, &cryptorRef)
 			
 			guard status == CCCryptorStatus(kCCSuccess), let cryptor = cryptorRef else {
@@ -51,7 +51,7 @@ extension AES.CBC {
 			buffer.count = outputLength
 			var dataOutMoved = 0
 			
-			let rawData = [UInt8](data)
+			let rawData = data.bytes
 			let status = buffer.withUnsafeMutableBytes { bufferPtr in
 				CCCryptorUpdate(context, rawData, rawData.count, bufferPtr.baseAddress!, outputLength, &dataOutMoved)
 			}

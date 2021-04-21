@@ -8,15 +8,17 @@
 import Foundation
 import CryptoKit
 
-public extension Data {
+extension Data {
 	/// Returns data after `xor` operation. it will change each byte of the byte array.
 	/// - Parameters:
 	///   - data: the main operand, the data which is "xorred"
 	///   - xor: a `xor` operand.
 	/// - Returns: manipulated copy of the data after the operation.
-	static func ^(data: Data, xor: UInt8) -> Data {
+	public static func ^(data: Data, xor: UInt8) -> Data {
 		return Data(data.map { $0 ^ xor })
 	}
+	
+	internal var bytes: [UInt8] { [UInt8](self) }
 }
 
 public extension String {
