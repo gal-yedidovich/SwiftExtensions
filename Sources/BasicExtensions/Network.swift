@@ -84,10 +84,6 @@ public enum NetResponse<Success, Failure> {
 	case error(Error)
 }
 
-public enum BasicErrors: Error {
-	case emptyResposne
-}
-
 public extension URLSession {
 	
 	/// Convenience request method.
@@ -102,7 +98,7 @@ public extension URLSession {
 	func dataTask(with request: URLRequest, completion: @escaping (NetResponse<Data, Data>) -> Void) -> URLSessionDataTask {
 		dataTask(with: request) { (d, r, e) in
 			if let error = e { completion(.error(error)); return }
-			guard let data = d, let urlRes = r as? HTTPURLResponse else { completion(.error(BasicErrors.emptyResposne)); return }
+			guard let data = d, let urlRes = r as? HTTPURLResponse else { completion(.error(URLError(.badServerResponse))); return }
 			
 			if urlRes.statusCode / 100 == 2 {
 				completion(.success(data))

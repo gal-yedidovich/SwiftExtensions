@@ -6,6 +6,7 @@
 //
 
 import XCTest
+import Combine
 import BasicExtensions
 @testable import StorageExtensions
 
@@ -227,14 +228,15 @@ final class PrefsTests: XCTestCase {
 		let prefs = createPrefs(name: #function)
 		var didNotify = [false, false]
 		
-		let key1 = prefs.observe { _ in didNotify[0] = true }
-		let key2 = prefs.observe { _ in didNotify[1] = true }
+		var store = Set<AnyCancellable>()
+		prefs.publisher.sink { _ in didNotify[0] = true }.store(in: &store)
+		prefs.publisher.sink { _ in didNotify[1] = true }.store(in: &store)
 		
 		prefs.edit().put(key: .name, "gal").commit()
 		
 		XCTAssertTrue(didNotify[0])
 		XCTAssertTrue(didNotify[1])
-		prefs.removeObservers(withKeys: key1, key2)
+		store.removeAll()
 		
 		try teardown(prefs)
 	}

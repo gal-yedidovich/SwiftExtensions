@@ -30,7 +30,9 @@ public class SimpleEncryptor {
 	///   - strategy: the cipher implementation, can be either GCM or CBC.
 	///   - keyAccess: control when the encryption key is accessible, default is `AfterFirstUnlock`.
 	///   - keychainQuery: A Dictionary, representing keychain query params. it is used to store & fetch the encryption key.
-	public init(strategy: CryptoStrategyType, keyAccess: CFString = kSecAttrAccessibleAfterFirstUnlock, keychainQuery: [CFString: Any] = defaultKeychainQuery) {
+	public init(strategy: CryptoStrategyType,
+				keyAccess: CFString = kSecAttrAccessibleAfterFirstUnlock,
+				keychainQuery: [CFString: Any] = defaultKeychainQuery) {
 		self.strategy = strategy.strategy
 		self.keyAccess = keyAccess
 		self.keychainQuery = keychainQuery

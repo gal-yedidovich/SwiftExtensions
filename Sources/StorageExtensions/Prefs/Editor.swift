@@ -60,6 +60,6 @@ public class Editor {
 		
 		let commit = Commit(changes: changes, clearFlag: clearFlag)
 		prefs.strategy.commit(commit)
-		prefs.notifyObservers()
+		prefs.publishChange()
 	}
 }
