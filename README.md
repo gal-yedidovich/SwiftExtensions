@@ -7,106 +7,6 @@ SwiftExtensions is a *Swift Package*.
 
 Use the swift package manager to install SwiftExtensions on your project. [Apple Developer Guide](https://developer.apple.com/documentation/xcode/adding_package_dependencies_to_your_app)
 
-## BasicExtensions 
-
-### lots of convenince utility functions
-
-#### Navigation
-```swift
-//Navigation:
-extension ControllerID {
-	static let myCtrl = ControllerID(value: "myCTRL") //make sure you have added "myCTRL" in the Storyboard
-}
-
-viewController.push(to: .myCtrl)
-
-//OR with `config` block
-viewController.present(.myCtrl) { (vc: MyViewController) in 
-	//do any configuration before presenting "myCTRL", for example: settting instance variables
-}
-```
-
-#### JSON Encoding with Codable protocol
-```swift
-struct MyType: Codable { 
-	//values
-}
-
-let data = MyType(...).json() //convert to JSON encoded data
-
-do {
-	let instance: MyType = try .from(json: data) //convert back to your type
-} catch { ... }
-```
-
-#### Asynchronous block  
-```swift
-post {
-	//run in the main thread
-}
-
-async {
-	//run in a background thread
-}
-```
-
-#### URLRequest builder
-```swift
-let req = URLRequest(url: "https://your.end.point")
-	.set(method: .POST) //OR .get, .put, .delete, .patch
-	.set(contentType: .json) //OR .xml, .urlEncoded etc.
-	.set(body: "some String or Data")
-```
-
-Another example:
-```swift
-let dict = ["title": "Bubu is the king", "message": "I am Groot"]
-
-let req = URLRequest(url: "https://your.end.point")
-	.set(method: .PUT)
-	.set(contentType: .json)
-	.set(body: dict.json()) //allows encodable values
-```
-
-#### Localization
-```swift
-let helloWorld = "helloWorld".localized //provided you have "helloWorld" key in Localizable.strings files"
-
-print(helloWorld) //will automatically use the wanted localization
-
-```
-
-## CryptoExtensions
-### awesome encryption & decryption APIs, including:
- * `SimpleEncryptor` class, great for convenience crypto operations (data and/or big files), using with keychain to store keys.
- * `AES/CBC` implementation in Swift, on top of "Common Crypto" implementation.
- * useful "crypto" extension methods.
-
-#### SimpleEncryptor example (with CBC)
-```swift
-let data = Data("I am Groot!".utf8)
-let encryptor = SimpleEncryptor(strategy: .cbc(iv: Data(...)))
-
-do {
-	let encrypted = try encryptor.encrypt(data) 
-	let decrypted = try encryptor.decrypt(encrypted)
-	
-	print(String(decoding: decrypted, as: UTF8.self)) //"I am Groot!"
-} catch {
-	//handle cryptographic errors
-}
-```
-
-#### Basic CBC cryptographic example:
-```swift
-let data: Data = ... //some data to encrypt
-let iv: Data = ... //an initial verctor
-let key: SymmetricKey = ... //encryption key
-
-let encrypted = AES.CBC.encrypt(data, using: key, iv: iv)
-let decrypted = try AES.CBC.decrypt(encrypted, using: key, iv: iv)
-```
-
 ## StorageExtensions
 ### Convenience Read & Write operations with an encryption layer from `CryptoExtensions`. 
 For easy, safe & scalable storage architecture, the `FileSystem` class gives you the ability to read & write files while keeping them extra secure in the file system.
@@ -152,7 +52,7 @@ FileSystem.encryptor = SimpleEncryptor(strategy: .gcm)
 ```
 
 ### Prefs - Secure Key-Value pairs in storage. 
-Insapired after iOS's `UserDefaults` & Android's `SharedPreferences`, The `Prefs` class enables you to manage Key-Value pairs easily and securely using the same encryption layer from `CryptoExtensions`, also comes with a caching logic for fast & non blocking read/writes operation in memory.
+Insapired after iOS's `UserDefaults` & Android's `SharedPreferences`, The `Prefs` class enables you to manage Key-Value pairs easily and securely using the encryption layer from `CryptoExtensions`, also comes with a caching logic for fast & non blocking read/writes operation in memory.
 
 You can either use the Standard instance, which is also using an obfuscated filename, or create your own instances for multiple files, like so:
 
@@ -211,6 +111,106 @@ struct ContentView: View {
 }
 ```
 Views will re-render when a `@PrefsValue` changes
+
+## CryptoExtensions
+### awesome encryption & decryption APIs, including:
+* `SimpleEncryptor` class, great for convenience crypto operations (data and/or big files), using with keychain to store keys.
+* `AES/CBC` implementation in Swift, on top of "Common Crypto" implementation.
+* useful "crypto" extension methods.
+
+#### SimpleEncryptor example (with CBC)
+```swift
+let data = Data("I am Groot!".utf8)
+let encryptor = SimpleEncryptor(strategy: .cbc(iv: Data(...)))
+
+do {
+let encrypted = try encryptor.encrypt(data) 
+let decrypted = try encryptor.decrypt(encrypted)
+
+print(String(decoding: decrypted, as: UTF8.self)) //"I am Groot!"
+} catch {
+//handle cryptographic errors
+}
+```
+
+#### Basic CBC cryptographic example:
+```swift
+let data: Data = ... //some data to encrypt
+let iv: Data = ... //an initial verctor
+let key: SymmetricKey = ... //encryption key
+
+let encrypted = AES.CBC.encrypt(data, using: key, iv: iv)
+let decrypted = try AES.CBC.decrypt(encrypted, using: key, iv: iv)
+```
+
+## BasicExtensions 
+
+### lots of convenince utility functions
+
+#### JSON Encoding with Codable protocol
+```swift
+struct MyType: Codable { 
+	//values
+}
+
+let data = MyType(...).json() //convert to JSON encoded data
+
+do {
+	let instance: MyType = try .from(json: data) //convert back to your type
+} catch { ... }
+```
+
+#### Asynchronous block  
+```swift
+post {
+	//run in the main thread
+}
+
+async {
+	//run in a background thread
+}
+```
+
+#### URLRequest builder
+```swift
+let req = URLRequest(url: "https://your.end.point")
+	.set(method: .POST) //OR .get, .put, .delete, .patch
+	.set(contentType: .json) //OR .xml, .urlEncoded etc.
+	.set(body: "some String or Data")
+```
+
+Another example:
+```swift
+let dict = ["title": "Bubu is the king", "message": "I am Groot"]
+
+let req = URLRequest(url: "https://your.end.point")
+	.set(method: .PUT)
+	.set(contentType: .json)
+	.set(body: dict.json()) //allows encodable values
+```
+
+#### Localization
+```swift
+let helloWorld = "helloWorld".localized //provided you have "helloWorld" key in Localizable.strings files"
+
+print(helloWorld) //will automatically use the wanted localization
+
+```
+
+#### UIKit Navigation
+```swift
+//Navigation:
+extension ControllerID {
+	static let myCtrl = ControllerID(value: "myCTRL") //make sure to have "myCTRL" identifier in Storyboard
+}
+
+viewController.push(to: .myCtrl)
+
+//OR with `config` block
+viewController.present(.myCtrl) { (vc: MyViewController) in 
+	//do any configuration before presenting "myCTRL", for example: settting instance variables
+}
+```
 
 ### Result API - Conveneince extension in URLSession.
 Using Swift's "Associated values" the following convenience methods allow you to handle responses easily without the boilerplate like unwrapping data and checking for errors.
