@@ -157,13 +157,14 @@ let cancelable1 = myPrefs.publisher
 	.sink { prefs in print("prefs changed") } //prints "prefs changed" whenever we commit changes.
 
 
-//Filtering specific changes
-let cancelable2 = myPrefs.publisher
-	.filter { prefs in prefs.contains(#someKey) }
-	.sink { prefs in print("#someKey exists after changes in prefs") }
+//Detecting changes on key 
+let cancelable2 = prefs.publisher
+	.compactMap { $0.string(key: .name) }
+	.removeDuplicates()
+	.sink { print("name changed to: \($0)") }
 ```
 
-> `Prefs.publisher` will not fire events when commits are empty.
+> `Prefs.publisher` will fire events when the prefs instance has committed non-empty commits.
 
 #### PrefsValue - Wrapped property for SwfitUI.
 Wrapping a variable with `@PrefsValue` allows to manage a single value transparently in the prefs
