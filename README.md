@@ -76,13 +76,43 @@ print(helloWorld) //will automatically use the wanted localization
 
 ```
 
+## CryptoExtensions
+### awesome encryption & decryption APIs, including:
+ * `SimpleEncryptor` class, great for convenience crypto operations (data and/or big files), using with keychain to store keys.
+ * `AES/CBC` implementation in Swift, on top of "Common Crypto" implementation.
+ * useful "crypto" extension methods.
+
+#### SimpleEncryptor example (with CBC)
+```swift
+let data = Data("I am Groot!".utf8)
+let encryptor = SimpleEncryptor(strategy: .cbc(iv: Data(...)))
+
+do {
+	let encrypted = try encryptor.encrypt(data) 
+	let decrypted = try encryptor.decrypt(encrypted)
+	
+	print(String(decoding: decrypted, as: UTF8.self)) //"I am Groot!"
+} catch {
+	//handle cryptographic errors
+}
+```
+
+#### Basic CBC cryptographic example:
+```swift
+let data: Data = ... //some data to encrypt
+let iv: Data = ... //an initial verctor
+let key: SymmetricKey = ... //encryption key
+
+let encrypted = AES.CBC.encrypt(data, using: key, iv: iv)
+let decrypted = try AES.CBC.decrypt(encrypted, using: key, iv: iv)
+```
+
 ## StorageExtensions
+### Convenience Read & Write operations with an encryption layer from `CryptoExtensions`. 
+For easy, safe & scalable storage architecture, the `FileSystem` class gives you the ability to read & write files while keeping them extra secure in the file system.
 
-### Convenience Read & Write operations with GCM Encryption 
-For easy, safe & scalable storage architecture, the `FileSystem` class gives you the ability to read & write files with GCM encryption, implemented using Apple's [CryptoKit Framework](https://developer.apple.com/documentation/cryptokit). 
-
-- IO (Read/Write) operations are synchronous, for more control over threading.
-- You are are required to use the `Filename` or `Folder` structs to state your desired files/folders. best used with `extension` like so:
+* IO (Read/Write) operations are *synchronous*, for more control and easier error handling.
+* You are are required to use the `Filename` or `Folder` structs to state your desired files/folders. best used with `extension` like so:
 ```swift
 extension Filename {
 	static let myFile1 = Filename(value: "name1InFileSystem")
@@ -115,7 +145,7 @@ You are able to change some values in the library.
 FileSystem.rootURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "your.app.group")
 ```
 
-`FileSystem.encryptor`: controls the underlining SimpleEncryptor that handles cryptographics:
+`FileSystem.encryptor`: controls the underlining SimpleEncryptor that handles cryptographics: (requires `CryptoExtensions`)
 
 ```swift
 FileSystem.encryptor = SimpleEncryptor(strategy: .gcm)
