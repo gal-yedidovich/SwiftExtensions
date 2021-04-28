@@ -151,17 +151,19 @@ if let name = myPrefs.string(key: .name) {
 }
 ```
 
-New in 3.1.0 - Observing changes
+Observing changes with `Combine` Framework
 ```swift
-//Registering observer
-let observerKey = myPrefs.observe { prefs in
-	print("prefs changed")
-}
+let cancelable1 = myPrefs.publisher
+	.sink { prefs in print("prefs changed") } //prints "prefs changed" whenever we commit changes.
 
 
-//Removing observers
-myPrefs.removeObservers(withKeys: observerKey)
+//Filtering specific changes
+let cancelable2 = myPrefs.publisher
+	.filter { prefs in prefs.contains(#someKey) }
+	.sink { prefs in print("#someKey exists after changes in prefs") }
 ```
+
+> `Prefs.publisher` will not fire events when commits are empty.
 
 #### PrefsValue - Wrapped property for SwfitUI.
 Wrapping a variable with `@PrefsValue` allows to manage a single value transparently in the prefs
