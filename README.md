@@ -114,7 +114,7 @@ Views will re-render when a `@PrefsValue` changes
 
 ## CryptoExtensions
 ### awesome encryption & decryption APIs, including:
-* `SimpleEncryptor` class, great for convenience crypto operations (data and/or big files), using with keychain to store keys.
+* `SimpleEncryptor` class, great for convenience crypto operations (data and/or big files), using keychain to store keys.
 * `AES/CBC` implementation in Swift, on top of "Common Crypto" implementation.
 * useful "crypto" extension methods.
 
@@ -124,12 +124,12 @@ let data = Data("I am Groot!".utf8)
 let encryptor = SimpleEncryptor(strategy: .cbc(iv: Data(...)))
 
 do {
-let encrypted = try encryptor.encrypt(data) 
-let decrypted = try encryptor.decrypt(encrypted)
+	let encrypted = try encryptor.encrypt(data) 
+	let decrypted = try encryptor.decrypt(encrypted)
 
-print(String(decoding: decrypted, as: UTF8.self)) //"I am Groot!"
+	print(String(decoding: decrypted, as: UTF8.self)) //"I am Groot!"
 } catch {
-//handle cryptographic errors
+	//handle cryptographic errors
 }
 ```
 
