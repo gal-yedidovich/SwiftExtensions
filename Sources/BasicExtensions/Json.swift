@@ -1,5 +1,5 @@
 //
-//  JsonObject.swift
+//  Json.swift
 //  
 //
 //  Created by Gal Yedidovich on 21/10/2020.
