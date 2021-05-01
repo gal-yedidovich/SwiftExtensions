@@ -51,8 +51,8 @@ fileprivate struct ImmediateWriteStrategy: WriteStrategy {
 		prefs.queue.sync { //sync changes
 			apply(commit, on: prefs)
 			
-			prefs.queue.async { [prefs] in
-				writeOrDelete(prefs: prefs)
+			prefs.queue.async {
+				writeOrDelete(prefs)
 			}
 		}
 	}
@@ -74,14 +74,16 @@ fileprivate class BatchWriteStrategy: WriteStrategy {
 			
 			if !triggered {
 				triggered = true
-				prefs.queue.asyncAfter(deadline: .now() + delay, execute: writeBatch)
+				prefs.queue.asyncAfter(deadline: .now() + delay) { [weak self] in
+					self?.writeBatch()
+				}
 			}
 		}
 	}
 	
 	private func writeBatch() {
 		triggered = false
-		writeOrDelete(prefs: prefs)
+		writeOrDelete(prefs)
 	}
 }
 
@@ -102,15 +104,15 @@ fileprivate func apply(_ commit: Commit, on prefs: Prefs) {
 	}
 }
 
-fileprivate func writeOrDelete(prefs: Prefs) {
+fileprivate func writeOrDelete(_ prefs: Prefs) {
 	if prefs.dict.isEmpty {
 		delete(prefs)
 	} else {
-		write(to: prefs)
+		write(prefs)
 	}
 }
 
-fileprivate func write(to prefs: Prefs) {
+fileprivate func write(_ prefs: Prefs) {
 	do {
 		try FileSystem.write(data: prefs.dict.json(), to: prefs.filename)
 	} catch {

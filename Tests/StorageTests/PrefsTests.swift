@@ -240,6 +240,22 @@ final class PrefsTests: XCTestCase {
 		
 		try teardown(prefs)
 	}
+	
+	func testWriteBatchIgnoredAfterDeinit() throws {
+		let filename = #function
+		var prefs: Prefs? = createPrefs(name: filename)
+		prefs?.writeStrategy = .batch
+		prefs?.edit().put(key: .name, "gal").commit()
+		prefs = nil
+
+		let expectation = XCTestExpectation(description: "waiting for delay")
+		post(delay: DEFAULT_BATCH_DELAY) {
+			expectation.fulfill()
+		}
+		wait(for: [expectation], timeout: 10)
+		
+		XCTAssertFalse(FileSystem.fileExists(Filename(name: filename)))
+	}
 }
 	
 private extension PrefsTests {

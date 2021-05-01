@@ -109,6 +109,7 @@ public extension Prefs {
 		changeSubject.send(self)
 	}
 	
+	/// A Combine publisher that publishes when ever the prefs commit changes.
 	var publisher: AnyPublisher<Prefs, Never> {
 		changeSubject.eraseToAnyPublisher()
 	}
