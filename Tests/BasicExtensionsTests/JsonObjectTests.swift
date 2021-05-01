@@ -72,12 +72,12 @@ final class JsonObjectTests: XCTestCase {
 			let isAlive: Bool
 		}
 		
-		let comp: Companian? = try json.decodable(key: "companian") //decoding
+		let comp: Companian? = try json.codable(key: "companian") //decoding
 		XCTAssertEqual(comp?.name, "Groot")
 		XCTAssertEqual(comp?.isAlive, true)
 		
 		json["companian2"] = Companian(name: "Pickachu", isAlive: false)
-		let comp2: Companian? = try json.decodable(key: "companian2") //casting
+		let comp2: Companian? = try json.codable(key: "companian2") //casting
 		XCTAssertEqual(comp2?.name, "Pickachu")
 		XCTAssertEqual(comp2?.isAlive, false)
 	}
