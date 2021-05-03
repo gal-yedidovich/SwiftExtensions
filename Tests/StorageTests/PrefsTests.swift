@@ -243,8 +243,8 @@ final class PrefsTests: XCTestCase {
 	
 	func testWriteBatchIgnoredAfterDeinit() throws {
 		let filename = #function
-		var prefs: Prefs? = createPrefs(name: filename)
-		prefs?.writeStrategy = .batch
+		var prefs: Prefs? = createPrefs(name: filename, strategy: .batch)
+		try FileSystem.delete(file: Filename(name: filename))
 		prefs?.edit().put(key: .name, "gal").commit()
 		prefs = nil
 

@@ -8,7 +8,7 @@
 import Foundation
 
 internal protocol WriteStrategy {
-	func commit(_ commit: Commit)
+	func commit(_ commit: Commit, to prefs: Prefs)
 }
 
 internal struct Commit {
@@ -33,99 +33,87 @@ public extension Prefs {
 		/// default batch strategy with delay of 0.1 seconds
 		public static let batch = Self.batch(delay: DEFAULT_BATCH_DELAY)
 		
-		internal func createStrategy(for prefs: Prefs) -> WriteStrategy {
+		internal func createStrategy() -> WriteStrategy {
 			switch self {
 			case .immediate:
-				return ImmediateWriteStrategy(prefs: prefs)
+				return ImmediateWriteStrategy()
 			case .batch(let delay):
-				return BatchWriteStrategy(prefs: prefs, delay: delay)
+				return BatchWriteStrategy(delay: delay)
 			}
 		}
 	}
 }
 
 fileprivate struct ImmediateWriteStrategy: WriteStrategy {
-	fileprivate unowned let prefs: Prefs
-	
-	func commit(_ commit: Commit) {
+	func commit(_ commit: Commit, to prefs: Prefs) {
 		prefs.queue.sync { //sync changes
-			apply(commit, on: prefs)
-			
-			prefs.queue.async {
-				writeOrDelete(prefs)
-			}
+			prefs.assign(commit)
+			prefs.queue.async(execute: prefs.writeOrDelete)
 		}
 	}
 }
 
 fileprivate class BatchWriteStrategy: WriteStrategy {
-	private unowned let prefs: Prefs
 	private let delay: Double
 	private var triggered = false
 	
-	init(prefs: Prefs, delay: Double) {
-		self.prefs = prefs
+	init(delay: Double) {
 		self.delay = delay
 	}
 	
-	func commit(_ commit: Commit) {
+	func commit(_ commit: Commit, to prefs: Prefs) {
 		prefs.queue.sync {
-			apply(commit, on: prefs)
+			prefs.assign(commit)
+			if triggered { return }
 			
-			if !triggered {
-				triggered = true
-				prefs.queue.asyncAfter(deadline: .now() + delay) { [weak self] in
-					self?.writeBatch()
-				}
+			triggered = true
+			prefs.queue.asyncAfter(deadline: .now() + delay) { [weak self, weak prefs] in
+				guard let self = self, let prefs = prefs else { return }
+				
+				self.triggered = false
+				prefs.writeOrDelete()
 			}
 		}
-	}
-	
-	private func writeBatch() {
-		triggered = false
-		writeOrDelete(prefs)
 	}
 }
 
 //MARK: - Helper functions
-
-/// Applies commit changes on the prefs inner dictionary.
-///
-/// This method does not write the changes to the disk.
-/// - Parameters:
-///   - commit: The changes to apply
-///   - prefs: Target `prefs` instance
-fileprivate func apply(_ commit: Commit, on prefs: Prefs) {
-	if commit.clearFlag { prefs.dict = [:] }
+fileprivate extension Prefs {
+	/// Assigns commit changes on the prefs inner dictionary.
+	///
+	/// This method does not write the changes to the disk.
+	/// - Parameters:
+	///   - commit: The changes to apply
+	///   - prefs: Target `prefs` instance
+	func assign(_ commit: Commit) {
+		if commit.clearFlag { dict = [:] }
+		
+		for (key, value) in commit.changes {
+			if value == nil { dict.removeValue(forKey: key) }
+			else { dict[key] = value }
+		}
+	}
 	
-	for (key, value) in commit.changes {
-		if value == nil { prefs.dict.removeValue(forKey: key) }
-		else { prefs.dict[key] = value }
+	func writeOrDelete() {
+		if dict.isEmpty { delete() }
+		else { write() }
 	}
-}
-
-fileprivate func writeOrDelete(_ prefs: Prefs) {
-	if prefs.dict.isEmpty {
-		delete(prefs)
-	} else {
-		write(prefs)
+	
+	func write() {
+		do {
+			try FileSystem.write(data: dict.json(), to: filename)
+		} catch {
+			print("could not write to \"Prefs\" file.")
+			print(error)
+		}
 	}
-}
-
-fileprivate func write(_ prefs: Prefs) {
-	do {
-		try FileSystem.write(data: prefs.dict.json(), to: prefs.filename)
-	} catch {
-		print("could not write to \"prefs\" file.")
-		print(error.localizedDescription)
-	}
-}
-
-fileprivate func delete(_ prefs: Prefs) {
-	do {
-		try FileSystem.delete(file: prefs.filename)
-	} catch {
-		print("could not delete \"prefs\" file.")
-		print(error)
+	
+	func delete() {
+		do {
+			try FileSystem.delete(file: filename)
+		} catch {
+			print("could not delete \"Prefs\" file.")
+			print(error)
+		}
 	}
 }

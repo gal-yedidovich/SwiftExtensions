@@ -7,6 +7,7 @@
 
 import Foundation
 import BasicExtensions
+import Combine
 
 /// An interface to an encrypted JSON file, where you store key-value pairs persistently and safely.
 ///
@@ -20,28 +21,14 @@ public final class Prefs {
 	internal var dict: [String: String] = [:]
 	internal var filename: Filename
 	
-	private(set) internal lazy var strategy: WriteStrategy = strategyType.createStrategy(for: self)
-	private var strategyType: WriteStrategyType
+	private let strategy: WriteStrategy
 	private let changeSubject = PassthroughSubject<Prefs, Never>()
-	
-	/// Represent the strategy to write to the prefs file in storage.
-	///
-	/// It is thread-safe to mutate this value while working with the `prefs` instance. as it will effect changes after the pending writes have finished.
-	public var writeStrategy: WriteStrategyType {
-		get { strategyType }
-		set {
-			queue.sync {
-				strategyType = newValue
-				strategy = newValue.createStrategy(for: self)
-			}
-		}
-	}
 	
 	/// Initialize new Prefs instance link to a given Filename, and loading it`s content
 	/// - Parameter file: Target Filename in storage
 	public init(file: Filename, writeStrategy: WriteStrategyType = .batch) {
 		self.filename = file
-		self.strategyType = writeStrategy
+		self.strategy = writeStrategy.createStrategy()
 		reload()
 	}
 	
@@ -99,18 +86,15 @@ public final class Prefs {
 	/// Create new editor instance, to start editing the Prefs
 	/// - Returns: new Editor isntance, referencing to this Prefs instance
 	public func edit() -> Editor { Editor(prefs: self) }
-}
-
-//MARK: - Observation
-import Combine
-public extension Prefs {
-	/// Alert all observers that changes were made.
-	internal func publishChange() {
+	
+	/// write commit and alert all subscribers that changes were made.
+	internal func apply(_ commit: Commit) {
+		strategy.commit(commit, to: self)
 		changeSubject.send(self)
 	}
 	
-	/// A Combine publisher that publishes when ever the prefs commit changes.
-	var publisher: AnyPublisher<Prefs, Never> {
+	/// A Combine publisher that publishes whenever the prefs commit changes.
+	public var publisher: AnyPublisher<Prefs, Never> {
 		changeSubject.eraseToAnyPublisher()
 	}
 }

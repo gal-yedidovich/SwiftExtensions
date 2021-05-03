@@ -58,7 +58,6 @@ public class Editor {
 		guard !changes.isEmpty || clearFlag else { return }
 		
 		let commit = Commit(changes: changes, clearFlag: clearFlag)
-		prefs.strategy.commit(commit)
-		prefs.publishChange()
+		prefs.apply(commit)
 	}
 }
