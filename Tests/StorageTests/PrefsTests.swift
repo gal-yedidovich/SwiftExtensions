@@ -282,16 +282,12 @@ private extension PrefsTests {
 	}
 	
 	func check(_ prefs: Prefs, _ expectation: XCTestExpectation, test: @escaping TestHandler) {
-		defer { expectation.fulfill() }
-		guard let data = try? FileSystem.read(file: prefs.filename) else {
-			XCTFail("could not read file: \(prefs.filename.value)")
-			return
+		do {
+			test(try FileSystem.load(json: prefs.filename))
+		} catch {
+			XCTFail(error.localizedDescription)
 		}
-		guard let json: [String: String] = try? .from(json: data) else {
-			XCTFail("could not decode file: \(prefs.filename.value)")
-			return
-		}
-		test(json)
+		expectation.fulfill()
 	}
 }
 
