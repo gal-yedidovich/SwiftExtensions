@@ -87,7 +87,7 @@ let cancelable1 = myPrefs.publisher
 	.sink { prefs in print("prefs changed") } //prints "prefs changed" whenever we commit changes.
 
 
-//Detecting changes on key 
+//Detecting changes on a key 
 let cancelable2 = prefs.publisher
 	.compactMap { $0.string(key: .name) }
 	.removeDuplicates()
