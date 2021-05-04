@@ -89,6 +89,7 @@ final class PrefsTests: XCTestCase {
 		prefs.edit().put(key: .numbers, dict).commit()
 		
 		XCTAssertEqual(dict, prefs.codable(key: .numbers))
+		XCTAssertEqual(dict, prefs.codable(key: .numbers, as: [String: Int].self))
 		
 		afterWrite(at: prefs) { json in
 			do {

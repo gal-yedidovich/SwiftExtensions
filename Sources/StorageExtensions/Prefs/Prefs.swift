@@ -65,7 +65,7 @@ public final class Prefs {
 	/// Get a Decodable value from `Prefs` by given key, or nil if not found
 	/// - Parameter key: The wanted key, linked to the wanted value
 	/// - Returns: Some Decodable, or nil if key is not found
-	public func codable<Type: Decodable>(key: PrefKey) -> Type? {
+	public func codable<Type: Decodable>(key: PrefKey, as type: Type.Type = Type.self) -> Type? {
 		guard let str = dict[key.value] else { return nil }
 		if Type.self == String.self { return str as? Type }
 		
