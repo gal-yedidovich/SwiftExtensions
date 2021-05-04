@@ -61,7 +61,7 @@ public enum Filer {
 	/// loads content of JSON file to a `Decodable` instance from a given filename
 	/// - Parameter file: filename to read the data from
 	/// - Returns: an instance conforming to Decodable, or throws if failed to load.
-	public static func load<Type: Decodable>(json file: Filename) throws -> Type {
+	public static func load<Type: Decodable>(json file: Filename, as type: Type.Type = Type.self) throws -> Type {
 		let data = try read(file: file)
 		return try .from(json: data)
 	}
