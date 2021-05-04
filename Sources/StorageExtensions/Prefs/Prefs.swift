@@ -26,6 +26,7 @@ public final class Prefs {
 	
 	/// Initialize new Prefs instance link to a given Filename, and loading it`s content
 	/// - Parameter file: Target Filename in storage
+	/// - Parameter writeStrategy: Strategy for writing to the FileSystem
 	public init(file: Filename, writeStrategy: WriteStrategyType = .batch) {
 		self.filename = file
 		self.strategy = writeStrategy.createStrategy()
@@ -39,36 +40,31 @@ public final class Prefs {
 		}
 	}
 	
-	/// Get a string value from `Prefs` by given key, or nil if not found
-	/// - Parameter key: the wanted key, linked to the wanted value
-	/// - Returns: string value of the given key, or nil if not found
+	/// Get a string value from `Prefs` by given key, or nil if its not found
+	/// - Parameter key: The wanted key, linked to the wanted value
+	/// - Returns: String value of the given key, or nil if its not found
 	public func string(key: PrefKey) -> String? { dict[key.value] }
 	
 	/// Get an int value from `Prefs` by given key, or nil if not found
-	/// - Parameter key: the wanted key, linked to the wanted value
-	/// - Returns: int value of the given key, or nil if not found
+	/// - Parameter key: The wanted key, linked to the wanted value
+	/// - Returns: Int value of the given key, or nil if its not found
 	public func int(key: PrefKey) -> Int? { codable(key: key) }
 	
 	/// Gets a boolean value from `Prefs` by given key, or uses the fallback value if not found
 	/// - Parameters:
-	///   - key: the wanted key, linked to the wanted value
-	///   - fallback: the default value in case the key is not found
-	/// - Returns: boolean value of the given key, or the fallback if not found.
+	///   - key: The wanted key, linked to the wanted value
+	///   - fallback: The default value in case the key is not found
+	/// - Returns: Bool value of the given key, or the fallback if its not found.
 	public func bool(key: PrefKey, fallback: Bool = false) -> Bool { codable(key: key) ?? fallback }
 	
 	/// Get a date value from `Prefs` by given key, or nil if not found
-	/// - Parameter key: the wanted key, linked to the wanted value
-	/// - Returns: date value of the given key, or nil if not found
+	/// - Parameter key: The wanted key, linked to the wanted value
+	/// - Returns: Date value of the given key, or nil if not found
 	public func date(key: PrefKey) -> Date? { codable(key: key) }
 	
-	/// Get a string array from `Prefs` by given key, or nil if not found
-	/// - Parameter key: the wanted key, linked to the wanted value
-	/// - Returns: string array, or nil if not found
-	public func array(key: PrefKey) -> [String]? { codable(key: key) }
-	
 	/// Get a Decodable value from `Prefs` by given key, or nil if not found
-	/// - Parameter key: the wanted key, linked to the wanted value
-	/// - Returns: some Decodable, or nil if not found
+	/// - Parameter key: The wanted key, linked to the wanted value
+	/// - Returns: Some Decodable, or nil if key is not found
 	public func codable<Type: Decodable>(key: PrefKey) -> Type? {
 		guard let str = dict[key.value] else { return nil }
 		if Type.self == String.self { return str as? Type }
