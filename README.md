@@ -7,24 +7,145 @@ SwiftExtensions is a *Swift Package*.
 
 Use the swift package manager to install SwiftExtensions on your project. [Apple Developer Guide](https://developer.apple.com/documentation/xcode/adding_package_dependencies_to_your_app)
 
+## StorageExtensions
+### Convenience Read & Write operations with an encryption layer from `CryptoExtensions`. 
+For easy, safe & scalable storage architecture, the `FileSystem` class gives you the ability to read & write files while keeping them extra secure in the file system.
+
+* IO (Read/Write) operations are *synchronous*, for more control and easier error handling.
+* You are are required to use the `Filename` or `Folder` structs to state your desired files/folders. best used with `extension` like so:
+```swift
+extension Filename {
+	static let myFile1 = Filename(value: "name1InFileSystem")
+	static let myFile2 = Filename(value: "name2InFileSystem")
+}
+
+//Usage
+let data = Data("Bubu is the king".utf8)
+do {
+	try FileSystem.write(data: data, to: .myFile1) //encrypts & write to file
+	let sameData = try FileSystem.read(file: .myFile1) //reads & decrypts
+
+	print(String(decoding: sameData, as: UTF8.self)) //"Bubu is the king"
+
+	try FileSystem.delete(file: .myFile1)
+} catch {
+	//Handle errors
+}
+```
+
+#### TIP
+> when instantiating `Filename` or `Folder` you can (and probably should) use obfusctated names, for exmaple: use "--" insated of "secret.info".
+
+### Storage Customizations
+You are able to change some values in the library.
+
+`FileSystem.rootURL`: defaults to the documents url of the app, it can change for example to an AppGroup url: 
+
+```swift
+FileSystem.rootURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "your.app.group")
+```
+
+`FileSystem.encryptor`: controls the underlining SimpleEncryptor that handles cryptographics: (requires `CryptoExtensions`)
+
+```swift
+FileSystem.encryptor = SimpleEncryptor(strategy: .gcm)
+```
+
+### Prefs - Secure Key-Value pairs in storage. 
+Insapired after iOS's `UserDefaults` & Android's `SharedPreferences`, The `Prefs` class enables you to manage Key-Value pairs easily and securely using the encryption layer from `CryptoExtensions`, also comes with a caching logic for fast & non blocking read/writes operation in memory.
+
+You can either use the Standard instance, which is also using an obfuscated filename, or create your own instances for multiple files, like so:
+
+```swift
+let standardPrefs = Prefs.standard //the built-in standard instance 
+
+//OR
+let myPrefs = Prefs(file: .myFile1) //new instance using the Filename struct
+```
+
+You can put values: 
+```swift	
+extension PrefKey {
+	static let name = PrefKey(value: "obfuscatedKey") //value should be obfuscated
+}
+
+let myPrefs.edit() //start editing
+	.put(key: .name, "Bubu") //using the static constant '.name'
+	.commit() //save your changes in memory & lcoal storage
+```
+
+And you can read them:
+```swift
+if let name = myPrefs.string(key: .name) {
+	print("\(name), is the king")
+}
+```
+
+Observing changes with `Combine` Framework
+```swift
+let cancelable1 = myPrefs.publisher
+	.sink { prefs in print("prefs changed") } //prints "prefs changed" whenever we commit changes.
+
+
+//Detecting changes on a key 
+let cancelable2 = prefs.publisher
+	.compactMap { $0.string(key: .name) }
+	.removeDuplicates()
+	.sink { print("name changed to: \($0)") }
+```
+
+> `Prefs.publisher` will fire events when the prefs instance has committed non-empty commits.
+
+#### PrefsValue - Wrapped property for SwfitUI.
+Wrapping a variable with `@PrefsValue` allows to manage a single value transparently in the prefs
+
+```swift
+extension PrefKey {
+	static let displayName = PrefKey(value: "someObfuscatedKey")
+}
+
+struct ContentView: View {
+	@PrefsValue(key: .displayName) var displayName: String = ""
+
+	var body: some View {...}
+}
+```
+Views will re-render when a `@PrefsValue` changes
+
+## CryptoExtensions
+### awesome encryption & decryption APIs, including:
+* `SimpleEncryptor` class, great for convenience crypto operations (data and/or big files), using keychain to store keys.
+* `AES/CBC` implementation in Swift, on top of "Common Crypto" implementation.
+* useful "crypto" extension methods.
+
+#### SimpleEncryptor example (with CBC)
+```swift
+let data = Data("I am Groot!".utf8)
+let encryptor = SimpleEncryptor(strategy: .cbc(iv: Data(...)))
+
+do {
+	let encrypted = try encryptor.encrypt(data) 
+	let decrypted = try encryptor.decrypt(encrypted)
+
+	print(String(decoding: decrypted, as: UTF8.self)) //"I am Groot!"
+} catch {
+	//handle cryptographic errors
+}
+```
+
+#### Basic CBC cryptographic example:
+```swift
+let data: Data = ... //some data to encrypt
+let iv: Data = ... //an initial verctor
+let key: SymmetricKey = ... //encryption key
+
+let encrypted = AES.CBC.encrypt(data, using: key, iv: iv)
+let decrypted = try AES.CBC.decrypt(encrypted, using: key, iv: iv)
+```
+
 ## BasicExtensions 
 
 ### lots of convenince utility functions
-
-#### Navigation
-```swift
-//Navigation:
-extension ControllerID {
-	static let myCtrl = ControllerID(value: "myCTRL") //make sure you have added "myCTRL" in the Storyboard
-}
-
-viewController.push(to: .myCtrl)
-
-//OR with `config` block
-viewController.present(.myCtrl) { (vc: MyViewController) in 
-	//do any configuration before presenting "myCTRL", for example: settting instance variables
-}
-```
 
 #### JSON Encoding with Codable protocol
 ```swift
@@ -76,138 +197,20 @@ print(helloWorld) //will automatically use the wanted localization
 
 ```
 
-## CryptoExtensions
-### awesome encryption & decryption APIs, including:
- * `SimpleEncryptor` class, great for convenience crypto operations (data and/or big files), using with keychain to store keys.
- * `AES/CBC` implementation in Swift, on top of "Common Crypto" implementation.
- * useful "crypto" extension methods.
-
-#### SimpleEncryptor example (with CBC)
+#### UIKit Navigation
 ```swift
-let data = Data("I am Groot!".utf8)
-let encryptor = SimpleEncryptor(strategy: .cbc(iv: Data(...)))
-
-do {
-	let encrypted = try encryptor.encrypt(data) 
-	let decrypted = try encryptor.decrypt(encrypted)
-	
-	print(String(decoding: decrypted, as: UTF8.self)) //"I am Groot!"
-} catch {
-	//handle cryptographic errors
-}
-```
-
-#### Basic CBC cryptographic example:
-```swift
-let data: Data = ... //some data to encrypt
-let iv: Data = ... //an initial verctor
-let key: SymmetricKey = ... //encryption key
-
-let encrypted = AES.CBC.encrypt(data, using: key, iv: iv)
-let decrypted = try AES.CBC.decrypt(encrypted, using: key, iv: iv)
-```
-
-## StorageExtensions
-### Convenience Read & Write operations with an encryption layer from `CryptoExtensions`. 
-For easy, safe & scalable storage architecture, the `FileSystem` class gives you the ability to read & write files while keeping them extra secure in the file system.
-
-* IO (Read/Write) operations are *synchronous*, for more control and easier error handling.
-* You are are required to use the `Filename` or `Folder` structs to state your desired files/folders. best used with `extension` like so:
-```swift
-extension Filename {
-	static let myFile1 = Filename(value: "name1InFileSystem")
-	static let myFile2 = Filename(value: "name2InFileSystem")
+//Navigation:
+extension ControllerID {
+	static let myCtrl = ControllerID(value: "myCTRL") //make sure to have "myCTRL" identifier in Storyboard
 }
 
-//Usage
-let data = Data("Bubu is the king".utf8)
-do {
-	try FileSystem.write(data: data, to: .myFile1) //encrypts & write to file
-	let sameData = try FileSystem.read(file: .myFile1) //reads & decrypts
+viewController.push(to: .myCtrl)
 
-	print(String(decoding: sameData, as: UTF8.self)) //"Bubu is the king"
-
-	try FileSystem.delete(file: .myFile1)
-} catch {
-	//Handle errors
+//OR with `config` block
+viewController.present(.myCtrl) { (vc: MyViewController) in 
+	//do any configuration before presenting "myCTRL", for example: settting instance variables
 }
 ```
-
-#### TIP
-> when instantiating `Filename` or `Folder` you can (and probably should) use obfusctated names, for exmaple: use "--" insated of "secret.info".
-
-### Storage Customizations
-You are able to change some values in the library.
-
-`FileSystem.rootURL`: defaults to the documents url of the app, it can change for example to an AppGroup url: 
-
-```swift
-FileSystem.rootURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "your.app.group")
-```
-
-`FileSystem.encryptor`: controls the underlining SimpleEncryptor that handles cryptographics: (requires `CryptoExtensions`)
-
-```swift
-FileSystem.encryptor = SimpleEncryptor(strategy: .gcm)
-```
-
-### Prefs - Secure Key-Value pairs in storage. 
-Insapired after iOS's `UserDefaults` & Android's `SharedPreferences`, The `Prefs` class enables you to manage Key-Value pairs easily and securely using the same encryption layer from `CryptoExtensions`, also comes with a caching logic for fast & non blocking read/writes operation in memory.
-
-You can either use the Standard instance, which is also using an obfuscated filename, or create your own instances for multiple files, like so:
-
-```swift
-let standardPrefs = Prefs.standard //the built-in standard instance 
-
-//OR
-let myPrefs = Prefs(file: .myFile1) //new instance using the Filename struct
-```
-
-You can put values: 
-```swift	
-extension PrefKey {
-	static let name = PrefKey(value: "obfuscatedKey") //value should be obfuscated
-}
-
-let myPrefs.edit() //start editing
-	.put(key: .name, "Bubu") //using the static constant '.name'
-	.commit() //save your changes in memory & lcoal storage
-```
-
-And you can read them:
-```swift
-if let name = myPrefs.string(key: .name) {
-	print("\(name), is the king")
-}
-```
-
-New in 3.1.0 - Observing changes
-```swift
-//Registering observer
-let observerKey = myPrefs.observe { prefs in
-	print("prefs changed")
-}
-
-
-//Removing observers
-myPrefs.removeObservers(withKeys: observerKey)
-```
-
-#### PrefsValue - Wrapped property for SwfitUI.
-Wrapping a variable with `@PrefsValue` allows to manage a single value transparently in the prefs
-
-```swift
-extension PrefKey {
-	static let displayName = PrefKey(value: "someObfuscatedKey")
-}
-
-struct ContentView: View {
-	@PrefsValue(key: .displayName) var displayName: String = ""
-
-	var body: some View {...}
-}
-```
-Views will re-render when a `@PrefsValue` changes
 
 ### Result API - Conveneince extension in URLSession.
 Using Swift's "Associated values" the following convenience methods allow you to handle responses easily without the boilerplate like unwrapping data and checking for errors.

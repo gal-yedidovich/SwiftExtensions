@@ -1,5 +1,5 @@
 //
-//  UrlRequestExt.swift
+//  Network.swift
 //  
 //
 //  Created by Gal Yedidovich on 18/06/2020.
@@ -75,60 +75,4 @@ public struct ContentType: ExpressibleByStringLiteral {
 	}
 	
 	let value: String
-}
-
-/// Convenient Netwrok Response, with Two types, Success & Failure
-public enum NetResponse<Success, Failure> {
-	case success(Success)
-	case failure(Int, Failure)
-	case error(Error)
-}
-
-public enum BasicErrors: Error {
-	case emptyResposne
-}
-
-public extension URLSession {
-	
-	/// Convenience request method.
-	/// Creates a `URLSeesionDataTask` with completion handler that trasform the basic paraemters into `Result<Data, Data>`
-	///
-	/// The result is holding the data/error from the request using enum + assosiated value
-	///
-	/// - Parameters:
-	///   - request: a request to send to a remote server
-	///   - completion: a completion handler that accepts the result from the response, can be either success/failure/error.
-	/// - Returns: Task, prepared to start with `resume()` call
-	func dataTask(with request: URLRequest, completion: @escaping (NetResponse<Data, Data>) -> Void) -> URLSessionDataTask {
-		dataTask(with: request) { (d, r, e) in
-			if let error = e { completion(.error(error)); return }
-			guard let data = d, let urlRes = r as? HTTPURLResponse else { completion(.error(BasicErrors.emptyResposne)); return }
-			
-			if urlRes.statusCode / 100 == 2 {
-				completion(.success(data))
-			} else {
-				completion(.failure(urlRes.statusCode, data))
-			}
-		}
-	}
-	
-	/// Convenience method for generic result type.
-	/// This overloadded method, calls `send(_: completion:)` and decode the response data to the generic type (unless there is an error)
-	/// - Parameters:
-	///   - request: a request to send to a remote server
-	///   - completion: a completion handler that accepts the generic result from the response, can be either success/failure/error.
-	/// - Returns: Task, prepared to start with `resume()` call
-	func dataTask<Response: Decodable, FailRes: Decodable>(with request: URLRequest, completion: @escaping (NetResponse<Response, FailRes>) -> Void) -> URLSessionDataTask {
-		dataTask(with: request) { result in
-			do {
-				switch result {
-					case .success(let data): completion(.success(try .from(json: data)))
-					case .failure(let status, let data): completion(.failure(status, try .from(json: data)))
-					case .error(let error): completion(.error(error))
-				}
-			} catch {
-				completion(.error(error))
-			}
-		}
-	}
 }

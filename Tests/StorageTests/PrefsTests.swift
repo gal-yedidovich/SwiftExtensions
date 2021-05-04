@@ -6,6 +6,7 @@
 //
 
 import XCTest
+import Combine
 import BasicExtensions
 @testable import StorageExtensions
 
@@ -72,7 +73,7 @@ final class PrefsTests: XCTestCase {
 		let expectation = XCTestExpectation(description: "wait to delete Prefs")
 		prefs.queue.async {
 			XCTAssertEqual(prefs.dict.count, 0)
-			XCTAssertFalse(FileSystem.fileExists(prefs.filename))
+			XCTAssertFalse(Filer.fileExists(prefs.filename))
 			expectation.fulfill()
 		}
 		
@@ -88,6 +89,7 @@ final class PrefsTests: XCTestCase {
 		prefs.edit().put(key: .numbers, dict).commit()
 		
 		XCTAssertEqual(dict, prefs.codable(key: .numbers))
+		XCTAssertEqual(dict, prefs.codable(key: .numbers, as: [String: Int].self))
 		
 		afterWrite(at: prefs) { json in
 			do {
@@ -227,16 +229,33 @@ final class PrefsTests: XCTestCase {
 		let prefs = createPrefs(name: #function)
 		var didNotify = [false, false]
 		
-		let key1 = prefs.observe { _ in didNotify[0] = true }
-		let key2 = prefs.observe { _ in didNotify[1] = true }
+		var store = Set<AnyCancellable>()
+		prefs.publisher.sink { _ in didNotify[0] = true }.store(in: &store)
+		prefs.publisher.sink { _ in didNotify[1] = true }.store(in: &store)
 		
 		prefs.edit().put(key: .name, "gal").commit()
 		
 		XCTAssertTrue(didNotify[0])
 		XCTAssertTrue(didNotify[1])
-		prefs.removeObservers(withKeys: key1, key2)
+		store.removeAll()
 		
 		try teardown(prefs)
+	}
+	
+	func testWriteBatchIgnoredAfterDeinit() throws {
+		let filename = #function
+		var prefs: Prefs? = createPrefs(name: filename, strategy: .batch)
+		try Filer.delete(file: Filename(name: filename))
+		prefs?.edit().put(key: .name, "gal").commit()
+		prefs = nil
+
+		let expectation = XCTestExpectation(description: "waiting for delay")
+		post(delay: DEFAULT_BATCH_DELAY) {
+			expectation.fulfill()
+		}
+		wait(for: [expectation], timeout: 10)
+		
+		XCTAssertFalse(Filer.fileExists(Filename(name: filename)))
 	}
 }
 	
@@ -248,7 +267,7 @@ private extension PrefsTests {
 	func teardown(_ prefs: Prefs...) throws {
 		for p in prefs {
 			try p.queue.sync {
-				try FileSystem.delete(file: p.filename)
+				try Filer.delete(file: p.filename)
 			}
 		}
 	}
@@ -264,16 +283,12 @@ private extension PrefsTests {
 	}
 	
 	func check(_ prefs: Prefs, _ expectation: XCTestExpectation, test: @escaping TestHandler) {
-		defer { expectation.fulfill() }
-		guard let data = try? FileSystem.read(file: prefs.filename) else {
-			XCTFail("could not read file: \(prefs.filename.value)")
-			return
+		do {
+			test(try Filer.load(json: prefs.filename))
+		} catch {
+			XCTFail(error.localizedDescription)
 		}
-		guard let json: [String: String] = try? .from(json: data) else {
-			XCTFail("could not decode file: \(prefs.filename.value)")
-			return
-		}
-		test(json)
+		expectation.fulfill()
 	}
 }
 

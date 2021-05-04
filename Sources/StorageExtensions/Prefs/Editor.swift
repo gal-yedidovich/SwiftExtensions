@@ -51,15 +51,13 @@ public class Editor {
 	/// Commit the all uncommited changes in the `changes` dictionary.
 	/// This method will notify all observers on the `prefs` instance (unless there were no changes).
 	///
-	/// - if the `clearFlag` if true, remove all values in the Prefs dctionary.
-	/// - if the `changes` dictionary is not empty, override the Prefs dictionary with the changes, including removals.
-	/// - in case there are no changes & `clearFlag` is true, delete the Prefs flie
-	/// - in case there are changes, they are written to Prefs file asynchronously
+	/// - if the `clear` was called, remove all values in the `Prefs` inner dictionary.
+	/// - if there are changes with `put` method, override the `Prefs` inner dictionary with those changes, including removals.
+	/// - in case the inner dictionary is empty after commit, remove this `Prefs` file. otherwise, write the inner dictionary to `Prefs` file asynchronously
 	public func commit() {
 		guard !changes.isEmpty || clearFlag else { return }
 		
 		let commit = Commit(changes: changes, clearFlag: clearFlag)
-		prefs.strategy.commit(commit)
-		prefs.notifyObservers()
+		prefs.apply(commit)
 	}
 }

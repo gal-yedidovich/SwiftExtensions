@@ -1,5 +1,5 @@
 //
-//  JsonObject.swift
+//  Json.swift
 //  
 //
 //  Created by Gal Yedidovich on 21/10/2020.
@@ -65,7 +65,7 @@ public extension JsonObject {
 		return JsonArray(from: arr)
 	}
 	
-	func decodable<Value: Decodable>(key: String) throws -> Value? {
+	func codable<Value: Decodable>(key: String, as: Value.Type = Value.self) throws -> Value? {
 		guard let value = dict[key] else { return nil }
 		if let v = value as? Value { return v }
 		

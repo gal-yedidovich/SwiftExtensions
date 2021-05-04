@@ -1,5 +1,5 @@
 //
-//  FileSystem.swift
+//  Filer.swift
 //  Storage
 //
 //  Created by Gal Yedidovich on 15/06/2020.
@@ -10,8 +10,8 @@ import CryptoExtensions
 
 /// An interface to work with the local storage of the device using a layer of Encryption.
 ///
-/// The `FileSystem` class provides easy IO (read/write) operations to local files, that are automatically encrypted with `SimpleEncryptor` functions for cipher data.
-public enum FileSystem {
+/// The `Filer` class provides easy IO (read/write) operations to local files, that are automatically encrypted with `SimpleEncryptor` functions for cipher data.
+public enum Filer {
 	private static let fm = FileManager.default
 	/// the URL in storage, where all fiels & folders under FileSystem, are managed.
 	public static var rootURL = fm.urls(for: .documentDirectory, in: .userDomainMask)[0]
@@ -61,7 +61,7 @@ public enum FileSystem {
 	/// loads content of JSON file to a `Decodable` instance from a given filename
 	/// - Parameter file: filename to read the data from
 	/// - Returns: an instance conforming to Decodable, or throws if failed to load.
-	public static func load<Type: Decodable>(json file: Filename) throws -> Type {
+	public static func load<Type: Decodable>(json file: Filename, as type: Type.Type = Type.self) throws -> Type {
 		let data = try read(file: file)
 		return try .from(json: data)
 	}
@@ -107,7 +107,7 @@ public enum FileSystem {
 }
 
 /// String Wrapper for files, each value represent a filename under the FileSystem's `rootURL`
-public struct Filename {
+public struct Filename: CustomStringConvertible {
 	public static var prefs: Filename { .init(name: "_") }
 	
 	public init(name: String) {
@@ -115,15 +115,19 @@ public struct Filename {
 	}
 	
 	public let value: String
+	
+	public var description: String { value }
 }
 
 /// String Wrapper for folders, each value represent a folder-name under the FileSystem's `rootURL`
-public struct Folder {
+public struct Folder: CustomStringConvertible {
 	public init(name: String) {
 		value = name
 	}
 	
 	public let value: String
+	
+	public var description: String { value }
 }
 
 public extension Folder {
@@ -159,3 +163,6 @@ public extension Folder {
 		Filename(name: value + "/" + file.value)
 	}
 }
+
+@available(*, unavailable, renamed: "Filer")
+public typealias FileSystem = Filer

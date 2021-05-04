@@ -66,20 +66,25 @@ final class UrlRequestTests: XCTestCase {
 	private func send<Value: Decodable>(_ request: URLRequest, type: Value.Type, test: @escaping (Value) -> Void) {
 		let expectation = XCTestExpectation(description: "waiting for request")
 		
-		URLSession.shared.dataTask(with: request) { (result: NetResponse<Value, StringDict>) in
-			switch result {
-			case .success(let data):
-				test(data)
-			case .failure(let status, let dict):
-				XCTFail("failure: \(status), \(dict)")
-			case .error(let error):
-				XCTFail("error: \(error)")
+		let token = URLSession.shared.dataTaskPublisher(for: request)
+			.tryMap { data, response in
+				guard let httpRes = response as? HTTPURLResponse, httpRes.statusCode / 100 == 2 else {
+					throw URLError(.badServerResponse)
+				}
+				return data
 			}
-			
-			expectation.fulfill()
-		}.resume()
+			.decode(type: Value.self, decoder: JSONDecoder())
+			.sink { completion in
+				if case .failure(let error) = completion {
+					XCTFail("error: \(error)")
+				}
+				expectation.fulfill()
+			} receiveValue: { value in
+				test(value)
+			}
 		
 		wait(for: [expectation], timeout: 10)
+		token.cancel()
 	}
 	
 	struct Post: Codable {
