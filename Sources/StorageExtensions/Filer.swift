@@ -1,5 +1,5 @@
 //
-//  FileSystem.swift
+//  Filer.swift
 //  Storage
 //
 //  Created by Gal Yedidovich on 15/06/2020.
@@ -10,8 +10,8 @@ import CryptoExtensions
 
 /// An interface to work with the local storage of the device using a layer of Encryption.
 ///
-/// The `FileSystem` class provides easy IO (read/write) operations to local files, that are automatically encrypted with `SimpleEncryptor` functions for cipher data.
-public enum FileSystem {
+/// The `Filer` class provides easy IO (read/write) operations to local files, that are automatically encrypted with `SimpleEncryptor` functions for cipher data.
+public enum Filer {
 	private static let fm = FileManager.default
 	/// the URL in storage, where all fiels & folders under FileSystem, are managed.
 	public static var rootURL = fm.urls(for: .documentDirectory, in: .userDomainMask)[0]

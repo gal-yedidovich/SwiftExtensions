@@ -37,7 +37,7 @@ public final class Prefs {
 	
 	/// Tries to safely reload content of the prefs file in FileSystem, if it does exists.
 	private func tryLoadFile() {
-		guard FileSystem.fileExists(filename) else { return }
+		guard Filer.fileExists(filename) else { return }
 		do {
 			try reload()
 		} catch {
@@ -48,7 +48,7 @@ public final class Prefs {
 	/// Loads the content from the target file, into memory
 	/// - Throws: When fails to load. Usually when the file does not exists, could not be decrypted or could not be decoded
 	public func reload() throws {
-		dict = try FileSystem.load(json: filename)
+		dict = try Filer.load(json: filename)
 	}
 	
 	/// Get a string value from `Prefs` by given key, or nil if its not found

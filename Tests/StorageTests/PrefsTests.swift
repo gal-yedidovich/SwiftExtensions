@@ -73,7 +73,7 @@ final class PrefsTests: XCTestCase {
 		let expectation = XCTestExpectation(description: "wait to delete Prefs")
 		prefs.queue.async {
 			XCTAssertEqual(prefs.dict.count, 0)
-			XCTAssertFalse(FileSystem.fileExists(prefs.filename))
+			XCTAssertFalse(Filer.fileExists(prefs.filename))
 			expectation.fulfill()
 		}
 		
@@ -245,7 +245,7 @@ final class PrefsTests: XCTestCase {
 	func testWriteBatchIgnoredAfterDeinit() throws {
 		let filename = #function
 		var prefs: Prefs? = createPrefs(name: filename, strategy: .batch)
-		try FileSystem.delete(file: Filename(name: filename))
+		try Filer.delete(file: Filename(name: filename))
 		prefs?.edit().put(key: .name, "gal").commit()
 		prefs = nil
 
@@ -255,7 +255,7 @@ final class PrefsTests: XCTestCase {
 		}
 		wait(for: [expectation], timeout: 10)
 		
-		XCTAssertFalse(FileSystem.fileExists(Filename(name: filename)))
+		XCTAssertFalse(Filer.fileExists(Filename(name: filename)))
 	}
 }
 	
@@ -267,7 +267,7 @@ private extension PrefsTests {
 	func teardown(_ prefs: Prefs...) throws {
 		for p in prefs {
 			try p.queue.sync {
-				try FileSystem.delete(file: p.filename)
+				try Filer.delete(file: p.filename)
 			}
 		}
 	}
@@ -284,7 +284,7 @@ private extension PrefsTests {
 	
 	func check(_ prefs: Prefs, _ expectation: XCTestExpectation, test: @escaping TestHandler) {
 		do {
-			test(try FileSystem.load(json: prefs.filename))
+			test(try Filer.load(json: prefs.filename))
 		} catch {
 			XCTFail(error.localizedDescription)
 		}

@@ -101,7 +101,7 @@ fileprivate extension Prefs {
 	
 	func write() {
 		do {
-			try FileSystem.write(data: dict.json(), to: filename)
+			try Filer.write(data: dict.json(), to: filename)
 			logger.debug("Updated file: '\(self.filename, privacy: .private(mask: .hash))'")
 		} catch {
 			logger.error("Failed to write commit into Prefs file, error: \(error.localizedDescription)")
@@ -110,7 +110,7 @@ fileprivate extension Prefs {
 	
 	func delete() {
 		do {
-			try FileSystem.delete(file: filename)
+			try Filer.delete(file: filename)
 			logger.debug("Deleted file: '\(self.filename, privacy: .private(mask: .hash))'")
 		} catch {
 			logger.error("Failed to delete file '\(self.filename, privacy: .private(mask: .hash))', error: \(error.localizedDescription)")

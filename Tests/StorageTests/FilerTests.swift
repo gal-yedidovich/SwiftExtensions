@@ -1,5 +1,5 @@
 //
-//  FileSystemTests.swift
+//  FilerTests.swift
 //  StorageTests
 //
 //  Created by Gal Yedidovich on 13/06/2020.
@@ -8,37 +8,37 @@
 import XCTest
 @testable import StorageExtensions
 
-final class FileSystemTests: XCTestCase {
+final class FilerTests: XCTestCase {
 	func testWrite() throws {
 		let str = "Bubu is the king"
-		try FileSystem.write(data: Data(str.utf8), to: .file)
+		try Filer.write(data: Data(str.utf8), to: .file)
 		
-		XCTAssert(FileSystem.fileExists(.file))
+		XCTAssert(Filer.fileExists(.file))
 		
-		let data = try FileSystem.read(file: .file)
+		let data = try Filer.read(file: .file)
 		XCTAssertEqual(str, String(data: data, encoding: .utf8))
 		
-		try FileSystem.delete(file: .file)
+		try Filer.delete(file: .file)
 	}
 	
 	func testOverwrite() throws {
-		try FileSystem.write(data: Data("Bubu is the king".utf8), to: .file)
+		try Filer.write(data: Data("Bubu is the king".utf8), to: .file)
 		
 		let newText = "I am Groot"
-		try FileSystem.write(data: Data(newText.utf8), to: .file)
+		try Filer.write(data: Data(newText.utf8), to: .file)
 		
-		let fileData = try FileSystem.read(file: .file)
+		let fileData = try Filer.read(file: .file)
 		XCTAssertEqual(newText, String(data: fileData, encoding: .utf8))
 		
-		try FileSystem.delete(file: .file)
+		try Filer.delete(file: .file)
 	}
 	
 	func testDelete() throws {
-		try FileSystem.write(data: Data("Bubu is the king".utf8), to: .file)
+		try Filer.write(data: Data("Bubu is the king".utf8), to: .file)
 		
-		try FileSystem.delete(file: .file)
-		XCTAssertFalse(FileSystem.fileExists(.file))
-		XCTAssertFalse(FileManager.default.fileExists(atPath: FileSystem.url(of: .file).path))
+		try Filer.delete(file: .file)
+		XCTAssertFalse(Filer.fileExists(.file))
+		XCTAssertFalse(FileManager.default.fileExists(atPath: Filer.url(of: .file).path))
 	}
 	
 	func testLoadJson() throws {
@@ -48,15 +48,15 @@ final class FileSystemTests: XCTestCase {
 		}
 		
 		let bubu = Person(name: "Bubu", age: 120)
-		try FileSystem.write(data: bubu.json(), to: .file)
-		let loaded: Person = try FileSystem.load(json: .file)
+		try Filer.write(data: bubu.json(), to: .file)
+		let loaded: Person = try Filer.load(json: .file)
 		
 		XCTAssertEqual(bubu, loaded)
-		try FileSystem.delete(file: .file)
+		try Filer.delete(file: .file)
 	}
 	
 	func testReadFileNotFound() throws {
-		XCTAssertThrowsError(try FileSystem.read(file: .file))
+		XCTAssertThrowsError(try Filer.read(file: .file))
 	}
 	
 	func testConcatingPaths() {
