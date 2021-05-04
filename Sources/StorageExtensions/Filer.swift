@@ -163,3 +163,6 @@ public extension Folder {
 		Filename(name: value + "/" + file.value)
 	}
 }
+
+@available(*, unavailable, renamed: "Filer")
+public typealias FileSystem = Filer
