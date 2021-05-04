@@ -8,6 +8,7 @@
 import Foundation
 import BasicExtensions
 import Combine
+import os
 
 /// An interface to an encrypted JSON file, where you store key-value pairs persistently and safely.
 ///
@@ -17,6 +18,7 @@ import Combine
 public final class Prefs {
 	///Built-in instance for convenience.
 	public static let standard = Prefs(file: .prefs)
+	internal var logger: Logger { Logger(subsystem: "gal.SwiftExtensions", category: "Prefs") }
 	internal let queue = DispatchQueue(label: "prefs", qos: .background)
 	internal var dict: [String: String] = [:]
 	internal var filename: Filename
@@ -30,14 +32,23 @@ public final class Prefs {
 	public init(file: Filename, writeStrategy: WriteStrategyType = .batch) {
 		self.filename = file
 		self.strategy = writeStrategy.createStrategy()
-		reload()
+		tryLoadFile()
 	}
 	
-	/// loads the content from the target JSON file, into memory
-	public func reload() {
-		if let json: [String: String] = try? FileSystem.load(json: filename) {
-			dict = json
+	/// Tries to safely reload content of the prefs file in FileSystem, if it does exists.
+	private func tryLoadFile() {
+		guard FileSystem.fileExists(filename) else { return }
+		do {
+			try reload()
+		} catch {
+			logger.error("Failed to load file '\(self.filename, privacy: .private(mask: .hash))', error: \(error.localizedDescription, privacy: .sensitive(mask: .hash))")
 		}
+	}
+	
+	/// Loads the content from the target file, into memory
+	/// - Throws: When fails to load. Usually when the file does not exists, could not be decrypted or could not be decoded
+	public func reload() throws {
+		dict = try FileSystem.load(json: filename)
 	}
 	
 	/// Get a string value from `Prefs` by given key, or nil if its not found
@@ -85,6 +96,7 @@ public final class Prefs {
 	public func edit() -> Editor { Editor(prefs: self) }
 	
 	/// write commit and alert all subscribers that changes were made.
+	/// - Parameter commit: The commited changes to be made.
 	internal func apply(_ commit: Commit) {
 		strategy.commit(commit, to: self)
 		changeSubject.send(self)

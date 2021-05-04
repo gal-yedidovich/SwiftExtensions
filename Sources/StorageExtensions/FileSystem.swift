@@ -107,7 +107,7 @@ public enum FileSystem {
 }
 
 /// String Wrapper for files, each value represent a filename under the FileSystem's `rootURL`
-public struct Filename {
+public struct Filename: CustomStringConvertible {
 	public static var prefs: Filename { .init(name: "_") }
 	
 	public init(name: String) {
@@ -115,15 +115,19 @@ public struct Filename {
 	}
 	
 	public let value: String
+	
+	public var description: String { value }
 }
 
 /// String Wrapper for folders, each value represent a folder-name under the FileSystem's `rootURL`
-public struct Folder {
+public struct Folder: CustomStringConvertible {
 	public init(name: String) {
 		value = name
 	}
 	
 	public let value: String
+	
+	public var description: String { value }
 }
 
 public extension Folder {
