@@ -147,7 +147,7 @@ let decrypted = try AES.CBC.decrypt(encrypted, using: key, iv: iv)
 
 ### lots of convenince utility functions
 
-#### JSON Encoding with Codable protocol
+#### JSON Encoding & Decoding with Codable protocol
 ```swift
 struct MyType: Codable { 
 	//values
@@ -174,7 +174,7 @@ async {
 #### URLRequest builder
 ```swift
 let req = URLRequest(url: "https://your.end.point")
-	.set(method: .POST) //OR .get, .put, .delete, .patch
+	.set(method: .POST) //OR .GET, .PUT, .DELETE, .PATCH
 	.set(contentType: .json) //OR .xml, .urlEncoded etc.
 	.set(body: "some String or Data")
 ```
@@ -212,58 +212,6 @@ viewController.present(.myCtrl) { (vc: MyViewController) in
 }
 ```
 
-### Result API - Conveneince extension in URLSession.
-Using Swift's "Associated values" the following convenience methods allow you to handle responses easily without the boilerplate like unwrapping data and checking for errors.
-
-You can easily get relevant values from response using a `switch` statement.
-
-```swift
-let req: URLRequest = ...
-URLSession.shared.dataTask(with: req) { (response: NetResponse<Data, Data>) in
-	switch response {
-	case .success(let data): //handle success (status 2##) with given data
-	case .failure(let statusCode, let data): //handle failure (ex: status 400) with given status+data
-	case .error(let error):  //handle given error
-	}
-}.resume()
-```
-
-You can use the generic overload, to automatically decode the response data.
-```swift
-struct MySuccessType: Codable { 
-	//values
-}
-
-struct MyFailureType: Codable { 
-	//values
-}
-
-//in this example we will create an API function
-func someApi(completion: @escaping (NetResponse<MySuccessType, MyFailureType>) -> Void)
-	let req: URLRequest = ...
-	URLSession.shared.dataTask(with: req, completion: completion).resume()
-}
-
-someApi { response in //response is of type: NetResponse<MySuccessType, MyFailureType>
-	switch response {
-	case .success(let successPayload): //handle success, 'successPayload' is of type MySuccessType.
-	case .failure(_, let failurePayload): //handle failure, 'failurePayload' is of type MyFailureType. ignoring the status code
-	case .error(let error):  //handle given error.
-	}
-}
-```
-
-You can also customize your usage, example with `someApi` that ignore some results and the associated payload
-
-```swift
-someApi { response in
-	switch response {
-	case .success: //handle success, but ignore the payload
-	default: //handle either failure or error, ignoring the payload
-	}
-}
-```
-
 ### JsonObject & JsonArray - dynamic JSON structs
 Conveniece structs for working with dynamic JSON.
 
@@ -287,7 +235,7 @@ do {
 //receiving JSON as `Data` from an API
 
 do {
-	let json = JsonObject(data: dataFromApi) //given data from API
+	let json = try JsonObject(data: dataFromApi) //given data from API
 
 	if let name = json.string(key: "name"), 
 		let age = json.int(key: "age") {
