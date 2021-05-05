@@ -85,14 +85,5 @@ extension AES.CBC {
 			defer { buffer = Data() }
 			return buffer
 		}
-		
-		public enum Operation {
-			case encrypt
-			case decrypt
-			
-			internal var operation: CCOperation {
-				CCOperation(self == .encrypt ? kCCEncrypt : kCCDecrypt)
-			}
-		}
 	}
 }

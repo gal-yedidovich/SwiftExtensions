@@ -104,7 +104,7 @@ fileprivate extension Prefs {
 			try Filer.write(data: dict.json(), to: filename)
 			logger.debug("Updated file: '\(self.filename, privacy: .private(mask: .hash))'")
 		} catch {
-			logger.error("Failed to write commit into Prefs file '\(self.filename, privacy: .private(mask: .hash))', error: \(error.localizedDescription, privacy: .sensitive(mask: .hash))")
+			logger.error("Failed to write commit into file '\(self.filename, privacy: .private(mask: .hash))', error: \(error.localizedDescription, privacy: .sensitive(mask: .hash))")
 		}
 	}
 	
