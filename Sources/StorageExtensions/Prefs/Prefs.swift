@@ -28,14 +28,14 @@ public final class Prefs {
 	
 	/// Initialize new Prefs instance link to a given Filename, and loading it`s content
 	/// - Parameter file: Target Filename in storage
-	/// - Parameter writeStrategy: Strategy for writing to the FileSystem
+	/// - Parameter writeStrategy: Strategy for writing to the Filer
 	public init(file: Filename, writeStrategy: WriteStrategyType = .batch) {
 		self.filename = file
 		self.strategy = writeStrategy.createStrategy()
 		tryLoadFile()
 	}
 	
-	/// Tries to safely reload content of the prefs file in FileSystem, if it does exists.
+	/// Tries to safely reload content of the prefs file in Filer, if it does exists.
 	private func tryLoadFile() {
 		guard Filer.fileExists(filename) else { return }
 		do {

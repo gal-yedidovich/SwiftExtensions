@@ -13,7 +13,7 @@ import CryptoExtensions
 /// The `Filer` class provides easy IO (read/write) operations to local files, that are automatically encrypted with `SimpleEncryptor` functions for cipher data.
 public enum Filer {
 	private static let fm = FileManager.default
-	/// the URL in storage, where all fiels & folders under FileSystem, are managed.
+	/// the URL in storage, where all fiels & folders under Filer, are managed.
 	public static var rootURL = fm.urls(for: .documentDirectory, in: .userDomainMask)[0]
 	
 	/// Underline encryptor that handles crypto operations.
@@ -106,7 +106,7 @@ public enum Filer {
 	}
 }
 
-/// String Wrapper for files, each value represent a filename under the FileSystem's `rootURL`
+/// String Wrapper for files, each value represent a filename under the Filer's `rootURL`
 public struct Filename: CustomStringConvertible {
 	public static var prefs: Filename { .init(name: "_") }
 	
@@ -119,7 +119,7 @@ public struct Filename: CustomStringConvertible {
 	public var description: String { value }
 }
 
-/// String Wrapper for folders, each value represent a folder-name under the FileSystem's `rootURL`
+/// String Wrapper for folders, each value represent a folder-name under the Filer's `rootURL`
 public struct Folder: CustomStringConvertible {
 	public init(name: String) {
 		value = name

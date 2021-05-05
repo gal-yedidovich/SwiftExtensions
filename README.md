@@ -9,25 +9,25 @@ Use the swift package manager to install SwiftExtensions on your project. [Apple
 
 ## StorageExtensions
 ### Convenience Read & Write operations with an encryption layer from `CryptoExtensions`. 
-For easy, safe & scalable storage architecture, the `FileSystem` class gives you the ability to read & write files while keeping them extra secure in the file system.
+For easy, safe & scalable storage architecture, the `Filer` class gives you the ability to read & write files while keeping them extra secure in the file system.
 
 * IO (Read/Write) operations are *synchronous*, for more control and easier error handling.
 * You are are required to use the `Filename` or `Folder` structs to state your desired files/folders. best used with `extension` like so:
 ```swift
 extension Filename {
-	static let myFile1 = Filename(value: "name1InFileSystem")
-	static let myFile2 = Filename(value: "name2InFileSystem")
+	static let myFile1 = Filename(value: "name1InFiler")
+	static let myFile2 = Filename(value: "name2InFiler")
 }
 
 //Usage
 let data = Data("Bubu is the king".utf8)
 do {
-	try FileSystem.write(data: data, to: .myFile1) //encrypts & write to file
-	let sameData = try FileSystem.read(file: .myFile1) //reads & decrypts
+	try Filer.write(data: data, to: .myFile1) //encrypts & write to file
+	let sameData = try Filer.read(file: .myFile1) //reads & decrypts
 
 	print(String(decoding: sameData, as: UTF8.self)) //"Bubu is the king"
 
-	try FileSystem.delete(file: .myFile1)
+	try Filer.delete(file: .myFile1)
 } catch {
 	//Handle errors
 }
@@ -39,16 +39,16 @@ do {
 ### Storage Customizations
 You are able to change some values in the library.
 
-`FileSystem.rootURL`: defaults to the documents url of the app, it can change for example to an AppGroup url: 
+`Filer.rootURL`: defaults to the documents url of the app, it can change for example to an AppGroup url: 
 
 ```swift
-FileSystem.rootURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "your.app.group")
+Filer.rootURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "your.app.group")
 ```
 
-`FileSystem.encryptor`: controls the underlining SimpleEncryptor that handles cryptographics: (requires `CryptoExtensions`)
+`Filer.encryptor`: controls the underlining SimpleEncryptor that handles cryptographics: (requires `CryptoExtensions`)
 
 ```swift
-FileSystem.encryptor = SimpleEncryptor(strategy: .gcm)
+Filer.encryptor = SimpleEncryptor(strategy: .gcm)
 ```
 
 ### Prefs - Secure Key-Value pairs in storage. 
