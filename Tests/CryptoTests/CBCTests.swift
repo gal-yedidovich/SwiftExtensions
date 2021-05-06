@@ -43,14 +43,14 @@ final class CBCTests: XCTestCase {
 		defer { try! FileManager.default.removeItem(at: url) }
 		
 		var decrypted = Data()
-		let ciper = try AES.CBC.Cipher(.decrypt, using: key, iv: iv)
+		let cipher = try AES.CBC.Cipher(.decrypt, using: key, iv: iv)
 		let input = InputStream(url: url)!
 		
 		try input.readAll { buffer, bytesRead in
 			let batch = Data(bytes: buffer, count: bytesRead)
-			decrypted += try ciper.update(batch)
+			decrypted += try cipher.update(batch)
 		}
-		decrypted += try ciper.finalize()
+		decrypted += try cipher.finalize()
 		
 		XCTAssertEqual(data, decrypted)
 	}
