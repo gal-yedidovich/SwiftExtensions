@@ -37,7 +37,7 @@ final class CBCTests: XCTestCase {
 	func testFileCipher() throws {
 		let encrypted = try AES.CBC.encrypt(data, using: key, iv: iv)
 		
-		let url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0].appendingPathComponent("test.txt")
+		let url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0].appendingPathComponent(#function)
 		try encrypted.write(to: url)
 		
 		defer { try! FileManager.default.removeItem(at: url) }
