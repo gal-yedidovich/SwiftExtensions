@@ -13,7 +13,7 @@ import BasicExtensions
 final class PrefsTests: XCTestCase {
 	
 	func testInsert() throws {
-		let prefs = createPrefs(name: #function)
+		let prefs = createPrefs()
 		prefs.edit().put(key: .name, "Gal").commit()
 		
 		XCTAssertEqual(prefs.string(key: .name), "Gal")
@@ -25,7 +25,7 @@ final class PrefsTests: XCTestCase {
 	}
 	
 	func testReplace() throws {
-		let prefs = createPrefs(name: #function)
+		let prefs = createPrefs()
 		
 		prefs.edit()
 			.put(key: .name, "Gal")
@@ -43,7 +43,7 @@ final class PrefsTests: XCTestCase {
 	}
 	
 	func testRemove() throws {
-		let prefs = createPrefs(name: #function)
+		let prefs = createPrefs()
 		
 		prefs.edit()
 			.put(key: .name, "Bubu")
@@ -61,7 +61,7 @@ final class PrefsTests: XCTestCase {
 	}
 	
 	func testClear() throws {
-		let prefs = createPrefs(name: #function)
+		let prefs = createPrefs()
 		
 		prefs.edit()
 			.put(key: .name, "Gal")
@@ -83,7 +83,7 @@ final class PrefsTests: XCTestCase {
 	}
 	
 	func testCodable() throws {
-		let prefs = createPrefs(name: #function)
+		let prefs = createPrefs()
 		
 		let dict = ["one": 1, "two": 2]
 		prefs.edit().put(key: .numbers, dict).commit()
@@ -178,7 +178,7 @@ final class PrefsTests: XCTestCase {
 	}
 	
 	func testStringAsCodable() throws {
-		let prefs = createPrefs(name: #function)
+		let prefs = createPrefs()
 		
 		prefs.edit().put(key: .name, "Bubu").commit()
 		
@@ -191,7 +191,7 @@ final class PrefsTests: XCTestCase {
 	}
 	
 	func testBatchingStrategy() throws {
-		let prefs = createPrefs(name: #function, strategy: .batch)
+		let prefs = createPrefs(strategy: .batch)
 		
 		for i in 1...10 {
 			prefs.edit().put(key: .age, i).commit()
@@ -210,7 +210,7 @@ final class PrefsTests: XCTestCase {
 	}
 	
 	func testContains() throws {
-		let prefs = createPrefs(name: #function)
+		let prefs = createPrefs()
 		
 		prefs.edit()
 			.put(key: .age, 10)
@@ -226,7 +226,7 @@ final class PrefsTests: XCTestCase {
 	}
 	
 	func testObservers() throws {
-		let prefs = createPrefs(name: #function)
+		let prefs = createPrefs()
 		var didNotify = [false, false]
 		
 		var store = Set<AnyCancellable>()
