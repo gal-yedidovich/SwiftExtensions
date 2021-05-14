@@ -139,8 +139,12 @@ let data: Data = ... //some data to encrypt
 let iv: Data = ... //an initial verctor
 let key: SymmetricKey = ... //encryption key
 
-let encrypted = AES.CBC.encrypt(data, using: key, iv: iv)
-let decrypted = try AES.CBC.decrypt(encrypted, using: key, iv: iv)
+do {
+	let encrypted = try AES.CBC.encrypt(data, using: key, iv: iv)
+	let decrypted = try AES.CBC.decrypt(encrypted, using: key, iv: iv)
+} catch {
+	//handle cryptographic errors
+}
 ```
 
 ## BasicExtensions 
