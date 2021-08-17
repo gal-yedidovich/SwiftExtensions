@@ -1,0 +1,16 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "CryptoExtensions",
+        "repositoryURL": "https://github.com/gal-yedidovich/CryptoExtensions",
+        "state": {
+          "branch": null,
+          "revision": "4b656dfa58a74c2edf2f990d665a1d1441e8d3d6",
+          "version": "1.0.1"
+        }
+      }
+    ]
+  },
+  "version": 1
+}
