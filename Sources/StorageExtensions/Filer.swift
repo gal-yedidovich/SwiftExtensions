@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import CryptoExtensions
+import SimpleEncryptor
 
 /// An interface to work with the local storage of the device using a layer of Encryption.
 ///
@@ -17,7 +17,7 @@ public enum Filer {
 	public static var rootURL = fm.urls(for: .documentDirectory, in: .userDomainMask)[0]
 	
 	/// Underline encryptor that handles crypto operations.
-	public static var encryptor = SimpleEncryptor(strategy: .gcm)
+	public static var encryptor = SimpleEncryptor(type: .gcm)
 	
 	/// Writes data into given Filename
 	/// - Parameters:
