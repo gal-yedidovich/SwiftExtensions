@@ -33,7 +33,7 @@ public extension Prefs {
 		/// default batch strategy with delay of 0.1 seconds
 		public static let batch = Self.batch(delay: DEFAULT_BATCH_DELAY)
 		
-		internal func createStrategy() -> WriteStrategy {
+		internal func createStrategy() -> any WriteStrategy {
 			switch self {
 			case .immediate:
 				return ImmediateWriteStrategy()
